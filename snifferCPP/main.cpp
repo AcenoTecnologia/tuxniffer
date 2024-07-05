@@ -16,6 +16,7 @@
 #include <string>
 #include "common.hpp"
 #include "json.hpp"
+#include "fkYAML.hpp"
 #include "sniffer.hpp"
 
 using json = nlohmann::json;
@@ -37,7 +38,7 @@ void print_help()
     std::cout << "(See config.json for a -i example file)" << std::endl;
 }
 
-std::vector<device_s> parse_input_file(const std::string& filePath, log_s* log)
+std::vector<device_s> parse_input_file_json(const std::string& filePath, log_s* log)
 {
     if(filePath.empty() || filePath == "" || log == nullptr)
     {
@@ -97,15 +98,105 @@ std::vector<device_s> parse_input_file(const std::string& filePath, log_s* log)
     // Parse the log settings
     const auto& logData = data.value("log", nlohmann::json::object()); // Get the log object or an empty object if it doesn't exist
     // If log object doesnt exist default values are used
-    log->use_pipe = logData.value("use_pipe", true);
-    log->perDevice = logData.value("perDevice", false);
-    log->base = logData.value("base", "outputLog");
-    log->log_hourly = logData.value("log_hourly", false);
-    log->log_daily = logData.value("log_daily", false);
+    log->file.enabled = logData.value("enabled", true);
+    log->file.path = logData.value("path", "./");
+    log->file.base_name = logData.value("base_name", "aceno");
+    log->file.split_devices_log = logData.value("splitDevicesLog", false);
+    log->file.reset_period = logData.value("resetPeriod", "none");
+
+    const auto& pipeData = data.value("pipe", nlohmann::json::object()); // Get the log object or an empty object if it doesn't exist
+    // If log object doesnt exist default values are used
+    log->file.enabled = pipeData.value("enabled", true);
+    log->file.path = pipeData.value("path", "/tmp/");
+    log->file.base_name = pipeData.value("base_name", "aceno");
+    log->file.split_devices_log = pipeData.value("splitDevicesLog", false);
+    log->file.reset_period = "none";
 
     // Return the vector of devices
     return devices;
 }
+// std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log)
+// {
+//     if (filePath.empty() || log == nullptr)
+//     {
+//         std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;
+//         return {};
+//     }
+
+//     // Try to open the file
+//     std::ifstream f(filePath);
+//     if (!f.is_open()) {
+//         std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;
+//         return {};
+//     }
+    
+//     // Read the file content into a string
+//     std::string fileContent((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+
+//     // Parse the YAML file
+//     fkYAML::Node data;
+//     try
+//     {
+//         data = fkYAML::Node::Load(fileContent);
+//     }
+//     catch (const std::exception& e)
+//     {
+//         std::cout << "[ERROR] Could not parse YAML file: " << e.what() << std::endl;
+//         return {};
+//     }
+
+//     // Check if YAML has devices field
+//     if (!data["devices"].IsDefined())
+//     {
+//         std::cout << "[ERROR] Missing or empty 'devices' field in YAML file." << std::endl;
+//         return {};
+//     }
+
+//     // Create a vector of devices
+//     std::vector<device_s> devices;
+
+//     // Parse the devices
+//     for (const auto& deviceNode : data["devices"])
+//     {
+//         device_s device;
+        
+//         // Checks if all required fields exist
+//         if (!deviceNode["port"].IsDefined() || !deviceNode["radio_mode"].IsDefined() || !deviceNode["channel"].IsDefined())
+//         {
+//             std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;
+//             continue;
+//         }
+
+//         // Read device details
+//         device.port = deviceNode["port"].as<std::string>();
+//         device.radio_mode = deviceNode["radio_mode"].as<int>();
+//         device.channel = deviceNode["channel"].as<int>();
+
+//         devices.push_back(device);
+//     }
+
+//     // Parse the log settings if available
+//     if (data["log"].IsDefined()) {
+//         const auto& logData = data["log"];
+//         log->file.enabled = logData["enabled"].IsDefined() ? logData["enabled"].as<bool>() : true;
+//         log->file.path = logData["path"].IsDefined() ? logData["path"].as<std::string>() : "./";
+//         log->file.base_name = logData["base_name"].IsDefined() ? logData["base_name"].as<std::string>() : "aceno";
+//         log->file.split_devices_log = logData["splitDevicesLog"].IsDefined() ? logData["splitDevicesLog"].as<bool>() : false;
+//         log->file.reset_period = logData["resetPeriod"].IsDefined() ? logData["resetPeriod"].as<std::string>() : "none";
+//     }
+
+//     // Parse the pipe settings if available
+//     if (data["pipe"].IsDefined()) {
+//         const auto& pipeData = data["pipe"];
+//         log->file.enabled = pipeData["enabled"].IsDefined() ? pipeData["enabled"].as<bool>() : true;
+//         log->file.path = pipeData["path"].IsDefined() ? pipeData["path"].as<std::string>() : "/tmp/";
+//         log->file.base_name = pipeData["base_name"].IsDefined() ? pipeData["base_name"].as<std::string>() : "aceno";
+//         log->file.split_devices_log = pipeData["splitDevicesPipe"].IsDefined() ? pipeData["splitDevicesPipe"].as<bool>() : false;
+//         // Reset period remains "none" based on original code
+//     }
+
+//     return devices;
+// }
 
 int main(int argc, char* argv[])
 {
@@ -130,9 +221,10 @@ int main(int argc, char* argv[])
     device_s device;
 
     // If theres no input file to config the log, use default values
-    log_s log;
-    log.use_pipe = true;
-    log.perDevice = false;
+    log_s log = {
+        {true, "./", "aceno", false, "none"},
+        {true, "/tmp/", "aceno", false, "none"}
+    };
 
     while(true)
     {
@@ -159,15 +251,16 @@ int main(int argc, char* argv[])
                 break;
             case 'b':
                 D(std::cout << "Base: " << optarg << std::endl;)
-                log.base = optarg;
+                log.file.base_name = optarg;
+                log.pipe.base_name = optarg;
                 break;
             case 'l':
                 D(std::cout << "Log hourly" << std::endl;)
-                log.log_hourly = true;
+                log.file.reset_period = "hourly";
                 break;
             case 'L':
                 D(std::cout << "Log daily" << std::endl;)
-                log.log_daily = true;
+                log.file.reset_period = "daily";
                 break;
             case 'i':
                 D(std::cout << "Input config file: " << optarg << ". Ignoring other input commands." << std::endl;)
@@ -180,7 +273,7 @@ int main(int argc, char* argv[])
     // If useInput is false, add parameter device to device vector
     if(!useInput) devices.push_back(device); 
     // If useInput is true, parse JSON file and add devices to device vector and update log settings
-    if(useInput) devices = parse_input_file(configFilePath, &log);
+    if(useInput) devices = parse_input_file_json(configFilePath, &log);
 
     // Run sniffer passing devices vector
     Sniffer sniffer(devices, log);

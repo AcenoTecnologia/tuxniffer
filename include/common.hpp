@@ -33,10 +33,15 @@ struct device_s {
     int channel;
 };
 
+struct log_entry_s {
+    bool enabled;
+    std::string path;
+    std::string base_name;
+    bool split_devices_log;
+    std::string reset_period;
+};
+
 struct log_s {
-    bool perDevice;
-    std::string base;
-    bool log_hourly;
-    bool log_daily;
-    bool use_pipe;
+    log_entry_s file;
+    log_entry_s pipe;
 };

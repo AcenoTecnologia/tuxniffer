@@ -26,6 +26,7 @@
 Serial::Serial(std::string port)
 {
     descriptor = INVALID_FILE_DESCRIPTOR;
+    this->port = port;
 }
 
 bool Serial::connect()

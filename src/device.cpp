@@ -23,8 +23,8 @@
 #include "framer.hpp"
 
 Device::Device(device_s device, int id_counter)
-    : serial(device.port, std::chrono::milliseconds(200)),  // Initialize serial with device.port
-     cmd()  // Initialize CommandAssembler
+    : serial(device.port),  // Initialize serial with device.port
+      cmd()  // Initialize CommandAssembler
 {
     state = State::WAITING_FOR_COMMAND;
     id = id_counter;

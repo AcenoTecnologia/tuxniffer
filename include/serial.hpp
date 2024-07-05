@@ -60,5 +60,4 @@ public:
     bool is_connected();
 
 private:
-    // void sleep_time(int n);
 };

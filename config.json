@@ -6,11 +6,17 @@
             "channel": 25
         }
     ],
-    "logs": {
-        "base": "wireshark",
-        "perDevice": true,      
-        "logHourly": true,
-        "logDaily": true,
-        "usePipes": false
+    "log": {
+        "enabled": true,
+        "path": "./",
+        "base_name": "aceno",
+        "splitDevicesLog": true,      
+        "resetPeriod": "daily"
+    },
+    "pipe": {
+        "enabled": true,
+        "name": "aceno",
+        "path": "./",
+        "splitDevicesPipe": true
     }
 }
