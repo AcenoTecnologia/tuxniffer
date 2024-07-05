@@ -53,8 +53,8 @@ public:
     bool stop();
     bool ping();
     bool configure();
-    // TODO: Make overload for stream  to allow streaming for X seconds
     void stream();
+    void stream(std::chrono::seconds seconds);
     bool disconnect();
 
     bool receive_response(std::vector<uint8_t> &ret);

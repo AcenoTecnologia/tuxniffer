@@ -23,11 +23,9 @@
 #include "common.hpp"
 #include "serial.hpp"
 
-Serial::Serial(std::string port, std::chrono::milliseconds timeout)
+Serial::Serial(std::string port)
 {
     descriptor = INVALID_FILE_DESCRIPTOR;
-    this->port = port;
-    millisec_timeout = timeout;
 }
 
 bool Serial::connect()
@@ -167,93 +165,6 @@ std::vector<uint8_t> Serial::readData()
     return std::vector<uint8_t>(buffer, buffer + bytes_read);
 }
 
-std::vector<uint8_t> Serial::readUntil(std::vector<uint8_t> end, std::chrono::milliseconds timeout)
-{
-    std::vector<uint8_t> data;
-    uint8_t byte;
-    auto start_time = std::chrono::steady_clock::now();
-    auto last_read_time = start_time;
-
-    // Read data from serial port linux
-    #ifdef __linux__
-    while (true) {
-        // Read byte from serial port
-        int bytes_read = read(descriptor, &byte, 1);
-        if (bytes_read > 0) {
-            // Add byte to data
-            D(std::cout << "[INFO] Byte read: " << std::hex << static_cast<int>(byte) << std::endl;)
-            data.push_back(byte);
-
-            // Reset the last read time on successful read
-            last_read_time = std::chrono::steady_clock::now();
-        }
-
-        // Check if end of data was reached
-        if (data.size() >= end.size() && std::equal(data.end() - end.size(), data.end(), end.begin())) {
-            break;
-        }
-
-        // Check for timeout since last read
-        auto elapsed_time = std::chrono::steady_clock::now() - last_read_time;
-        if (elapsed_time >= timeout) {
-            D(std::cout << "[ERROR] Timeout occurred while reading from serial port" << std::endl;)
-            return std::vector<uint8_t>();
-        }
-
-        // Sleep for a short time to avoid busy-waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-    #endif
-
-    // Read data from serial port windows
-    #ifdef _WIN32
-    NO_IMPL
-    #endif
-
-    return data;
-}
-
-std::vector<uint8_t> Serial::readUntil(std::vector<uint8_t> end)
-{
-    std::vector<uint8_t> data;
-    uint8_t byte;
-    auto start_time = std::chrono::steady_clock::now();
-
-    // Read data from serial port linux
-    #ifdef __linux__
-    while (true) {
-        // Read byte from serial port
-        int bytes_read = read(descriptor, &byte, 1);
-        if (bytes_read > 0) {
-            // Add byte to data
-            data.push_back(byte);
-        }
-
-        // Check if end of data was reached
-        if (data.size() >= end.size() && std::equal(data.end() - end.size(), data.end(), end.begin())) {
-            break;
-        }
-
-        // Check for timeout
-        auto elapsed_time = std::chrono::steady_clock::now() - start_time;
-        if (elapsed_time >= millisec_timeout) {
-            D(std::cout << "[ERROR] Timeout occurred while reading from serial port" << std::endl;)
-            return std::vector<uint8_t>();
-        }
-
-        // Sleep for a short time to avoid busy-waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-    #endif
-
-    // Read data from serial port windows
-    #ifdef _WIN32
-    NO_IMPL
-    #endif
-
-    return data;
-}
-
 bool Serial::readByte(uint8_t* byte)
 {
     // Read byte from serial port linux
@@ -302,13 +213,3 @@ bool Serial::is_connected()
 {
     return (descriptor != INVALID_FILE_DESCRIPTOR);
 }
-
-// TODO: Automate sleep time
-// void Serial::sleep_time(int n)
-// {
-//     double sleep_time = n * bit_time;
-    
-//     std::chrono::microseconds duration(static_cast<int64_t>(sleep_time));
-
-//     usleep(sleep_time);
-// }

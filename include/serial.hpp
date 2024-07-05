@@ -46,17 +46,14 @@ public:
     uint8_t buffer[BUFFER_SIZE];
 
     std::string port;
-    std::chrono::milliseconds millisec_timeout;
 
-    Serial(std::string port, std::chrono::milliseconds timeout);
+    Serial(std::string port);
 
     bool connect();
     bool disconnect();
     bool writeData(std::vector<uint8_t> data);
     bool writeData(uint8_t data);
     std::vector<uint8_t> readData();
-    std::vector<uint8_t> readUntil(std::vector<uint8_t> end, std::chrono::milliseconds timeout);
-    std::vector<uint8_t> readUntil(std::vector<uint8_t> end);
     bool readByte(uint8_t* byte);
     void flush();
     void purge();

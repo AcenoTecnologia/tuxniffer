@@ -133,6 +133,29 @@ void Device::stream()
     }
 }
 
+void Device::stream(std::chrono::seconds seconds)
+{
+    is_streaming = true;
+    int totalPackets = 0;
+    auto start_time = std::chrono::steady_clock::now();
+    while(is_streaming)
+    {
+        std::vector<uint8_t> response;
+        receive_response(response);
+        if(!cmd.verify_response(response)) continue;
+        totalPackets++;
+        std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;
+
+        // Check if time has elapsed
+        auto current_time = std::chrono::steady_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+        if (elapsed_time >= seconds)
+        {
+            is_streaming = false;
+        }
+    }
+}
+
 bool Device::disconnect()
 {
     return serial.disconnect();
