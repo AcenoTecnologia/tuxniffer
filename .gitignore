@@ -1,0 +1,7 @@
+*.o
+# Ignore folder bin and all its contents
+bin/
+# Ignore folder obj and all its contents
+obj/
+# Ignore visual code files
+.vscode/

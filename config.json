@@ -1,0 +1,16 @@
+{
+    "devices": [
+        {
+            "port": "/dev/ttyACM0",
+            "radio_mode": 20,
+            "channel": 25
+        }
+    ],
+    "logs": {
+        "base": "wireshark",
+        "perDevice": true,      
+        "logHourly": true,
+        "logDaily": true,
+        "usePipes": false
+    }
+}
