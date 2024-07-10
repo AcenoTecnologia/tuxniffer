@@ -17,7 +17,7 @@
 #include "command_assembler.hpp"
 #include "common.hpp"
 
-void PcapBuilder::write_global_header(FILE* file)
+std::vector<uint8_t> PcapBuilder::get_global_header()
 {
     pcap_hdr_s pcap_hdr;
     pcap_hdr.magic_number = 0xa1b2c3d4;
@@ -27,10 +27,11 @@ void PcapBuilder::write_global_header(FILE* file)
     pcap_hdr.sigfigs = 0;
     pcap_hdr.snaplen = 65535;
     pcap_hdr.network = 228;
-    fwrite(&pcap_hdr, sizeof(pcap_hdr_s), 1, file);
+
+    return std::vector<uint8_t>(reinterpret_cast<uint8_t*>(&pcap_hdr), reinterpret_cast<uint8_t*>(&pcap_hdr) + sizeof(pcap_hdr_s));
 }
 
-void PcapBuilder::write_packet_header(FILE* file, packet_queue_s packet, std::chrono::microseconds start_time)
+std::vector<uint8_t> PcapBuilder::get_packet_header(packet_queue_s packet, std::chrono::microseconds start_time)
 {
     CommandAssembler command_assembler;
     packet_data data = command_assembler.convert_to_network_packet(packet.packet, start_time);
@@ -57,10 +58,10 @@ void PcapBuilder::write_packet_header(FILE* file, packet_queue_s packet, std::ch
     pcaprec_hdr.incl_len = total_length;
     pcaprec_hdr.orig_len = total_length;
 
-    fwrite(&pcaprec_hdr, sizeof(pcaprec_hdr_s), 1, file);
+    return std::vector<uint8_t>(reinterpret_cast<uint8_t*>(&pcaprec_hdr), reinterpret_cast<uint8_t*>(&pcaprec_hdr) + sizeof(pcaprec_hdr_s));
 }
 
-void PcapBuilder::write_packet_data(FILE* file, packet_queue_s packet)
+std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
 {
     CommandAssembler command_assembler;
 
@@ -130,5 +131,5 @@ void PcapBuilder::write_packet_data(FILE* file, packet_queue_s packet)
     // Add payload
     final_packet.insert(final_packet.end(), data.data.begin(), data.data.end());
 
-    fwrite(final_packet.data(), final_packet.size(), 1, file);
+    return final_packet;
 }

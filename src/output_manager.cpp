@@ -64,7 +64,8 @@ bool OutputManager::configure(int num_devices)
                     return false;
                 }
                 // Write global header
-                PcapBuilder::write_global_header(log_file);
+                std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
+                fwrite(global_header.data(), 1, global_header.size(), log_file);
                 log_files.push_back(log_file);
                 D(std::cout << "[INFO] Log file created: " << filename << std::endl;);
             }
@@ -79,7 +80,8 @@ bool OutputManager::configure(int num_devices)
                 return false;
             }
             // Write global header
-            PcapBuilder::write_global_header(log_file);
+            std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
+            fwrite(global_header.data(), 1, global_header.size(), log_file);
             log_files.push_back(log_file);
             D(std::cout << "[INFO] Log file created: " << filename << std::endl;);
         }
@@ -133,16 +135,20 @@ void OutputManager::handle_packet(packet_queue_s packet)
             // If so, write to the correct file
             FILE* log_file = log_files[packet.id];
             auto start_time_micros = std::chrono::duration_cast<std::chrono::microseconds>(start_time.time_since_epoch());
-            PcapBuilder::write_packet_header(log_file, packet, start_time_micros);
-            PcapBuilder::write_packet_data(log_file, packet);
+            std::vector<uint8_t> packet_header = PcapBuilder::get_packet_header(packet, start_time_micros);
+            fwrite(packet_header.data(), 1, packet_header.size(), log_file);
+            std::vector<uint8_t> packet_data = PcapBuilder::get_packet_data(packet);
+            fwrite(packet_data.data(), 1, packet_data.size(), log_file);
         }
         // If not, write to the only file
         if(!log.file.split_devices_log)
         {
             FILE* log_file = log_files[0];
             auto start_time_micros = std::chrono::duration_cast<std::chrono::microseconds>(start_time.time_since_epoch());
-            PcapBuilder::write_packet_header(log_file, packet, start_time_micros);
-            PcapBuilder::write_packet_data(log_file, packet);
+            std::vector<uint8_t> packet_header = PcapBuilder::get_packet_header(packet, start_time_micros);
+            fwrite(packet_header.data(), 1, packet_header.size(), log_file);
+            std::vector<uint8_t> packet_data = PcapBuilder::get_packet_data(packet);
+            fwrite(packet_data.data(), 1, packet_data.size(), log_file);
         }
     }
 

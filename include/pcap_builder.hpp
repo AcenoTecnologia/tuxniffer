@@ -67,26 +67,27 @@ class PcapBuilder
 {
 public:
     /**
-     * @brief Writes the global header to a pcap file.
+     * @brief Gets the global header to a pcap file.
      * 
-     * @param file The file to write to.
+     * @return std::vector<uint8_t> The global header data.
      */
-    static void write_global_header(FILE* file);
+    static std::vector<uint8_t> get_global_header();
 
     /**
-     * @brief Writes the packet header to a pcap file.
+     * @brief Gets the packet header to a pcap file.
      * 
-     * @param file The file to write to.
      * @param packet The packet information.
      * @param start_time The start time of the capture.
+     * @return std::vector<uint8_t> The packet header data.
      */
-    static void write_packet_header(FILE* file, packet_queue_s packet, std::chrono::microseconds start_time);
+    static std::vector<uint8_t> get_packet_header(packet_queue_s packet, std::chrono::microseconds start_time);
 
     /**
-     * @brief Writes the packet data to a pcap file.
+     * @brief Gets the packet data to a pcap file.
      * 
-     * @param file The file to write to.
      * @param packet The packet information.
+     * @return std::vector<uint8_t> The packet data.
      */
-    static void write_packet_data(FILE* file, packet_queue_s packet);
+    static std::vector<uint8_t> get_packet_data(packet_queue_s packet);
 };
+
