@@ -37,7 +37,7 @@ void PcapBuilder::write_packet_header(FILE* file, packet_queue_s packet, std::ch
 
     pcaprec_hdr_s pcaprec_hdr;
     pcaprec_hdr.ts_sec = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(start_time).count()) + std::chrono::duration_cast<std::chrono::seconds>(data.device_timestamp).count();
-    pcaprec_hdr.ts_usec = (static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(start_time).count()) + std::chrono::duration_cast<std::chrono::seconds>(data.device_timestamp).count()) % 1000000;
+    pcaprec_hdr.ts_usec = (static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(start_time).count()) + std::chrono::duration_cast<std::chrono::microseconds>(data.device_timestamp).count()) % 1000000;
     
     int total_length = (
         ipv4_header.size() +
@@ -56,8 +56,6 @@ void PcapBuilder::write_packet_header(FILE* file, packet_queue_s packet, std::ch
 
     pcaprec_hdr.incl_len = total_length;
     pcaprec_hdr.orig_len = total_length;
-
-    std::cout << "incl_len: " << pcaprec_hdr.incl_len << std::endl;
 
     fwrite(&pcaprec_hdr, sizeof(pcaprec_hdr_s), 1, file);
 }
@@ -123,8 +121,8 @@ void PcapBuilder::write_packet_data(FILE* file, packet_queue_s packet)
     std::vector<uint8_t> final_frequency = command_assembler.convertFreqToByte(command_assembler.calculateFinalFreq(phy, radio_mode_table[packet.mode].freq, packet.channel));
     final_packet.insert(final_packet.end(), final_frequency.begin(), final_frequency.end());
     // Add channel as 16 bits
-    final_packet.push_back(packet.channel >> 8);
     final_packet.push_back(packet.channel & 0xFF);
+    final_packet.push_back(packet.channel >> 8);
     // Add rssi as 8 bits
     final_packet.push_back(data.rssi);
     // Add fcs as 8 bits
@@ -132,40 +130,5 @@ void PcapBuilder::write_packet_data(FILE* file, packet_queue_s packet)
     // Add payload
     final_packet.insert(final_packet.end(), data.data.begin(), data.data.end());
 
-    std::cout << "final size: " << final_packet.size() << std::endl;
-
     fwrite(final_packet.data(), final_packet.size(), 1, file);
 }
-
-
-
-/*
-
-incl_len: 55
-4053
-c0
-3800
-f52568020000
-2f
-4188fce1fbffff00000912fcff000001c6d5ebc629004b120028852a0100d5ebc629004b12000045d119ca2c92fa32d2
-80
-4045
-ipv4_header: 45000055000000008011b73bc0a80103c0a80103
-udp_header: 4560456000411d82
-ti_header: 003c0000
-final size: 5b
-
-
-final packet: 45000055000000008011b73bc0a80103c0a80103
-4560456000411d82
-003c0000
-0000 - interface
-02 - separator
-12 - phy
-ab090000 - freq
-0019 - channel
-2f
-80
-4188fce1fbffff00000912fcff000001c6d5ebc629004b120028852a0100d5ebc629004b12000045d119ca2c92fa32
-
-*/

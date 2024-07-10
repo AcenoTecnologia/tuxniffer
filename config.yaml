@@ -7,7 +7,7 @@ log:
   path: ./
   base_name: aceno
   splitDevicesLog: false
-  resetPeriod: daily
+  resetPeriod: daily # none | hourly | daily | weekly | monthly
 pipe:
   enabled: true
   name: aceno
