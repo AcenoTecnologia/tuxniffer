@@ -18,6 +18,7 @@
 #include "command_assembler.hpp"
 #include "serial.hpp"
 #include "common.hpp"
+#include "output_manager.hpp"
 
 // Enum State
 enum class State
@@ -38,6 +39,7 @@ public:
     Serial serial;
     CommandAssembler cmd;
     State state;
+    OutputManager* output_manager;
 
     bool is_ready = false;
     bool is_streaming = false;

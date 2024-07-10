@@ -15,6 +15,8 @@
 #include <vector>
 #include <chrono>
 
+#include "common.hpp"
+
 struct phy_table_entry
 {
     uint8_t phy;
@@ -70,18 +72,6 @@ const phy_table_entry radio_mode_table[22] = {   /*LP-CC1352P7*/
 /* ble_2405             */          {0x13, f2405}
 };
 
-
-struct packet_data
-{
-    int64_t length;                                     //2B
-    std::chrono::microseconds device_timestamp;     //6B
-    std::chrono::microseconds system_timestamp;     //6B
-    uint8_t rssi;                                   //1B
-    std::vector<uint8_t> data;                      //nB
-    uint8_t status;                                 //1B
-    uint8_t fcs;                                    //1B
-};
-
 class CommandAssembler
 {
 public:
@@ -100,11 +90,10 @@ public:
 
     // Command converters
     packet_data convert_to_network_packet(std::vector<uint8_t> data, std::chrono::microseconds system_timestamp);
-
-private:
-    
-    uint8_t calculate_fcs(std::vector<uint8_t> data);
+    std::chrono::microseconds get_device_timestamp(std::vector<uint8_t> data);
     float calculateFinalFreq(uint8_t phy, float freq, int channel);
     std::vector<uint8_t> convertFreqToByte(float freq);
+private:
+    uint8_t calculate_fcs(std::vector<uint8_t> data);
 };
 

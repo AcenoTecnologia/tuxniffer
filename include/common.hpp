@@ -15,6 +15,9 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include <vector>
+#include <chrono>
 
 #ifdef DEBUG 
 #define D(x) x
@@ -25,7 +28,30 @@
 #define IS_FILE 0
 #define IS_PIPE 1
 
+// Timezone offset in seconds
+#define TIMEZONE -10800
+
 #define NO_IMPL {D(std::cout << "[ERROR] Function not implemented" << std::endl;)}
+
+struct packet_data
+{
+    int64_t length;                                     //2B
+    std::chrono::microseconds device_timestamp;         //6B
+    std::chrono::microseconds system_timestamp;         //6B
+    uint8_t rssi;                                       //1B
+    std::vector<uint8_t> data;                          //nB
+    uint8_t status;                                     //1B
+    uint8_t fcs;                                        //1B
+};
+
+struct packet_queue_s {
+    int id;
+    std::string interface;
+    int channel;
+    uint8_t mode;
+    std::vector<uint8_t> packet;
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+};;
 
 struct device_s {
     std::string port;

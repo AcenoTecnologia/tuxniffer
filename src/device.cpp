@@ -129,7 +129,10 @@ void Device::stream()
         receive_response(response);
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;
+        D(std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        if (output_manager != nullptr) output_manager->add_packet(
+            {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
+        );
     }
 }
 
@@ -144,8 +147,10 @@ void Device::stream(std::chrono::seconds seconds)
         receive_response(response);
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;
-
+        D(std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        if (output_manager != nullptr) output_manager->add_packet(
+            {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
+        );
         // Check if time has elapsed
         auto current_time = std::chrono::steady_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);

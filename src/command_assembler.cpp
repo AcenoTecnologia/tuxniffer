@@ -229,7 +229,6 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
     std::vector<uint8_t> timestamp;
     uint8_t rssi;
     std::vector<uint8_t> payload;
-    uint8_t status;
     uint8_t fcs;
     // Exclude SOF, INFO and EOF
     data = std::vector<uint8_t>(data.begin() + 3, data.end() - 2);
@@ -237,33 +236,46 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
     // LENGHT 2B | TIMESTAMP 6B | RSSI 1B | DATA N B | STATUS 1B | FCS 1B
     // LENGHT
     length.insert(length.end(), data.begin(), data.begin() + 2);
+
     // TIMESTAMP
     timestamp.insert(timestamp.end(), data.begin() + 2, data.begin() + 8);
+
     // RSSI
     rssi = data[8];
+
     // DATA
     payload.insert(payload.end(), data.begin() + 9, data.end() - 2);
-    // STATUS
-    status = data[data.size() - 2];
+
     // FCS
-    fcs = data[data.size() - 1];
+    fcs = data.back();
 
     // Length and timestamp are in little endian
     std::reverse(length.begin(), length.end());
     std::reverse(timestamp.begin(), timestamp.end());
 
     // Convert to packet
-
-
     packet_data packet = {
-        .length = (length[0] << 8) | length[1],
+        .length = ((length[0] << 8) | length[1]) - 9,
         .device_timestamp = std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5])),
         .system_timestamp = system_timestamp,
         .rssi = rssi,
         .data = payload,
-        .status = status,
+        .status = fcs,
         .fcs = fcs
     };
 
     return packet;
+}
+
+// Get device timestamp
+std::chrono::microseconds CommandAssembler::get_device_timestamp(std::vector<uint8_t> data)
+{
+    std::vector<uint8_t> timestamp;
+    // Exclude SOF, INFO and EOF
+    data = std::vector<uint8_t>(data.begin() + 3, data.end() - 2);
+    // TIMESTAMP 6B
+    timestamp.insert(timestamp.end(), data.begin() + 2, data.begin() + 8);
+    // Timestamp is in little endian
+    std::reverse(timestamp.begin(), timestamp.end());
+    return std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5]));
 }
