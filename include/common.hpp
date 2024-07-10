@@ -6,9 +6,8 @@
 // Date:     2024
 //
 // Copyright (C) 2002-2024 Aceno Tecnologia.
-// Todos os direitos reservados.
+// All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 #pragma once
 
@@ -33,41 +32,61 @@
 
 #define NO_IMPL {D(std::cout << "[ERROR] Function not implemented" << std::endl;)}
 
+/**
+ * @struct packet_data
+ * @brief Represents the data of a packet.
+ */
 struct packet_data
 {
-    int64_t length;                                     //2B
-    std::chrono::microseconds device_timestamp;         //6B
-    std::chrono::microseconds system_timestamp;         //6B
-    uint8_t rssi;                                       //1B
-    std::vector<uint8_t> data;                          //nB
-    uint8_t status;                                     //1B
-    uint8_t fcs;                                        //1B
+    int64_t length;                                     ///< Packet length in bytes.
+    std::chrono::microseconds device_timestamp;         ///< Timestamp from the device.
+    std::chrono::microseconds system_timestamp;         ///< System timestamp.
+    uint8_t rssi;                                       ///< RSSI value.
+    std::vector<uint8_t> data;                          ///< Packet data.
+    uint8_t status;                                     ///< Packet status.
+    uint8_t fcs;                                        ///< Frame Check Sequence.
 };
 
+/**
+ * @struct packet_queue_s
+ * @brief Represents a packet in the queue.
+ */
 struct packet_queue_s {
-    int id;
-    std::string interface;
-    int channel;
-    uint8_t mode;
-    std::vector<uint8_t> packet;
-    std::chrono::time_point<std::chrono::system_clock> timestamp;
-};;
+    int id;                                             ///< Packet ID.
+    std::string interface;                              ///< Interface name.
+    int channel;                                        ///< Channel number.
+    uint8_t mode;                                       ///< Mode of the packet.
+    std::vector<uint8_t> packet;                        ///< Packet data.
+    std::chrono::time_point<std::chrono::system_clock> timestamp; ///< Timestamp when the packet was queued.
+};
 
+/**
+ * @struct device_s
+ * @brief Represents a device configuration.
+ */
 struct device_s {
-    std::string port;
-    int radio_mode;
-    int channel;
+    std::string port;                                   ///< Device port.
+    int radio_mode;                                     ///< Radio mode.
+    int channel;                                        ///< Channel number.
 };
 
+/**
+ * @struct log_entry_s
+ * @brief Represents a log entry configuration.
+ */
 struct log_entry_s {
-    bool enabled;
-    std::string path;
-    std::string base_name;
-    bool split_devices_log;
-    std::string reset_period;
+    bool enabled;                                       ///< Indicates if logging is enabled.
+    std::string path;                                   ///< Log file path.
+    std::string base_name;                              ///< Base name for the log files.
+    bool split_devices_log;                             ///< Indicates if log files should be split by device.
+    std::string reset_period;                           ///< Log reset period.
 };
 
+/**
+ * @struct log_s
+ * @brief Represents the logging configuration.
+ */
 struct log_s {
-    log_entry_s file;
-    log_entry_s pipe;
+    log_entry_s file;                                   ///< File log entry configuration.
+    log_entry_s pipe;                                   ///< Pipe log entry configuration.
 };

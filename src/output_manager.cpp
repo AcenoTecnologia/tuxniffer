@@ -83,6 +83,7 @@ bool OutputManager::configure(int num_devices)
             log_files.push_back(log_file);
             D(std::cout << "[INFO] Log file created: " << filename << std::endl;);
         }
+    last_update = std::chrono::system_clock::now();
     }
 
     return true;
@@ -121,8 +122,8 @@ void OutputManager::handle_packet(packet_queue_s packet)
         is_first_packet = false;
     }
 
-    //TODO: Check if needs to recreate the log file according to the reset period
-
+    // Recreate log files if necessary (based on reset period)
+    recreate_log_files();
 
     if(log.file.enabled)
     {
@@ -151,4 +152,77 @@ void OutputManager::handle_packet(packet_queue_s packet)
         // If so, write to the correct pipe
         // If not, write to the only pipe
     }
+}
+
+void OutputManager::recreate_log_files()
+{
+// Check if the reset period is none
+    if (log.file.reset_period == "none") return;
+
+    // Calculate the time difference since the last update
+    auto now = std::chrono::system_clock::now();
+    auto diff = now - last_update;
+    
+    bool recreate = false;
+    if (log.file.reset_period == "hourly" && diff > std::chrono::hours(1)) recreate = true;
+    if (log.file.reset_period == "daily" && diff > std::chrono::hours(24)) recreate = true;
+    if (log.file.reset_period == "weekly" && diff > std::chrono::hours(24 * 7)) recreate = true;
+    if (log.file.reset_period == "monthly" && diff > std::chrono::hours(24 * 30)) recreate = true;
+
+    // If the time has not come yet, return
+    if (!recreate) return;
+    D(std::cout << "[INFO] Recreating log files..." << std::endl;)
+
+
+    // Update the last update time
+    last_update = now;
+
+    // Generate the timestamp
+    std::time_t t = std::time(nullptr);
+    std::tm tm = *std::localtime(&t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d_%H-%M");
+    std::string timestamp = ss.str();
+
+    // Construct the base filename
+    std::string base_filename = log.file.path;
+    if (log.file.reset_period != "none") base_filename += timestamp;
+    base_filename += "_" + log.file.base_name;
+
+    // Close old log files
+    for (auto log_file : log_files) {
+        fclose(log_file);
+    }
+    log_files.clear();
+
+    // Recreate log files
+    if (log.file.split_devices_log)
+    {
+        for (int i = 0; i < num_devices; ++i) {
+            std::string filename = base_filename + "_" + std::to_string(i) + ".pcap";
+            FILE* new_log_file = fopen(filename.c_str(), "wb");
+            if (!new_log_file) {
+                D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+                return;
+            }
+            // Write global header
+            // PcapBuilder::write_global_header(new_log_file);  // Assuming this function is defined elsewhere
+            log_files.push_back(new_log_file);
+            D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
+        }
+
+        return;
+    }
+
+    std::string filename = base_filename + ".pcap";
+    FILE* new_log_file = fopen(filename.c_str(), "wb");
+    if (!new_log_file) {
+        D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+        return;
+    }
+    // Write global header
+    // PcapBuilder::write_global_header(new_log_file);  // Assuming this function is defined elsewhere
+    log_files.push_back(new_log_file);
+    D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
+
 }
