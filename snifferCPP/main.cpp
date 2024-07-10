@@ -115,88 +115,81 @@ std::vector<device_s> parse_input_file_json(const std::string& filePath, log_s* 
     // Return the vector of devices
     return devices;
 }
-// std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log)
-// {
-//     if (filePath.empty() || log == nullptr)
-//     {
-//         std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;
-//         return {};
-//     }
 
-//     // Try to open the file
-//     std::ifstream f(filePath);
-//     if (!f.is_open()) {
-//         std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;
-//         return {};
-//     }
-    
-//     // Read the file content into a string
-//     std::string fileContent((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
-//     // Parse the YAML file
-//     fkYAML::Node data;
-//     try
-//     {
-//         data = fkYAML::Node::Load(fileContent);
-//     }
-//     catch (const std::exception& e)
-//     {
-//         std::cout << "[ERROR] Could not parse YAML file: " << e.what() << std::endl;
-//         return {};
-//     }
+std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log)
+{
+    if (filePath.empty() || log == nullptr)
+    {
+        std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;
+        return std::vector<device_s>();
+    }
 
-//     // Check if YAML has devices field
-//     if (!data["devices"].IsDefined())
-//     {
-//         std::cout << "[ERROR] Missing or empty 'devices' field in YAML file." << std::endl;
-//         return {};
-//     }
+    // Try to open the file
+    std::ifstream f(filePath);
+    if (!f.is_open()) {
+        std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;
+        return std::vector<device_s>();
+    }
 
-//     // Create a vector of devices
-//     std::vector<device_s> devices;
 
-//     // Parse the devices
-//     for (const auto& deviceNode : data["devices"])
-//     {
-//         device_s device;
-        
-//         // Checks if all required fields exist
-//         if (!deviceNode["port"].IsDefined() || !deviceNode["radio_mode"].IsDefined() || !deviceNode["channel"].IsDefined())
-//         {
-//             std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;
-//             continue;
-//         }
+    fkyaml::node yaml;
+    try
+    {
+        // Load the YAML file
+        std::ifstream ifs(filePath);
+        // deserialize the loaded file contents.
+        yaml = fkyaml::node::deserialize(ifs);
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "[ERROR] Could not open or parse YAML file: " << e.what() << std::endl;
+        // Return an empty vector
+        return std::vector<device_s>();
+    }
 
-//         // Read device details
-//         device.port = deviceNode["port"].as<std::string>();
-//         device.radio_mode = deviceNode["radio_mode"].as<int>();
-//         device.channel = deviceNode["channel"].as<int>();
+    // Check if has field devices
+    if (!yaml.contains("devices")) {
+        std::cout << "[ERROR] Missing devices field in YAML file." << std::endl;
+        return std::vector<device_s>();
+    }
+    // Create a vector of devices
+    std::vector<device_s> devices;
 
-//         devices.push_back(device);
-//     }
+    // Parse the devices
+    for (auto& device : yaml["devices"]) {
+        // Checks if all required fields exists
+        if (!device.contains("port") || !device.contains("radio_mode") || !device.contains("channel")) {
+            std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;
+            continue;
+        }
+        devices.push_back(device_s{
+            device["port"].get_value<std::string>(),
+            device["radio_mode"].get_value<int>(),
+            device["channel"].get_value<int>()
+        });
+    }
 
-//     // Parse the log settings if available
-//     if (data["log"].IsDefined()) {
-//         const auto& logData = data["log"];
-//         log->file.enabled = logData["enabled"].IsDefined() ? logData["enabled"].as<bool>() : true;
-//         log->file.path = logData["path"].IsDefined() ? logData["path"].as<std::string>() : "./";
-//         log->file.base_name = logData["base_name"].IsDefined() ? logData["base_name"].as<std::string>() : "aceno";
-//         log->file.split_devices_log = logData["splitDevicesLog"].IsDefined() ? logData["splitDevicesLog"].as<bool>() : false;
-//         log->file.reset_period = logData["resetPeriod"].IsDefined() ? logData["resetPeriod"].as<std::string>() : "none";
-//     }
+    // Parse the log settings
+    auto& yaml_log = yaml["log"];
+    // Property                     Optional Field                          Read Value                                          Default Value 
+    log->file.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
+    log->file.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : "./";
+    log->file.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
+    log->file.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
+    log->file.reset_period =        yaml_log.contains("resetPeriod")        ? yaml_log["resetPeriod"].get_value<std::string>()  : "none";
 
-//     // Parse the pipe settings if available
-//     if (data["pipe"].IsDefined()) {
-//         const auto& pipeData = data["pipe"];
-//         log->file.enabled = pipeData["enabled"].IsDefined() ? pipeData["enabled"].as<bool>() : true;
-//         log->file.path = pipeData["path"].IsDefined() ? pipeData["path"].as<std::string>() : "/tmp/";
-//         log->file.base_name = pipeData["base_name"].IsDefined() ? pipeData["base_name"].as<std::string>() : "aceno";
-//         log->file.split_devices_log = pipeData["splitDevicesPipe"].IsDefined() ? pipeData["splitDevicesPipe"].as<bool>() : false;
-//         // Reset period remains "none" based on original code
-//     }
+    yaml_log = yaml["pipe"];
+    // Property                     Optional Field                          Read Value                                          Default Value 
+    log->pipe.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
+    log->pipe.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : "./";
+    log->pipe.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
+    log->pipe.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
+    log->pipe.reset_period = "none";
 
-//     return devices;
-// }
+    // Return the vector of devices
+    return devices;
+}
 
 int main(int argc, char* argv[])
 {
@@ -272,8 +265,16 @@ int main(int argc, char* argv[])
 
     // If useInput is false, add parameter device to device vector
     if(!useInput) devices.push_back(device); 
-    // If useInput is true, parse JSON file and add devices to device vector and update log settings
-    if(useInput) devices = parse_input_file_json(configFilePath, &log);
+    // If useInput is true, parse input file based on file extension and add devices to device vector and update log settings
+    if(useInput) {
+        std::string fileExtension = configFilePath.substr(configFilePath.find_last_of(".") + 1);
+        if(fileExtension == "json")
+            devices = parse_input_file_json(configFilePath, &log);
+        if(fileExtension == "yaml")
+            devices = parse_input_file_yaml(configFilePath, &log);
+        else
+            std::cout << "[ERROR] Invalid file extension. Please use a .json or .yaml file." << std::endl;
+    }
 
     // Run sniffer passing devices vector
     Sniffer sniffer(devices, log);
