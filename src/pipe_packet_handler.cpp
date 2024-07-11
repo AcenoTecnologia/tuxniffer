@@ -80,4 +80,5 @@ void PipePacketHandler::run()
 
     // Close the pipe
     pipe.close();
+    is_open = false;
 }

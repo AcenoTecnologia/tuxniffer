@@ -282,7 +282,9 @@ void OutputManager::recreate_log_files()
                 return;
             }
             // Write global header
-            // PcapBuilder::write_global_header(new_log_file);  // Assuming this function is defined elsewhere
+            std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
+            fwrite(global_header.data(), 1, global_header.size(), new_log_file);
+
 
             log_files.push_back(new_log_file);
             D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
@@ -298,7 +300,9 @@ void OutputManager::recreate_log_files()
         return;
     }
     // Write global header
-    // PcapBuilder::write_global_header(new_log_file);  // Assuming this function is defined elsewhere
+    std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
+    fwrite(global_header.data(), 1, global_header.size(), new_log_file);
+
     log_files.push_back(new_log_file);
     D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
 

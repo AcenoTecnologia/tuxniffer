@@ -17,26 +17,45 @@
 #include <queue>
 #include <chrono>
 
-
 #include "pipe.hpp"
 #include "common.hpp"
 #include "pcap_builder.hpp"
 
+/**
+ * @brief Handles packets received through a named pipe interface.
+ */
 class PipePacketHandler
 {
 public:
+    /**
+     * @brief Constructs a PipePacketHandler object.
+     * 
+     * @param pipe_path The path to the named pipe.
+     * @param base      The base string.
+     * @param start_time The start time of packet handling.
+     */
     PipePacketHandler(std::string pipe_path, std::string base, std::chrono::time_point<std::chrono::system_clock> start_time);
-    bool is_running = false;
-    std::queue<packet_queue_s> packet_queue;
 
+    bool is_running = false; ///< Flag indicating if the packet handler is running.
+    std::queue<packet_queue_s> packet_queue; ///< Queue for storing incoming packets.
+
+    /**
+     * @brief Adds a packet to the packet queue.
+     * 
+     * @param packet The packet to add.
+     */
     void add_packet(packet_queue_s packet);
+
+    /**
+     * @brief Starts the packet handling process.
+     */
     void run();
 
 private:
-    std::chrono::time_point<std::chrono::system_clock> start_time;
-    std::mutex m_mutex;
-    Pipe pipe;
-    std::string pipe_path;
-    std::string base;
-    bool is_open = false;
+    std::chrono::time_point<std::chrono::system_clock> start_time; ///< Start time of packet handling.
+    std::mutex m_mutex; ///< Mutex for thread synchronization.
+    Pipe pipe; ///< Named pipe interface.
+    std::string pipe_path; ///< Path to the named pipe.
+    std::string base; ///< Base string.
+    bool is_open = false; ///< Flag indicating if the named pipe is open.
 };
