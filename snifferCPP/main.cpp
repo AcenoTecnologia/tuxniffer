@@ -15,11 +15,15 @@
 #include <cstdlib>
 #include <string>
 #include "common.hpp"
-#include "json.hpp"
 #include "fkYAML.hpp"
 #include "sniffer.hpp"
 
-using json = nlohmann::json;
+#ifdef __linux__
+#define DEFAULT_PIPE_PATH "/tmp/"
+#endif
+#ifdef _WIN32
+#define DEFAULT_PIPE_PATH "\\\\.\\pipe\\"
+#endif
 
 void print_help()
 {
@@ -35,87 +39,8 @@ void print_help()
     std::cout << "[OPTIONAL]  -l, --log_hourly\t\t\tLog hourly" << std::endl;
     std::cout << "[OPTIONAL]  -L, --log_daily\t\t\tLog daily" << std::endl;
     std::cout << "[OPTIONAL]  -i, --input\t\t\t\tInput config file" << std::endl;
-    std::cout << "(See config.json for a -i example file)" << std::endl;
+    std::cout << "(See config.yaml for a -i example file)" << std::endl;
 }
-
-std::vector<device_s> parse_input_file_json(const std::string& filePath, log_s* log)
-{
-    if(filePath.empty() || filePath == "" || log == nullptr)
-    {
-        D(std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;)
-        return std::vector<device_s>();
-    }
-
-    // Try to open the file
-    std::ifstream f(filePath);
-    if (!f.is_open()) {
-        D(std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;)
-        // Return an empty vector
-        return std::vector<device_s>();
-    }
-    
-    // Parse the JSON file
-    json data;
-    try
-    {
-        data = json::parse(f);
-    }
-    catch(json::parse_error& e)
-    {
-        D(std::cout << "[ERROR] Could not parse JSON file: " << e.what() << std::endl;)
-        // Return an empty vector
-        return std::vector<device_s>();
-    }
-
-    // Check if JSON has devices field
-    if (!data.contains("devices"))
-    {
-        D(std::cout << "[ERROR] Missing devices field in JSON file." << std::endl;)
-        // Return an empty vector
-        return std::vector<device_s>();
-    }
-    
-    // Create a vector of devices
-    std::vector<device_s> devices;
-
-    // Parse the devices
-    for (auto& device : data["devices"])
-    {
-        // Checks if all required fields exists
-        if (!device.contains("port") || !device.contains("radio_mode") || !device.contains("channel"))
-        {
-            std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;
-            continue;
-        }
-        
-        devices.push_back(device_s{
-            device["port"].get<std::string>(),
-            device["radio_mode"].get<int>(),
-            device["channel"].get<int>()
-        });
-    }
-
-    // Parse the log settings
-    const auto& logData = data.value("log", nlohmann::json::object()); // Get the log object or an empty object if it doesn't exist
-    // If log object doesnt exist default values are used
-    log->file.enabled = logData.value("enabled", true);
-    log->file.path = logData.value("path", "./");
-    log->file.base_name = logData.value("base_name", "aceno");
-    log->file.split_devices_log = logData.value("splitDevicesLog", false);
-    log->file.reset_period = logData.value("resetPeriod", "none");
-
-    const auto& pipeData = data.value("pipe", nlohmann::json::object()); // Get the log object or an empty object if it doesn't exist
-    // If log object doesnt exist default values are used
-    log->file.enabled = pipeData.value("enabled", true);
-    log->file.path = pipeData.value("path", "/tmp/");
-    log->file.base_name = pipeData.value("base_name", "aceno");
-    log->file.split_devices_log = pipeData.value("splitDevicesLog", false);
-    log->file.reset_period = "none";
-
-    // Return the vector of devices
-    return devices;
-}
-
 
 std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log)
 {
@@ -182,7 +107,7 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     yaml_log = yaml["pipe"];
     // Property                     Optional Field                          Read Value                                          Default Value 
     log->pipe.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
-    log->pipe.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : "./";
+    log->pipe.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : DEFAULT_PIPE_PATH;
     log->pipe.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
     log->pipe.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
     log->pipe.reset_period = "none";
@@ -268,8 +193,6 @@ int main(int argc, char* argv[])
     // If useInput is true, parse input file based on file extension and add devices to device vector and update log settings
     if(useInput) {
         std::string fileExtension = configFilePath.substr(configFilePath.find_last_of(".") + 1);
-        if(fileExtension == "json")
-            devices = parse_input_file_json(configFilePath, &log);
         if(fileExtension == "yaml")
             devices = parse_input_file_yaml(configFilePath, &log);
         else

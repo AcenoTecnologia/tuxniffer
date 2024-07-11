@@ -43,6 +43,15 @@ void PipePacketHandler::run()
         is_open = pipe.open(path);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+    // When passing this point, the pipe is open or is_running is false
+    // If is_open is false, the pipe thread will be closed and the data will be discarded
+    if(!is_open)
+    {
+        D(std::cout << "[INFO] Pipe data was discarded." << std::endl;);
+        return;
+    }
+
     D(std::cout << "[INFO] Pipe Packet Handler recieved a consumer." << std::endl;)
 
 

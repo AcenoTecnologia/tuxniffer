@@ -96,22 +96,6 @@ bool OutputManager::configure_files()
 bool OutputManager::configure_pipes()
 {
 
-    return true;
-}
-
-bool OutputManager::configure(int num_devices)
-{
-    this->num_devices = num_devices;
-
-    if (log.file.enabled && !configure_files()) return false;
-    if (log.pipe.enabled && !configure_pipes()) return false;
-
-    return true;
-}
-
-void OutputManager::run()
-{
-
     if(log.pipe.enabled)
     {
         if(log.pipe.split_devices_log)
@@ -135,6 +119,24 @@ void OutputManager::run()
         }
     }
     
+    return true;
+}
+
+bool OutputManager::configure(int num_devices)
+{
+    this->num_devices = num_devices;
+
+    if(log.file.enabled)
+        if(!configure_files()) return false;
+
+    if(log.pipe.enabled)
+        if(!configure_pipes()) return false;
+
+    return true;
+}
+
+void OutputManager::run()
+{
     // Starts to run
     is_running = true;
     while (is_running || !packet_queue.empty())
@@ -163,7 +165,7 @@ void OutputManager::run()
         pipe_packet_handler->is_running = false;
     }
 
-    // Join the threads
+    // Join the threads from the pipes
     for (auto& pipe_thread : log_pipes_threads)
     {
         pipe_thread.join();
@@ -281,6 +283,7 @@ void OutputManager::recreate_log_files()
             }
             // Write global header
             // PcapBuilder::write_global_header(new_log_file);  // Assuming this function is defined elsewhere
+
             log_files.push_back(new_log_file);
             D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
         }

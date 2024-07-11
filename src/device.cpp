@@ -190,7 +190,7 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
 
             if (elapsed_time >= timeout_duration)
             {
-                std::cout << "Timeout reached, no response received within 10 seconds." << std::endl;
+                std::cout << "[INFO] Timeout reached, no response received within 10 seconds." << std::endl;
                 break;
             }
 
