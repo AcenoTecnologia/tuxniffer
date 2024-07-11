@@ -51,7 +51,6 @@ std::vector<uint8_t> PcapBuilder::get_packet_header(packet_queue_s packet, std::
         2 + // channel
         1 + // rssi
         1 +  // fcs
-        // -15 counting BOF, EOF, INFO, TIMESTAMP, RSSI, FCS, LENGTH...
         (data.length)
     );
 

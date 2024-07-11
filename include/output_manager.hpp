@@ -34,6 +34,8 @@ public:
      */
     bool is_running = false;
 
+    bool can_run = false;
+
     /**
      * @brief Constructor for the OutputManager class.
      * 

@@ -82,6 +82,7 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     case 0x01:
     case 0x02:
     case 0x03:
+        // TODO: Implement IEEE 802.15.4ge frequency calculation
         if (freq == 868)
         {
             finalFreq = 868;
@@ -99,6 +100,7 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     case 0x08:
     case 0x09:
     case 0x0A:
+        // TODO: Implement Wi-SUN frequency calculation
         if (freq == 868)
         {
             finalFreq = 868;
@@ -108,24 +110,24 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
             finalFreq = 915;
         }
         break;
-    // Zigbee
+    // TODO: Zigbee
     case 0x0B:
     case 0x0C:
         break;
-    // IEEE 915
+    // TODO: IEEE 915
     case 0x0D:
         break;
-    // EasyLink
+    // TODO: EasyLink
     case 0x0E:
     case 0x0F:
     case 0x10:
     case 0x11:
         break;
-    // IEEE 2.4GHz
+    // TODO: IEEE 2.4GHz
     case 0x12:
         finalFreq = 2405 + ((channel - 11) * 5);
         break;
-    // BLE
+    // TODO: BLE
     case 0x13:
         break;
     default:
@@ -233,19 +235,18 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
     // Exclude SOF, INFO and EOF
     data = std::vector<uint8_t>(data.begin() + 3, data.end() - 2);
 
-    // LENGHT 2B | TIMESTAMP 6B | RSSI 1B | DATA N B | STATUS 1B | FCS 1B
-    // LENGHT
+    // LENGHT 2B | TIMESTAMP 6B | RSSI 1B | DATA N B | ??? 1B | FCS 1B
+    // LENGHT 2B
     length.insert(length.end(), data.begin(), data.begin() + 2);
-
-    // TIMESTAMP
+    // TIMESTAMP 6B
     timestamp.insert(timestamp.end(), data.begin() + 2, data.begin() + 8);
 
-    // RSSI
-    rssi = data[8];
+    // NOTE: data[8] does not represent anything in specific. It is not clear what it is.
 
-    // DATA
+    // DATA N B
     payload.insert(payload.end(), data.begin() + 9, data.end() - 2);
-
+    // RSSI 1B
+    rssi = data[data.size() - 2];
     // FCS
     fcs = data.back();
 
@@ -255,6 +256,7 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
 
     // Convert to packet
     packet_data packet = {
+        // Packetsize - (1 from RSSI + 1 from FCS + 6 from TIMESTAMP + 1 from ???? (see note above))
         .length = ((length[0] << 8) | length[1]) - 9,
         .device_timestamp = std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5])),
         .system_timestamp = system_timestamp,

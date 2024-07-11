@@ -50,9 +50,9 @@ bool OutputManager::configure_files()
         std::string base_filename = log.file.path;
         if (log.file.reset_period != "none")
         {
-            base_filename += timestamp;
+            base_filename += timestamp + "_";
         }
-        base_filename += "_" + log.file.base_name;
+        base_filename += log.file.base_name;
 
         if (log.file.split_devices_log)
         {
@@ -62,7 +62,7 @@ bool OutputManager::configure_files()
                 FILE* log_file = fopen(filename.c_str(), "wb");
                 if (!log_file)
                 {
-                    D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+                    D(std::cout << "[ERROR] Could not open log file: " << filename << ". Packets will be discarded." << std::endl;)
                     return false;
                 }
                 // Write global header
@@ -78,7 +78,7 @@ bool OutputManager::configure_files()
             FILE* log_file = fopen(filename.c_str(), "wb");
             if (!log_file)
             {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+                D(std::cout << "[ERROR] Could not open log file: " << filename << ". Packets will be discarded." << std::endl;)
                 return false;
             }
             // Write global header
@@ -132,6 +132,7 @@ bool OutputManager::configure(int num_devices)
     if(log.pipe.enabled)
         if(!configure_pipes()) return false;
 
+    can_run = true;
     return true;
 }
 
@@ -139,7 +140,7 @@ void OutputManager::run()
 {
     // Starts to run
     is_running = true;
-    while (is_running || !packet_queue.empty())
+    while ((is_running || !packet_queue.empty()) && can_run)
     {
         if(!packet_queue.empty())
         {
@@ -233,7 +234,7 @@ void OutputManager::handle_packet(packet_queue_s packet)
 void OutputManager::recreate_log_files()
 {
     // Check if the reset period is none
-    if (log.file.reset_period == "none") return;
+    if (log.file.reset_period == "none" || !log.file.enabled) return;
 
     // Calculate the time difference since the last update
     auto now = std::chrono::system_clock::now();

@@ -30,9 +30,6 @@ Sniffer::Sniffer(std::vector<device_s> devices_info, log_s log_settings)
         devices.emplace_back(device_info, device_id_counter);
         device_id_counter++;
     }
-
-    // Initialize log settings
-    output_manager.configure(devices.size());
 }
 
 
@@ -49,6 +46,17 @@ void Sniffer::configureAllDevices()
 
 void Sniffer::initAllDevices()
 {
+    // Check if all devices are ready. At least one must be to start streaming.
+    if (std::all_of(devices.begin(), devices.end(), [](Device& device) { return !device.is_ready; })) {
+        D(std::cout << "[ERROR] No devices are ready." << std::endl;)
+        return;
+    }
+
+    // Initialize log settings
+    D(std::cout << "[INFO] Configuring output manager." << std::endl;)
+    D(std::cout << "[INFO] Initializing Pipe threads." << std::endl;)
+    output_manager.configure(devices.size());
+
     // Preallocates vector for threads
     threads.reserve(devices.size());
 
@@ -70,11 +78,24 @@ void Sniffer::initAllDevices()
         }
     }
 
+    if(threads.size() == 0)
+    {
+        D(std::cout << "[ERROR] There are no ready devices." << std::endl;)
+        return;
+    }
+
     D(std::cout << "[INFO] All ready devices initialized." << std::endl;)
+
 }
 
 void Sniffer::streamAll()
 {
+    // Check if all devices are ready. At least one must be to start streaming.
+    if (std::all_of(devices.begin(), devices.end(), [](Device& device) { return !device.is_ready; })) {
+        D(std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;)
+        return;
+    }
+
     // Start the output manager thread
     output_manager_thread = std::thread(&OutputManager::run, &output_manager);
 
@@ -105,11 +126,17 @@ void Sniffer::streamAll()
         output_manager_thread.join();
     }
     
-    D(std::cout << "[INFO] All ready devices streaming." << std::endl;)
+    D(std::cout << "[INFO] All ready devices finished streaming." << std::endl;)
 }
 
 void Sniffer::streamAll(std::chrono::seconds duration)
 {
+    // Check if all devices are ready. At least one must be to start streaming.
+    if (std::all_of(devices.begin(), devices.end(), [](Device& device) { return !device.is_ready; })) {
+        D(std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;)
+        return;
+    }
+
     // Start the output manager thread
     output_manager_thread = std::thread(&OutputManager::run, &output_manager);
 
@@ -140,5 +167,5 @@ void Sniffer::streamAll(std::chrono::seconds duration)
         output_manager_thread.join();
     }
 
-    D(std::cout << "[INFO] All ready devices streaming." << std::endl;)
+    D(std::cout << "[INFO] All ready devices finished streaming." << std::endl;)
 }

@@ -53,13 +53,16 @@ bool Device::init()
 bool Device::start()
 {
     std::vector<uint8_t> response;
-    // Send stop command
+    // Send start command
     serial.flush();
     std::vector<uint8_t> start_command = cmd.assemble_start();
     serial.writeData(start_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device " << id << " started" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] started" << std::endl;)
+
+    state = State::STARTED;
+
     return true;
 }
 
@@ -72,14 +75,24 @@ bool Device::stop()
     serial.writeData(stop_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device " << id << " stopped" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] stopped" << std::endl;)
+
+    state = State::STOPPED;
+
     return true;
 }
 
 bool Device::ping()
 {
+
+    if(state != State::STOPPED)
+    {
+        D(std::cout << "[ERROR] Device [" << id << "] must be stopped before pinging." << std::endl;)
+        return false;
+    }
+
     std::vector<uint8_t> response;
-    // Send stop command
+    // Send ping command
     serial.flush();
     std::vector<uint8_t> ping_command = cmd.assemble_ping();
     serial.writeData(ping_command);
@@ -99,6 +112,13 @@ bool Device::ping()
 
 bool Device::configure()
 {
+
+    if(state != State::STOPPED)
+    {
+        D(std::cout << "[ERROR] Device [" << id << "] must be stopped before configuring." << std::endl;)
+        return false;
+    }
+
     std::vector<uint8_t> response;
     // Send phy command
     serial.flush();
@@ -106,7 +126,7 @@ bool Device::configure()
     serial.writeData(set_phy_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device " << id << " set PHY" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] set PHY" << std::endl;)
 
     // Send frequency command
     serial.flush();
@@ -114,7 +134,7 @@ bool Device::configure()
     serial.writeData(set_freq_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device " << id << " set frequency" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] set frequency" << std::endl;)
 
     return true;
 }
@@ -129,7 +149,7 @@ void Device::stream()
         receive_response(response);
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
@@ -147,7 +167,7 @@ void Device::stream(std::chrono::seconds seconds)
         receive_response(response);
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device " << id << " received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );

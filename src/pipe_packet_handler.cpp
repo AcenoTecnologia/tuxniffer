@@ -29,13 +29,9 @@ void PipePacketHandler::add_packet(packet_queue_s packet)
 void PipePacketHandler::run()
 {
     is_running = true;
-
     std::string path = pipe_path + base;
 
-    std::cout << path << std::endl;
-
     pipe.create(path);
-
     D(std::cout << "[INFO] Pipe was created. Will be waiting consumer on: " << path << std::endl;)
     // Check if the pipe is open each second until its open or until is_running is false
     while (is_running && !is_open)
@@ -67,7 +63,7 @@ void PipePacketHandler::run()
             std::lock_guard<std::mutex> lock(m_mutex);
             packet_queue_s packet = packet_queue.front();
             packet_queue.pop();
-            D(std::cout << "[INFO] Packet processed by Pipe Packet Handler. Size: " << packet.packet.size() << std::endl;)
+            // D(std::cout << "[INFO] Packet processed by Pipe Packet Handler. Size: " << packet.packet.size() << std::endl;)
             auto start_time_micros = std::chrono::duration_cast<std::chrono::microseconds>(start_time.time_since_epoch());
             std::vector<uint8_t> packet_header = PcapBuilder::get_packet_header(packet, start_time_micros);
             pipe.write(packet_header);

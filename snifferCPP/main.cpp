@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
     Sniffer sniffer(devices, log);
     sniffer.configureAllDevices();
     sniffer.initAllDevices();
-    sniffer.streamAll();
+    sniffer.streamAll(std::chrono::seconds(10));
 
     return 0;
 }
