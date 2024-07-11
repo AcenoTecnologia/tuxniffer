@@ -16,10 +16,14 @@
 #include <queue>
 #include <ctime>
 #include <iomanip>
+#include <memory>
+
+#include "pipe.hpp"
 #include "common.hpp"
 #include "output_manager.hpp"
 #include "pcap_builder.hpp"
 #include "command_assembler.hpp"
+#include "pipe_packet_handler.hpp"
 
 OutputManager::OutputManager(log_s log_settings)
 {
@@ -33,10 +37,8 @@ void OutputManager::add_packet(packet_queue_s packet)
     packet_queue.push(packet);
 }
 
-bool OutputManager::configure(int num_devices)
+bool OutputManager::configure_files()
 {
-    this->num_devices = num_devices;
-
     if (log.file.enabled)
     {
         std::time_t t = std::time(nullptr);
@@ -91,8 +93,49 @@ bool OutputManager::configure(int num_devices)
     return true;
 }
 
+bool OutputManager::configure_pipes()
+{
+
+    return true;
+}
+
+bool OutputManager::configure(int num_devices)
+{
+    this->num_devices = num_devices;
+
+    if (log.file.enabled && !configure_files()) return false;
+    if (log.pipe.enabled && !configure_pipes()) return false;
+
+    return true;
+}
+
 void OutputManager::run()
 {
+
+    if(log.pipe.enabled)
+    {
+        if(log.pipe.split_devices_log)
+        {
+            for (int i = 0; i < num_devices; ++i)
+            {
+                std::string pipe_path = log.pipe.path + "_" + std::to_string(i);
+                std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, log.file.base_name, start_time);
+                log_pipes_handlers.push_back(pipe_packet_handler);
+                std::thread pipe_thread(&PipePacketHandler::run, pipe_packet_handler);
+                log_pipes_threads.push_back(std::move(pipe_thread));
+            }
+        }
+        if(!log.pipe.split_devices_log)
+        {
+            std::string pipe_path = log.pipe.path;
+            std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, log.file.base_name, start_time);
+            log_pipes_handlers.push_back(pipe_packet_handler);
+            std::thread pipe_thread(&PipePacketHandler::run, pipe_packet_handler);
+            log_pipes_threads.push_back(std::move(pipe_thread));
+        }
+    }
+    
+    // Starts to run
     is_running = true;
     while (is_running || !packet_queue.empty())
     {
@@ -101,11 +144,29 @@ void OutputManager::run()
             std::lock_guard<std::mutex> lock(m_mutex);
             packet_queue_s packet = packet_queue.front();
             packet_queue.pop();
-            D(std::cout << "[INFO] Packet processed by Output Manager. Size: " << packet.packet.size() << std::endl;)
+            // D(std::cout << "[INFO] Packet processed by Output Manager. Size: " << packet.packet.size() << std::endl;)
             handle_packet(packet);
         }
         // Sleep to avoid busy waiting
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    // Close log files
+    for (auto log_file : log_files)
+    {
+        fclose(log_file);
+    }
+
+    // The PipePacketHandler to is_running = false
+    for (auto pipe_packet_handler : log_pipes_handlers)
+    {
+        pipe_packet_handler->is_running = false;
+    }
+
+    // Join the threads
+    for (auto& pipe_thread : log_pipes_threads)
+    {
+        pipe_thread.join();
     }
 
     D(std::cout << "[INFO] Output Manager stopped." << std::endl;)
@@ -154,15 +215,22 @@ void OutputManager::handle_packet(packet_queue_s packet)
 
     if(log.pipe.enabled)
     {
-        // Check if i have more than one pipe
-        // If so, write to the correct pipe
-        // If not, write to the only pipe
+        if(log.pipe.split_devices_log)
+        {
+            PipePacketHandler* pipe_packet_handler = log_pipes_handlers[packet.id].get();
+            pipe_packet_handler->add_packet(packet);
+        }
+        if(!log.pipe.split_devices_log)
+        {
+            PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
+            pipe_packet_handler->add_packet(packet);
+        }
     }
 }
 
 void OutputManager::recreate_log_files()
 {
-// Check if the reset period is none
+    // Check if the reset period is none
     if (log.file.reset_period == "none") return;
 
     // Calculate the time difference since the last update

@@ -15,7 +15,10 @@
 #include <thread> 
 #include <mutex> 
 #include <queue>
+#include <memory>
+
 #include "common.hpp"
+#include "pipe_packet_handler.hpp"
 
 /**
  * @class OutputManager
@@ -46,7 +49,21 @@ public:
     void add_packet(packet_queue_s packet);
 
     /**
-     * @brief Configures the output manager.
+     * @brief Configures the log files.
+     * 
+     * @return true if the configuration was successful, false otherwise.
+     */
+    bool configure_files();
+
+    /**
+     * @brief Configures the pipes for logging.
+     * 
+     * @return true if the configuration was successful, false otherwise.
+     */
+    bool configure_pipes();
+
+    /**
+     * @brief Configures the output manager (log files and pipes)
      * 
      * @param num_devices Number of devices to be configured.
      * @return true if the configuration was successful, false otherwise.
@@ -111,5 +128,13 @@ private:
      */
     std::vector<FILE*> log_files;
 
-    // std::vector<FILE*> log_pipes;
+    /**
+     * @brief Vector of pipes for logging.
+     */
+    std::vector<std::shared_ptr<PipePacketHandler>> log_pipes_handlers;
+
+    /**
+     * @brief Vector of threads for pipe logging.
+     */
+    std::vector<std::thread> log_pipes_threads;
 };

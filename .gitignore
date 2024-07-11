@@ -3,6 +3,7 @@
 bin/
 # Ignore folder obj and all its contents
 obj/
+out/
 # Ignore visual code files
 .vscode/
 *.pcap
