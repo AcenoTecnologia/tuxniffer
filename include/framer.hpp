@@ -60,6 +60,7 @@ public:
 
     /**
      * @brief Recovers the framer to handle errors.
+     * - Resets to the initial state of the framer and keep reading until a new frame is found.
      */
     void recover();
 

@@ -86,7 +86,9 @@ class CommandAssembler
 {
 public:
     /**
-     * @brief Assembles a command with data.
+     * @brief Assembles a generic command with data.
+     * This methods put the data in the format:
+     * [SOF] [INFO] [LEN] [DATA] [FCS] [EOF]
      * 
      * @param info Command info byte.
      * @param data Data to be included in the command.
@@ -96,6 +98,8 @@ public:
 
     /**
      * @brief Assembles a command without data.
+     * This methods put the data in the format:
+     * [SOF] [INFO] [LEN (0x0000)] [FCS] [EOF]
      * 
      * @param info Command info byte.
      * @return Assembled command.
@@ -184,7 +188,7 @@ public:
     float calculateFinalFreq(uint8_t phy, float freq, int channel);
 
     /**
-     * @brief Converts frequency to byte format.
+     * @brief Converts frequency to byte format in little endian format.
      * 
      * @param freq Frequency value.
      * @return Frequency in byte format.
@@ -194,6 +198,7 @@ public:
 private:
     /**
      * @brief Calculates the Frame Check Sequence (FCS) for the data.
+     * The equation used is (sum(bytes(data)) + info + len) & 0xFF. 
      * 
      * @param data Data for which the FCS is to be calculated.
      * @return Calculated FCS.

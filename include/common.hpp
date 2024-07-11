@@ -35,6 +35,7 @@
 /**
  * @struct packet_data
  * @brief Represents the data of a packet.
+ * It's used to pass data around the application between the command_assembler and the output_manager
  */
 struct packet_data
 {
@@ -50,6 +51,7 @@ struct packet_data
 /**
  * @struct packet_queue_s
  * @brief Represents a packet in the queue.
+ * It's used to pass data around the application between the device, the output_manager and the pipe_packet_handler
  */
 struct packet_queue_s {
     int id;                                             ///< Packet ID.
@@ -63,6 +65,7 @@ struct packet_queue_s {
 /**
  * @struct device_s
  * @brief Represents a device configuration.
+ * It's used to store the configuration of a device that is captured through the CLI or the configuration file.
  */
 struct device_s {
     std::string port;                                   ///< Device port.
@@ -73,6 +76,7 @@ struct device_s {
 /**
  * @struct log_entry_s
  * @brief Represents a log entry configuration.
+ * It's used to store the configuration of a log entry that is captured through the CLI or the configuration file.
  */
 struct log_entry_s {
     bool enabled;                                       ///< Indicates if logging is enabled.
@@ -85,6 +89,7 @@ struct log_entry_s {
 /**
  * @struct log_s
  * @brief Represents the logging configuration.
+ * It's only job is to hold the log entry configurations for the file and pipe logs.
  */
 struct log_s {
     log_entry_s file;                                   ///< File log entry configuration.

@@ -22,6 +22,26 @@
 
 #include "common.hpp"
 
+/*
+ * The following code is based on the following sources:
+ * - https://wiki.wireshark.org/Development/LibpcapFileFormat
+ *  Texas Instruments SmartRF Packet Sniffer 2 User Guide
+ * 
+ * Texas Instruments has its own wireshark dissector that needs the pcap file to be in a specific format.
+ * The header order is:
+ * - Global header
+ * - Packet header
+ * - IPV4 header (mockup because the packet is not an IP packet. TI uses it to send the TI Radio Packet Info layer via UDP)
+ * -- UDP header
+ * --- TI header
+ * ---- IEEE 802.15.4 header
+ * ----- Zigbee (Optional)
+ * 
+ * The packet data is actually the IEEE 802.15.4 packet data with extra information from TI.
+ * Because of that, the IPV4 and UDP headers needs to have the same size as the real headers.
+ * The IP and PORT fields are fake and are not being used.
+*/
+
 /**
  * @struct pcap_hdr_s
  * @brief Represents the global header of a pcap file.
@@ -75,6 +95,7 @@ public:
 
     /**
      * @brief Gets the packet header to a pcap file.
+     * - The start time is simply added as system time. No operation is performed with it.
      * 
      * @param packet The packet information.
      * @param start_time The start time of the capture.
