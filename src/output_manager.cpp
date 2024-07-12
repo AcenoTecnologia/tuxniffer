@@ -184,8 +184,13 @@ void OutputManager::handle_packet(packet_queue_s packet)
     {
         CommandAssembler command_assembler;
         auto now = std::chrono::system_clock::now();
-        start_time = now - command_assembler.get_device_timestamp(packet.packet);
+        start_time = now - command_assembler.get_device_timestamp(packet.packet) + std::chrono::seconds(TIMEZONE);;
         is_first_packet = false;
+        // Update the time on the PipePacketHandler
+        for (auto pipe_packet_handler : log_pipes_handlers)
+        {
+            pipe_packet_handler->start_time = start_time;
+        }
     }
 
     // Recreate log files if necessary (based on reset period)

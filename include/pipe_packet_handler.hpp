@@ -27,6 +27,10 @@
 class PipePacketHandler
 {
 public:
+    bool is_running = false; ///< Flag indicating if the packet handler is running.
+    std::queue<packet_queue_s> packet_queue; ///< Queue for storing incoming packets.
+    std::chrono::time_point<std::chrono::system_clock> start_time; ///< Start time of packet handling.
+    
     /**
      * @brief Constructs a PipePacketHandler object.
      * 
@@ -36,8 +40,6 @@ public:
      */
     PipePacketHandler(std::string pipe_path, std::string base, std::chrono::time_point<std::chrono::system_clock> start_time);
 
-    bool is_running = false; ///< Flag indicating if the packet handler is running.
-    std::queue<packet_queue_s> packet_queue; ///< Queue for storing incoming packets.
 
     /**
      * @brief Adds a packet to the packet queue.
@@ -52,7 +54,6 @@ public:
     void run();
 
 private:
-    std::chrono::time_point<std::chrono::system_clock> start_time; ///< Start time of packet handling.
     std::mutex m_mutex; ///< Mutex for thread synchronization.
     Pipe pipe; ///< Named pipe interface.
     std::string pipe_path; ///< Path to the named pipe.
