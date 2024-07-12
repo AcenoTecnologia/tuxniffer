@@ -15,12 +15,23 @@
 #include <iostream>
 #include <unistd.h> 
 #include <iomanip>
+#include <signal.h>
 #include <chrono>
 #include <thread>
 
 #include "common.hpp"
 #include "device.hpp"
 #include "framer.hpp"
+
+int interruption = 0;
+
+void signal_handler(int sig)
+{
+    sig = sig;
+	interruption = 1;
+    D(std::cout << "[INTERRUPTION] Signal " << sig << " received. The stream will stop after recieving the next packet." << std::endl;)
+}
+
 
 Device::Device(device_s device, int id_counter)
     : serial(device.port),  // Initialize serial with device.port
@@ -141,6 +152,12 @@ bool Device::configure()
 
 void Device::stream()
 {
+
+    // ctrl-c
+	signal(SIGINT, signal_handler);
+	// killall
+	signal(SIGTERM, signal_handler);
+
     is_streaming = true;
     int totalPackets = 0;
     while(is_streaming)
@@ -153,11 +170,23 @@ void Device::stream()
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
+        if(interruption) is_streaming = false;
     }
+
+    // Reset SIGINT to default behavior
+    signal(SIGINT, SIG_DFL);
+    // Reset SIGTERM to default behavior
+    signal(SIGTERM, SIG_DFL);
 }
 
 void Device::stream(std::chrono::seconds seconds)
 {
+    
+    // ctrl-c
+	signal(SIGINT, signal_handler);
+	// killall
+	signal(SIGTERM, signal_handler);
+
     is_streaming = true;
     int totalPackets = 0;
     auto start_time = std::chrono::steady_clock::now();
@@ -174,11 +203,15 @@ void Device::stream(std::chrono::seconds seconds)
         // Check if time has elapsed
         auto current_time = std::chrono::steady_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
-        if (elapsed_time >= seconds)
-        {
-            is_streaming = false;
-        }
+        if (elapsed_time >= seconds) is_streaming = false;
+        if (interruption) is_streaming = false;
     }
+
+    
+    // Reset SIGINT to default behavior
+    signal(SIGINT, SIG_DFL);
+    // Reset SIGTERM to default behavior
+    signal(SIGTERM, SIG_DFL);
 }
 
 bool Device::disconnect()

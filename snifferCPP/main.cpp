@@ -12,8 +12,10 @@
 
 #include <iostream>
 #include <getopt.h>
+#include <stdlib.h>
 #include <cstdlib>
 #include <string>
+#include <signal.h>
 #include "common.hpp"
 #include "fkYAML.hpp"
 #include "sniffer.hpp"
@@ -226,6 +228,7 @@ int main(int argc, char* argv[])
 
     // Run sniffer passing devices vector
     Sniffer sniffer(devices, log);
+
     sniffer.configureAllDevices();
     sniffer.initAllDevices();
     sniffer.streamAll();
