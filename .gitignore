@@ -7,3 +7,4 @@ out/
 # Ignore visual code files
 .vscode/
 *.pcap
+build/
