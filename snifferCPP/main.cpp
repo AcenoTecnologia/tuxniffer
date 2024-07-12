@@ -38,10 +38,8 @@ void print_help()
     std::cout << "[REQUIRED]  -c, --channel\t\t\tChannel to use" << std::endl;
     std::cout << "Log Settings" << std::endl;
     std::cout << "[OPTIONAL]  -b, --base\t\t\t\tBase file/ pipe name" << std::endl;
-    std::cout << "[OPTIONAL]  -l, --log_hourly\t\t\tLog hourly" << std::endl;
-    std::cout << "[OPTIONAL]  -L, --log_daily\t\t\tLog daily" << std::endl;
-    std::cout << "[OPTIONAL]  -w, --log_weekly\t\t\tLog weekly" << std::endl;
-    std::cout << "[OPTIONAL]  -M, --log_monthly\t\t\tLog monthly" << std::endl;
+    std::cout << "[OPTIONAL]  -P, --path\t\t\t\tPath to save file" << std::endl;
+    std::cout << "[OPTIONAL]  -r, --reset_period\t\t\tReset period" << std::endl;
     std::cout << "[OPTIONAL]  -s, --log_split\t\t\tSplit log files by device" << std::endl;
     std::cout << "[OPTIONAL]  -i, --input\t\t\t\tInput config file" << std::endl;
     std::cout << "(See config.yaml for a -i example file)" << std::endl;
@@ -125,18 +123,16 @@ int main(int argc, char* argv[])
 {
     D(std::cout << "[INFO] Debug mode is on!" << std::endl;)
 
-    const char* const short_opts = "hp:m:c:b:li:LwMs";    
+    const char* const short_opts = "hp:m:c:b:i:r:P:s";    
     const option long_opts[] = {
         {"help",        no_argument,       nullptr, 'h'},
         {"port",        required_argument, nullptr, 'p'},
         {"radio_mode",  required_argument, nullptr, 'm'},
         {"channel",     required_argument, nullptr, 'c'},
         {"base",        required_argument, nullptr, 'b'},
-        {"log_hourly",  no_argument,       nullptr, 'l'},
         {"input",       required_argument, nullptr, 'i'},
-        {"log_daily",   no_argument,       nullptr, 'L'},
-        {"log_weekly",  no_argument,       nullptr, 'w'},
-        {"log_monthly", no_argument,       nullptr, 'M'},
+        {"reset_period",no_argument,       nullptr, 'r'},
+        {"path",        no_argument,       nullptr, 'P'},
         {"log_split",   no_argument,       nullptr, 's'},
         {nullptr,       no_argument,       nullptr, 0}
     };
@@ -180,21 +176,13 @@ int main(int argc, char* argv[])
                 log.file.base_name = optarg;
                 log.pipe.base_name = optarg;
                 break;
-            case 'l':
-                D(std::cout << "[CONFIG] Log hourly" << std::endl;)
-                log.file.reset_period = "hourly";
+            case 'r':
+                D(std::cout << "[CONFIG] Reset period" << optarg << std::endl;)
+                log.file.reset_period = optarg;
                 break;
-            case 'L':
-                D(std::cout << "[CONFIG] Log daily" << std::endl;)
-                log.file.reset_period = "daily";
-                break;
-            case 'w':
-                D(std::cout << "[CONFIG] Log weekly" << std::endl;)
-                log.file.reset_period = "weekly";
-                break;
-            case 'M':
-                D(std::cout << "[CONFIG] Log monthly" << std::endl;)
-                log.file.reset_period = "monthly";
+            case 'P':
+                D(std::cout << "[CONFIG] Path " << optarg << std::endl;)
+                log.file.path = optarg;
                 break;
             case 's':
                 D(std::cout << "[CONFIG] Split log files by device" << std::endl;)
@@ -224,6 +212,7 @@ int main(int argc, char* argv[])
             devices = parse_input_file_yaml(configFilePath, &log);
         else
             std::cout << "[ERROR] Invalid file extension. Please use a .yaml file." << std::endl;
+            return 0;
     }
 
     // Run sniffer passing devices vector

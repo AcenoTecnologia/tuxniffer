@@ -8,3 +8,4 @@ out/
 .vscode/
 *.pcap
 build/
+testSuite.md

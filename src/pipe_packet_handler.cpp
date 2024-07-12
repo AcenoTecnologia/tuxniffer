@@ -32,7 +32,9 @@ void PipePacketHandler::run()
     std::string path = pipe_path + base;
 
     pipe.create(path);
-    D(std::cout << "[INFO] Pipe was created. Will be waiting consumer on: " << path << std::endl;)
+    D(std::cout << "[INFO] Pipe was created." << std::endl;)
+    D(std::cout << "[INFO] Will be waiting consumer on: " << path << std::endl;)
+    
     // Check if the pipe is open each second until its open or until is_running is false
     while (is_running && !is_open)
     {
@@ -58,6 +60,7 @@ void PipePacketHandler::run()
     pipe.write(global_header);
     while (is_running || !packet_queue.empty())
     {
+        // Check if the pipe is open
         if (!packet_queue.empty())
         {
             std::lock_guard<std::mutex> lock(m_mutex);
