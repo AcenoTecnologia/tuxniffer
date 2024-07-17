@@ -104,9 +104,35 @@ Using this software through the CLI has some limitations:
 
 ### .YAML Config File
 
-Using the parameter `-i [config_file_dir/config.yaml]`, you can use a separate config file for defining multiple devices and different log options. An example of a config file explaining each parameter, the supported, and default values can be seen at `./config.yaml`.
+Using the parameter `-i [config_file_dir/config.yaml]`, you can use a separate config file for defining multiple devices and different log options.
 
 **Note: when the parameter `-i` is used, other CLI parameters are ignored.**
+
+#### YAML supported parameters:
+
+```yaml
+devices:
+  - port: /dev/ttyACM0          # (required) /dev/ttyACM0 (linux) or COM3 (windows)
+    radio_mode: 20              # (required)
+    channel: 25                 # (required)
+log:
+  enabled: true                 # (optional - default) true | false
+  path: ./                      # (optional - default) ./
+  base_name: aceno              # (optional - default) aceno
+  splitDevicesLog: false        # true | (optional - default) false
+  resetPeriod: hourly           # (optional - default) none | hourly | daily | weekly | monthly
+pipe:
+  enabled: true                 # (optional - default) true | false
+  name: test                    # (optional - default) aceno
+  path: /tmp/                   # (optional - default) /tmp/ (linux) or \\.\pipe\ (windows)
+                                # Pipes can be created wherever the user has write permissions on linux
+                                # However, on Windows the pipe must be created at \\.\pipe\
+  splitDevicesPipe: false       # true | (optional - default) false
+                                # Pipes are created as <path>/<name>[-<id>] on Linux or \\.\pipe\<name>[-<id>] on Windows
+                                # Pipes does not support the resetPeriod option
+```
+
+This example is also presented in the `config.yaml` file.
 
 #### Usage Example:
 
@@ -161,6 +187,7 @@ During development it was found some inconsistencies between the sniffer documen
 - The PHY code informed by the documentation for `IEEE 802.15.4 2.4 GHz band O-QPSK` is `0x11`, but in reality it is `0x12`.
 - This happens because the `Smart RF Sniffer Agent software` by TI has a Radio Configuration for `IEEE 802.15.4 915 MHz GSFK 200 kbps` after `0x0C`, which causes a offset of `0x01` to all subsequent values. This configuration is not on the reference, but can be selected on the software. The Radio Mode table bellow fixes that.
 - The packet response documentation also informs that the response frame data payload has the format: `Timestamp (6B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. But, in reality is `Timestamp (6B) | Separator (1B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. It was not found the usage of the Separator. However, neither considering it as Timestamp or Payload work. The Timestamp gets incorrect and the Payload doesn't match the FCS at the end of the frame (last 2B of payload).
+- While this software was developed using the 1352P7-1 model, the 1352P1 model was also used for tests and validation. A issue found is that on Windows, with the original Texas Instruments SmartRF Packet Sniffer, the 1352P1 could not run any 2.4GHz modes, despite having support. The solution for this issue can be found [here](https://e2e.ti.com/support/wireless-connectivity/bluetooth-group/bluetooth/f/bluetooth-forum/1229627/launchxl-cc1352p-packet-sniffer-2-error-sending-message-msg-cfgphy-problem-unknown?tisearch=e2e-sitesearch&keymatch=LAUNCHXL-CC1352P%25252525252525252520Error%25252525252525252520Sending%25252525252525252520Message#).
 
 ## Radio Mode
 

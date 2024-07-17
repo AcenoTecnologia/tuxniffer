@@ -102,8 +102,9 @@ bool OutputManager::configure_pipes()
         {
             for (int i = 0; i < num_devices; ++i)
             {
-                std::string pipe_path = log.pipe.path + "_" + std::to_string(i);
-                std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, log.file.base_name, start_time);
+                std::string pipe_path = log.pipe.path;
+                std::string pipe_base_name =  log.file.base_name + "_" + std::to_string(i);
+                std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, pipe_base_name, start_time);
                 log_pipes_handlers.push_back(pipe_packet_handler);
                 std::thread pipe_thread(&PipePacketHandler::run, pipe_packet_handler);
                 log_pipes_threads.push_back(std::move(pipe_thread));

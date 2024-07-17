@@ -27,6 +27,34 @@ struct phy_table_entry
     float freq;    ///< Frequency value.
 };
 
+// These values were found at packet-tirpi.c from the TI wireshark dissector source code.
+/* Protocol values */
+const uint8_t PROTOCOL_GENERIC                      = 0;
+const uint8_t PROTOCOL_IEEE_802_15_4_G              = 1;
+const uint8_t PROTOCOL_IEEE_802_15_4                = 2;
+const uint8_t PROTOCOL_BLE                          = 3;
+const uint8_t PROTOCOL_WBMS                         = 4;
+
+// These values were found at packet-tirpi.c from the TI wireshark dissector source code.
+/* PHY type values */
+const uint8_t PHY_TYPE_UNUSED                       = 0;
+const uint8_t PHY_TYPE_50KBPS_GFSK                  = 1;
+const uint8_t PHY_TYPE_SLR                          = 2;
+const uint8_t PHY_TYPE_OQPSK                        = 3;
+const uint8_t PHY_TYPE_200KBPS_GFSK                 = 4;
+const uint8_t PHY_TYPE_BLE                          = 5;
+const uint8_t PHY_TYPE_WBMS                         = 6;
+const uint8_t PHY_TYPE_50KBPS_GFSK_WISUN_1A         = 7;
+const uint8_t PHY_TYPE_50KBPS_GFSK_WISUN_1B         = 8;
+const uint8_t PHY_TYPE_100KBPS_GFSK_WISUN_2A        = 9;
+const uint8_t PHY_TYPE_100KBPS_GFSK_WISUN_2B        = 10;
+const uint8_t PHY_TYPE_150KBPS_GFSK_WISUN_3         = 11;
+const uint8_t PHY_TYPE_200KBPS_GFSK_WISUN_4A        = 12;
+const uint8_t PHY_TYPE_200KBPS_GFSK_WISUN_4B        = 13;
+const uint8_t PHY_TYPE_100KBPS_GFSK_ZIGBEE_R23      = 14;
+const uint8_t PHY_TYPE_500KBPS_GFSK_ZIGBEE_R23      = 15;
+
+
 // Delimiters
 const std::vector<uint8_t> sof = {0x40, 0x53}; ///< Start of frame delimiter.
 const std::vector<uint8_t> eof = {0x40, 0x45}; ///< End of frame delimiter.
@@ -194,6 +222,22 @@ public:
      * @return Frequency in byte format.
      */
     std::vector<uint8_t> convertFreqToByte(float freq);
+
+    /**
+     * @brief Gets the PHY TI value for a radio mode.
+     * 
+     * @param radio_mode Radio mode identifier.
+     * @return PHY value that has to be sent to wireshark packet TI header info.
+     */
+    uint8_t get_ti_phy_value(uint8_t radio_mode);
+
+    /**
+     * @brief Gets the protocol TI value for a radio mode.
+     * 
+     * @param radio_mode Radio mode identifier.
+     * @return Protocol value that has to be sent to wireshark packet TI header info.
+     */
+    uint8_t get_protocol_value(uint8_t radio_mode);
 
 private:
     /**

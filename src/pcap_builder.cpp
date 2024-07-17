@@ -44,7 +44,7 @@ std::vector<uint8_t> PcapBuilder::get_packet_header(packet_queue_s packet, std::
         ipv4_header.size() +
         udp_header.size() +
         ti_header.size() +
-        ti_separator.size() +
+        ti_protocol.size() +
         2 + // interface
         1 + // phy
         4 + // frequency
@@ -72,7 +72,7 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
         ipv4_header.size() +
         udp_header.size() +
         ti_header.size() +
-        ti_separator.size() +
+        ti_protocol.size() +
         2 + // interface
         1 + // phy
         4 + // frequency
@@ -113,10 +113,12 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
 
 
     // Add separator
-    final_packet.insert(final_packet.end(), ti_separator.begin(), ti_separator.end());
+    uint8_t protocol = command_assembler.get_protocol_value(packet.mode);
+    final_packet.push_back(protocol);
     // Add phy
+    int phy_ti = command_assembler.get_ti_phy_value(packet.mode);
     int phy = radio_mode_table[packet.mode].phy;
-    final_packet.push_back(phy);
+    final_packet.push_back(phy_ti);
     // Add frequency
     std::vector<uint8_t> final_frequency = command_assembler.convertFreqToByte(command_assembler.calculateFinalFreq(phy, radio_mode_table[packet.mode].freq, packet.channel));
     final_packet.insert(final_packet.end(), final_frequency.begin(), final_frequency.end());

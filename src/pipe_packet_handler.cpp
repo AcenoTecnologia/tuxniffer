@@ -15,8 +15,8 @@
 
 PipePacketHandler::PipePacketHandler(std::string pipe_path, std::string base, std::chrono::time_point<std::chrono::system_clock> start_time)
 {
-    this->base = base;
     this->pipe_path = pipe_path;
+    this->base = base;
     this->start_time = start_time;
 }
 

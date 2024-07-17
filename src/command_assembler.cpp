@@ -19,6 +19,117 @@
 #include "command_assembler.hpp"
 #include "common.hpp"
 
+uint8_t CommandAssembler::get_protocol_value(uint8_t radio_mode)
+{    
+    // TODO: Fill other PHY types according to necessity
+    switch (radio_mode)
+    {
+    case 0:
+        return PROTOCOL_GENERIC;
+    case 1:
+        return PROTOCOL_GENERIC;
+    case 2:
+        return PROTOCOL_GENERIC;
+    case 3:
+        return PROTOCOL_GENERIC;
+    case 4:
+        return PROTOCOL_GENERIC;
+    case 5:
+        return PROTOCOL_GENERIC;
+    case 6:
+        return PROTOCOL_GENERIC;
+    case 7:
+        return PROTOCOL_GENERIC;
+    case 8:
+        return PROTOCOL_GENERIC;
+    case 9:
+        return PROTOCOL_GENERIC;
+    case 10:
+        return PROTOCOL_GENERIC;
+    case 11:
+        return PROTOCOL_GENERIC;
+    case 12:
+        return PROTOCOL_GENERIC;
+    case 13:
+        return PROTOCOL_GENERIC;
+    case 14:
+        return PROTOCOL_GENERIC;
+    case 15:
+        return PROTOCOL_GENERIC;
+    case 16:
+        return PROTOCOL_GENERIC;
+    case 17:
+        return PROTOCOL_GENERIC;
+    case 18:
+        return PROTOCOL_GENERIC;
+    case 19:
+        return PROTOCOL_GENERIC;
+    case 20:
+        return PROTOCOL_IEEE_802_15_4;
+    case 21:
+        return PROTOCOL_BLE;
+    default:
+        return PROTOCOL_GENERIC;
+    }
+
+    return PROTOCOL_GENERIC;
+}
+
+uint8_t CommandAssembler::get_ti_phy_value(uint8_t radio_mode)
+{
+    // TODO: Fill other PHY types according to necessity
+    switch (radio_mode)
+    {
+    case 0:
+        return PHY_TYPE_UNUSED;
+    case 1:
+        return PHY_TYPE_UNUSED;
+    case 2:
+        return PHY_TYPE_UNUSED;
+    case 3:
+        return PHY_TYPE_UNUSED;
+    case 4:
+        return PHY_TYPE_UNUSED;
+    case 5:
+        return PHY_TYPE_UNUSED;
+    case 6:
+        return PHY_TYPE_UNUSED;
+    case 7:
+        return PHY_TYPE_UNUSED;
+    case 8:
+        return PHY_TYPE_UNUSED;
+    case 9:
+        return PHY_TYPE_UNUSED;
+    case 10:
+        return PHY_TYPE_UNUSED;
+    case 11:
+        return PHY_TYPE_UNUSED;
+    case 12:
+        return PHY_TYPE_UNUSED;
+    case 13:
+        return PHY_TYPE_UNUSED;
+    case 14:
+        return PHY_TYPE_UNUSED;
+    case 15:
+        return PHY_TYPE_UNUSED;
+    case 16:
+        return PHY_TYPE_UNUSED;
+    case 17:
+        return PHY_TYPE_UNUSED;
+    case 18:
+        return PHY_TYPE_UNUSED;
+    case 19:
+        return PHY_TYPE_UNUSED;
+    case 20:
+        return PHY_TYPE_OQPSK;
+    case 21:
+        return PHY_TYPE_BLE;
+    default:
+        return PHY_TYPE_UNUSED;
+    }
+    return PHY_TYPE_UNUSED;
+}
+
 // Calculate FCS
 uint8_t CommandAssembler::calculate_fcs(std::vector<uint8_t> data)
 {
@@ -123,12 +234,16 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     case 0x10:
     case 0x11:
         break;
-    // TODO: IEEE 2.4GHz
     case 0x12:
         finalFreq = 2405 + ((channel - 11) * 5);
         break;
-    // TODO: BLE
     case 0x13:
+        // Channels 37, 38 and 39 are used for advertising and are not part of the 2 MHz spacing
+        if(channel == 37) finalFreq = 2402;
+        else if(channel == 38) finalFreq = 2426;
+        else if(channel == 39) finalFreq = 2480;
+        // Channels 0 to 36 are part of the 2 MHz spacing
+        else finalFreq = 2402 + channel * 2;
         break;
     default:
         break;

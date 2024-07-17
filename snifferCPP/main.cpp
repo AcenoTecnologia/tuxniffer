@@ -107,12 +107,18 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     log->file.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
     log->file.reset_period =        yaml_log.contains("resetPeriod")        ? yaml_log["resetPeriod"].get_value<std::string>()  : "none";
 
+    // Checks if reset period is valid, if not, default to none
+    if(log->file.reset_period != "none" && log->file.reset_period != "hourly" && log->file.reset_period != "daily" && log->file.reset_period != "weekly" && log->file.reset_period != "monthly") {
+        D(std::cout << "[ERROR] Invalid reset period for file log. Defaulting to none." << std::endl;)
+        log->file.reset_period = "none";
+    }
+
     yaml_log = yaml["pipe"];
     // Property                     Optional Field                          Read Value                                          Default Value 
     log->pipe.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
     log->pipe.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : DEFAULT_PIPE_PATH;
     log->pipe.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
-    log->pipe.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
+    log->pipe.split_devices_log =   yaml_log.contains("splitDevicesPipe")   ? yaml_log["splitDevicesPipe"].get_value<bool>()     : false;
     log->pipe.reset_period = "none";
 
     // Return the vector of devices
@@ -177,8 +183,13 @@ int main(int argc, char* argv[])
                 log.pipe.base_name = optarg;
                 break;
             case 'r':
-                D(std::cout << "[CONFIG] Reset period" << optarg << std::endl;)
-                log.file.reset_period = optarg;
+                D(std::cout << "[CONFIG] Reset period: " << optarg << std::endl;)
+                if (std::string(optarg) == "none" || std::string(optarg) == "hourly" || std::string(optarg) == "daily" || std::string(optarg) == "weekly" || std::string(optarg) == "monthly") {
+                    log.file.reset_period = optarg;
+                } else {
+                    std::cout << "[ERROR] Invalid reset period. Please choose from: none, hourly, daily, weekly, or monthly." << std::endl;
+                    return 0;
+                }
                 break;
             case 'P':
                 D(std::cout << "[CONFIG] Path " << optarg << std::endl;)
@@ -210,9 +221,10 @@ int main(int argc, char* argv[])
         std::string fileExtension = configFilePath.substr(configFilePath.find_last_of(".") + 1);
         if(fileExtension == "yaml")
             devices = parse_input_file_yaml(configFilePath, &log);
-        else
+        else{
             std::cout << "[ERROR] Invalid file extension. Please use a .yaml file." << std::endl;
             return 0;
+        }
     }
 
     // Run sniffer passing devices vector

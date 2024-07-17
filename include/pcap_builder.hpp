@@ -76,8 +76,8 @@ const std::vector<uint8_t> udp_header = {0x45, 0x60, 0x45, 0x60, 0x00, 0x47, 0x1
 /// TI header template.
 const std::vector<uint8_t> ti_header = {0x00, 0x3c, 0x00, 0x00};
 
-/// TI separator template.
-const std::vector<uint8_t> ti_separator = {0x02};
+/// TI protocol template.
+const std::vector<uint8_t> ti_protocol = {0x00};
 
 /**
  * @class PcapBuilder
