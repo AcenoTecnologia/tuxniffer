@@ -28,6 +28,8 @@ On powershell as administrator:
   # Pay attention to the tty* and ttyACM*. The forwarded port should be one of them.
   ```
 
+Each serial port forwarded is actually 2 ttys, thus, one device should map to ttyACM0 and ttyACM1.
+
 ### Windows tests
 This software currently does not support Windows.
 
@@ -181,13 +183,78 @@ Users that will use all of the software capabilities and will stress it to its l
         base_name: output
         splitDevicesLog: false
   ```
+
   - Basic usage tests;
   - Intermediate usage tests;
   - Check if system has enough RAM to run at least during one day;
   - Check if packets are written to file faster then they are captured;
   - Check if queue overflow;
   - Open pipe and check how much RAM wireshark will consume over time;
-  - Check the size of the .pcap file generated during one day;
+  - Check the size of the .pcap files generated during one day;
+
+
+## Additional Test Cases for Unexpected Events
+
+
+1. **Test what happens if a device disconnects during use:**
+   - Simulate a device (like `/dev/ttyACM0`) disconnecting during data transmission;
+   - Check if the system logs the disconnection and attempts reconnection;
+   - Verify that the data integrity is maintained for the already captured data;
+   - Check if the software closes correctly.
+
+2. **Test what happens if a device fails to connect:**
+   - Attempt to start the system with a device that fails to connect;
+   - Ensure that appropriate error messages are logged;
+   - Verify that the system handles the failure without crashing;
+   - Check if the software closes correctly;
+   - Check what happens to other devices that connected correctly;
+
+3. **Test what happens if no devices can connect:**
+   - Simulate a scenario where none of the configured devices are available for connection;
+   - Ensure that the system logs the failure;
+   - Verify that the system does not crash;
+
+4. **Test if a .pcap file can be deleted during use:**
+   - Start the system and begin logging to a .pcap file;
+   - Manually try to delete the .pcap file during the logging process;
+   - Verify that the system detects the deletion and logs an appropriate error;
+   - Check if the system creates a new .pcap file or stops logging;
+   - Verify that the system does not crash;
+
+5. **Test what happens if the device consuming the pipe is closed:**
+   - Start the system with a pipe enabled;
+   - Start Wireshark to consume the pipe data;
+   - Close Wireshark during data transmission;
+   - Ensure the system logs the event and handles the pipe closure;
+   - Verify that data integrity is maintained up to the point of closure;
+   - Check if other Wireshark can connect to the same pipe and continue getting packets that were on the queue waiting to be stored;
+   - Verify that the system does not crash;
+   - Verify that the system does not interrupt the other pipes or log process;
+
+6. **Test what happens if the pipe is never consumed:**
+   - Start the system with a pipe enabled but without any process consuming it.
+   - Check how the system handles the accumulation of data. Is there a chance of overflow?
+   - Verify that the system logs warnings about the unconsumed pipe and does not crash.
+
+7. **Test what happens if the pipe is consumed over SSH:**
+   - Set up a remote process over SSH to consume the pipe data.
+   - Verify that the data transmission works correctly over SSH.
+   - Check for any latency or data loss issues.
+
+8. **Test what happens if the pipe is consumed over SSH via WSL:**
+   - Set up a WSL environment on a Windows machine and use SSH within WSL to consume the pipe.
+   - Verify the data integrity and transmission over this setup.
+   - Check for compatibility issues or data loss.
+
+9. **Test what happens if the sniffer process is terminated:**
+   - Start the sniffer process and then terminate it abruptly (closing the terminal window, for example);
+   - Verify the integrity of the .pcap files;
+
+10. **Test what happens if the sniffer process is interrupted:**
+    - Start the sniffer process and interrupt it (like via a keyboard interrupt with Ctrl + C);
+    - Ensure that the system handles the interruption;
+    - Verify that the .pcap files and pipes are not corrupted;
+
 
 ## Menu and Parameters
 

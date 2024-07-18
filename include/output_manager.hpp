@@ -162,6 +162,7 @@ private:
 
     /**
      * @brief Maximum size of the packet queue.
+     * - May be useful to avoid memory issues in high packet flow situations (such as BLE).
      */
     int queue_max_size = 500000;
 };

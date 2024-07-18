@@ -20,6 +20,6 @@ pipe:
   path: /tmp/                   # (optional - default) /tmp/ (linux) or \\.\pipe\ (windows)
                                 # Pipes can be created wherever the user has write permissions on linux
                                 # However, on Windows the pipe must be created at \\.\pipe\
-  splitDevicesPipe: false        # true | (optional - default) false
+  splitDevicesPipe: true        # true | (optional - default) false
                                 # Pipes are created as <path>/<name>[-<id>] on Linux or \\.\pipe\<name>[-<id>] on Windows
                                 # Pipes does not support the resetPeriod option
