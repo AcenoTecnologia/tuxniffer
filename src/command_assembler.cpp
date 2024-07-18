@@ -21,41 +21,42 @@
 
 uint8_t CommandAssembler::get_protocol_value(uint8_t radio_mode)
 {    
-    // TODO: Fill other PHY types according to necessity
+    // TODO: Check each and every value.
+    // Only PROTOCOL_IEEE_802_15_4 and PROTOCOL_BLE are tested.
     switch (radio_mode)
     {
     case 0:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 1:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 2:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 3:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 4:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 5:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 6:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 7:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 8:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 9:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 10:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 11:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 12:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 13:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 14:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 15:
-        return PROTOCOL_GENERIC;
+        return PROTOCOL_IEEE_802_15_4_G;
     case 16:
         return PROTOCOL_GENERIC;
     case 17:
@@ -77,49 +78,50 @@ uint8_t CommandAssembler::get_protocol_value(uint8_t radio_mode)
 
 uint8_t CommandAssembler::get_ti_phy_value(uint8_t radio_mode)
 {
-    // TODO: Fill other PHY types according to necessity
+    // TODO: Check each and every value.
+    // Only PHY_TYPE_OQPSK and PHY_TYPE_BLE are tested.
     switch (radio_mode)
     {
     case 0:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK;
     case 1:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK;
     case 2:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK;
     case 3:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_SLR;
     case 4:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_SLR;
     case 5:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_SLR;
     case 6:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK_WISUN_1A;
     case 7:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK_WISUN_1B;
     case 8:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_100KBPS_GFSK_WISUN_2A;
     case 9:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_100KBPS_GFSK_WISUN_2B;
     case 10:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_150KBPS_GFSK_WISUN_3;
     case 11:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_200KBPS_GFSK_WISUN_4A;
     case 12:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_200KBPS_GFSK_WISUN_4B;
     case 13:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_100KBPS_GFSK_ZIGBEE_R23;
     case 14:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_500KBPS_GFSK_ZIGBEE_R23;
     case 15:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_200KBPS_GFSK;
     case 16:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK;
     case 17:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_50KBPS_GFSK;
     case 18:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_SLR;
     case 19:
-        return PHY_TYPE_UNUSED;
+        return PHY_TYPE_SLR;
     case 20:
         return PHY_TYPE_OQPSK;
     case 21:
@@ -194,14 +196,8 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     case 0x02:
     case 0x03:
         // TODO: Implement IEEE 802.15.4ge frequency calculation
-        if (freq == 868)
-        {
-            finalFreq = 868;
-        }
-        else if (freq == 915)
-        {
-            finalFreq = 915;
-        }
+        if (freq == 868) finalFreq = 868;
+        if (freq == 915) finalFreq = 915;
         break;
     // Wi-SUN 
     case 0x04:
@@ -212,14 +208,8 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     case 0x09:
     case 0x0A:
         // TODO: Implement Wi-SUN frequency calculation
-        if (freq == 868)
-        {
-            finalFreq = 868;
-        }
-        else if (freq == 915)
-        {
-            finalFreq = 915;
-        }
+        if (freq == 868) finalFreq = 868;
+        if (freq == 915) finalFreq = 915;
         break;
     // TODO: Zigbee
     case 0x0B:
@@ -238,12 +228,11 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
         finalFreq = 2405 + ((channel - 11) * 5);
         break;
     case 0x13:
-        // Channels 37, 38 and 39 are used for advertising and are not part of the 2 MHz spacing
+        // Channels 37, 38 and 39 are used for advertising
+        // There are the only channels that can be used in BLE
         if(channel == 37) finalFreq = 2402;
-        else if(channel == 38) finalFreq = 2426;
-        else if(channel == 39) finalFreq = 2480;
-        // Channels 0 to 36 are part of the 2 MHz spacing
-        else finalFreq = 2402 + channel * 2;
+        if(channel == 38) finalFreq = 2426;
+        if(channel == 39) finalFreq = 2480;
         break;
     default:
         break;
