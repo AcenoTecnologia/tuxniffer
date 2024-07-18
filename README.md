@@ -71,16 +71,13 @@ The binary file is now stored in `build/bin`.
 Usage: `.build/bin/sniffer [options]`
 
 #### Options:
-
 - `-h, --help`: Show help message and exit.
 - **[REQUIRED]** `-p, --port`: Serial port to connect to.
 - **[REQUIRED]** `-m, --radio_mode`: Radio mode to use.
 - **[REQUIRED]** `-c, --channel`: Channel to use.
 - **[OPTIONAL]** `-b, --base`: Base file/pipe name.
-- **[OPTIONAL]** `-l, --log_hourly`: Log hourly.
-- **[OPTIONAL]** `-L, --log_daily`: Log daily.
-- **[OPTIONAL]** `-w, --log_weekly`: Log weekly.
-- **[OPTIONAL]** `-M, --log_monthly`: Log monthly.
+- **[OPTIONAL]** `-P, --path`: Path to save file.
+- **[OPTIONAL]** `-r, --reset_period`: Reset period.
 - **[OPTIONAL]** `-s, --log_split`: Split log files by device.
 - **[OPTIONAL]** `-i, --input`: Input config file.
 
@@ -94,7 +91,7 @@ Usage: `.build/bin/sniffer [options]`
 ./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25
 
 # Specify base name and log hourly
-./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25 -b sniffer -l
+./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25 -b sniffer -r hourly
 ```
 
 Using this software through the CLI has some limitations:
@@ -159,10 +156,13 @@ This software allows live packet viewing using Pipes. The live viewing can be us
 ./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25 | wireshark -k -i /tmp/aceno
 
 # Specify custom name pipe and open Wireshark
-./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25 -b test | wireshark -k -i /tmp/teste
+./snifferCPP -p /dev/ttyUSB0 -m 20 -c 25 -b test | wireshark -k -i /tmp/test
 ```
 
 Wireshark doesn't need to be open at the start of the sniffer execution. The sniffer will store a queue of packets during its running time, and as long as Wireshark is open while the sniffer is running, the packets will be sent in order to it.
+
+## Use Cases
+The file `testing.md` has a list of cases for basic, intermediate and advanced uses. This file also contains a list of tests with defined inputs and expected outputs that should be checked.
 
 ## Compatibility
 
@@ -174,9 +174,9 @@ Texas Instruments sends packets to Wireshark in a specific way:
 - The first layer is a IPv4 packet (with fake IP addresses);
 - The second layer is a UDP packet (with a fake port);
 - The third layer is the "TI Radio Packet Info", that contains details about COMs, frequency, PHYs, RSSI and FCS;
-- The forth layer is the data layer (IEEE 802.15.4, BLE, ...);
+- The forth layer can be other Packet Info layer (like BLE Packet Info), or the data layer (IEEE 802.15.4, BLE, ...);
 
-The first two layers are used only to send the "TI Radio Packet Info", and does not impact the data layer.
+**The first two layers are used only to send the "TI Radio Packet Info" by the original SmartRF Packet Sniffer 2 software and contain fake data, thus, it does not impact the data layer nor represent real IP addresses and ports.**
 
 ## Texas Instruments Documentation Issues
 
@@ -185,39 +185,39 @@ During development it was found some inconsistencies between the sniffer documen
 - The baudrate presented in the documentation is `921600`, but the firmware source code uses `3000000`.
 - Despite showing a state machine with a `PAUSED` state in the documentation, the firmware source code doesn't have one. Therefore, neither `pause` and `resume` commands exists.
 - The PHY code informed by the documentation for `IEEE 802.15.4 2.4 GHz band O-QPSK` is `0x11`, but in reality it is `0x12`.
-- This happens because the `Smart RF Sniffer Agent software` by TI has a Radio Configuration for `IEEE 802.15.4 915 MHz GSFK 200 kbps` after `0x0C`, which causes a offset of `0x01` to all subsequent values. This configuration is not on the reference, but can be selected on the software. The Radio Mode table bellow fixes that.
+- This happens because the `Smart RF Sniffer Agent software` by TI has a Radio Configuration for `IEEE 802.15.4 915 MHz GSFK 200 kbps` after `0x0C`, which causes a offset of `0x01` to all subsequent values. This configuration is not on the reference/ documentation, but can be selected on the software. The Radio Mode table bellow is already fixed.
 - The packet response documentation also informs that the response frame data payload has the format: `Timestamp (6B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. But, in reality is `Timestamp (6B) | Separator (1B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. It was not found the usage of the Separator. However, neither considering it as Timestamp or Payload work. The Timestamp gets incorrect and the Payload doesn't match the FCS at the end of the frame (last 2B of payload).
-- While this software was developed using the 1352P7-1 model, the 1352P1 model was also used for tests and validation. A issue found is that on Windows, with the original Texas Instruments SmartRF Packet Sniffer, the 1352P1 could not run any 2.4GHz modes, despite having support. The solution for this issue can be found [here](https://e2e.ti.com/support/wireless-connectivity/bluetooth-group/bluetooth/f/bluetooth-forum/1229627/launchxl-cc1352p-packet-sniffer-2-error-sending-message-msg-cfgphy-problem-unknown?tisearch=e2e-sitesearch&keymatch=LAUNCHXL-CC1352P%25252525252525252520Error%25252525252525252520Sending%25252525252525252520Message#).
+- While this software was developed using the ``1352P7-1`` model, the ``1352P1`` model was also used for tests and validation. A issue found is that on Windows, with the original Texas Instruments SmartRF Packet Sniffer, the ``1352P1`` could not run any 2.4GHz modes, despite having support. The solution for this issue can be found [here](https://e2e.ti.com/support/wireless-connectivity/bluetooth-group/bluetooth/f/bluetooth-forum/1229627/launchxl-cc1352p-packet-sniffer-2-error-sending-message-msg-cfgphy-problem-unknown?tisearch=e2e-sitesearch&keymatch=LAUNCHXL-CC1352P%25252525252525252520Error%25252525252525252520Sending%25252525252525252520Message#).
 
 ## Radio Mode
 
 This program currently supports the following Radio Modes for different kinds of packets:
 
-| Mode Name                | PHY ID | Frequency | Radio Mode |
-|--------------------------|--------|-----------|------------|
-| LP-CC1352P7              |        |           |            |
-| ieee_868_915             | 0x00   | f868      | 0          |
-| ieee_868_915             | 0x00   | f915      | 1          |
-| ieee_433                 | 0x01   | f433      | 2          |
-| ieee_868_915_slr         | 0x02   | f868      | 3          |
-| ieee_868_915_slr         | 0x02   | f915      | 4          |
-| ieee_433_slr             | 0x03   | f433      | 5          |
-| wiSun_868_915_50a        | 0x04   | f868      | 6          |
-| wiSun_868_915_50b        | 0x05   | f915      | 7          |
-| wiSun_868_915_100a       | 0x06   | f868      | 8          |
-| wiSun_868_915_100b       | 0x07   | f915      | 9          |
-| wiSun_868_915_150        | 0x08   | f868      | 10         |
-| wiSun_868_915_200a       | 0x09   | f915      | 11         |
-| wiSun_868_915_200b       | 0x0A   | f915      | 12         |
-| zigbee_868_915_100       | 0x0B   | f868      | 13         |
-| zigbee_868_915_500       | 0x0C   | f868      | 14         |
-| ieee_915                 | 0x0D   | f915      | 15         |
-| easyLink_868_915_50      | 0x0E   | f868      | 16         |
-| easyLink_433_50          | 0x0F   | f433      | 17         |
-| easyLink_868_915_slr     | 0x10   | f868      | 18         |
-| easyLink_433_slr         | 0x11   | f433      | 19         |
-| ieee_2405                | 0x12   | f2405     | 20         |
-| ble_2405                 | 0x13   | f2405     | 21         |
+| Mode Name                | PHY ID | Frequency |Supported Channels| Radio Mode |
+|--------------------------|--------|-----------|------------------|------------|
+| LP-CC1352P7/LP-CC1352P1  |        |           |                  |            |
+| ieee_868_915             | 0x00   | f868      | 0-128            | 0          |
+| ieee_868_915             | 0x00   | f915      | 0-33             | 1          |
+| ieee_433                 | 0x01   | f433      | 0-6              | 2          |
+| ieee_868_915_slr         | 0x02   | f868      | 0-128            | 3          |
+| ieee_868_915_slr         | 0x02   | f915      | 0-33             | 4          |
+| ieee_433_slr             | 0x03   | f433      | 0-6              | 5          |
+| wiSun_868_915_50a        | 0x04   | f868      | 0-128            | 6          |
+| wiSun_868_915_50b        | 0x05   | f915      | 0-128            | 7          |
+| wiSun_868_915_100a       | 0x06   | f868      | 0-128            | 8          |
+| wiSun_868_915_100b       | 0x07   | f915      | 0-128            | 9          |
+| wiSun_868_915_150        | 0x08   | f868      | 0-128            | 10         |
+| wiSun_868_915_200a       | 0x09   | f915      | 0-128            | 11         |
+| wiSun_868_915_200b       | 0x0A   | f915      | 0-128            | 12         |
+| zigbee_868_915_100       | 0x0B   | f868      | 0-128            | 13         |
+| zigbee_868_915_500       | 0x0C   | f868      | 0-128            | 14         |
+| ieee_915                 | 0x0D   | f915      | 0-63             | 15         |
+| easyLink_868_915_50      | 0x0E   | f868      | Ignored          | 16         |
+| easyLink_433_50          | 0x0F   | f433      | Ignored          | 17         |
+| easyLink_868_915_slr     | 0x10   | f868      | Ignored          | 18         |
+| easyLink_433_slr         | 0x11   | f433      | Ignored          | 19         |
+| ieee_2405                | 0x12   | f2405     | 11-26            | 20         |
+| ble_2405                 | 0x13   | f2405     | 37,38,39         | 21         |
 
 ## Dependencies
 [fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License).

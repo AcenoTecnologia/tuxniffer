@@ -26,43 +26,25 @@ uint8_t CommandAssembler::get_protocol_value(uint8_t radio_mode)
     switch (radio_mode)
     {
     case 0:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 1:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 2:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 3:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 4:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 5:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 6:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 7:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 8:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 9:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 10:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 11:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 12:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 13:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 14:
-        return PROTOCOL_IEEE_802_15_4_G;
     case 15:
         return PROTOCOL_IEEE_802_15_4_G;
     case 16:
-        return PROTOCOL_GENERIC;
     case 17:
-        return PROTOCOL_GENERIC;
     case 18:
-        return PROTOCOL_GENERIC;
     case 19:
         return PROTOCOL_GENERIC;
     case 20:
@@ -83,15 +65,11 @@ uint8_t CommandAssembler::get_ti_phy_value(uint8_t radio_mode)
     switch (radio_mode)
     {
     case 0:
-        return PHY_TYPE_50KBPS_GFSK;
     case 1:
-        return PHY_TYPE_50KBPS_GFSK;
     case 2:
         return PHY_TYPE_50KBPS_GFSK;
     case 3:
-        return PHY_TYPE_SLR;
     case 4:
-        return PHY_TYPE_SLR;
     case 5:
         return PHY_TYPE_SLR;
     case 6:
@@ -115,7 +93,6 @@ uint8_t CommandAssembler::get_ti_phy_value(uint8_t radio_mode)
     case 15:
         return PHY_TYPE_200KBPS_GFSK;
     case 16:
-        return PHY_TYPE_50KBPS_GFSK;
     case 17:
         return PHY_TYPE_50KBPS_GFSK;
     case 18:
@@ -195,53 +172,53 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
     {
     // IEEE 802.15.4ge
     case 0:
-        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
         break;
     case 1:
-        if(channel > 0 && channel < 33) finalFreq = 863.125 + (channel * 0.2);
+        if(channel >= 0 && channel <= 33) finalFreq = 863.125 + (channel * 0.2);
         break;
     case 2:
-        if(channel > 0 && channel < 6) finalFreq = 433.3 + (channel * 0.2);
+        if(channel >= 0 && channel <= 6) finalFreq = 433.3 + (channel * 0.2);
         break;
     case 3:
-        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
         break;
     case 4:
-        if(channel > 0 && channel < 33) finalFreq = 863.125 + (channel * 0.2); 
+        if(channel >= 0 && channel <= 33) finalFreq = 863.125 + (channel * 0.2); 
         break;
     case 5:
-        if(channel > 0 && channel < 6) finalFreq = 433.3 + (channel * 0.2);
+        if(channel >= 0 && channel <= 6) finalFreq = 433.3 + (channel * 0.2);
         break;
     // Wi-SUN 
     case 6:
-        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.1);
+        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.1);
         break;
     case 7:
-        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
         break;
     case 8:
-        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
         break;
     case 9:
-        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
         break;
     case 10:
-        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
         break;
     case 11:
-        if(channel > 0 && channel < 128) finalFreq = 902.4 + (channel * 0.4);
+        if(channel >= 0 && channel <= 128) finalFreq = 902.4 + (channel * 0.4);
         break;
     case 12:
-        if(channel > 0 && channel < 128) finalFreq = 920.8 + (channel * 0.6);
+        if(channel >= 0 && channel <= 128) finalFreq = 920.8 + (channel * 0.6);
         break;
     // Zigbee
     case 13:
     case 14:
-        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
         break;
     // IEEE 915
     case 15:
-        if(channel > 0 && channel < 63) finalFreq = 902.4 + (channel * 0.4);
+        if(channel >= 0 && channel <= 63) finalFreq = 902.4 + (channel * 0.4);
         break;
     // EasyLink/ Generic
     case 16:
@@ -257,7 +234,8 @@ float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
         finalFreq = 433.3;
         break;
     case 20:
-        finalFreq = 2405 + ((channel - 11) * 5);
+        if(channel >= 11 && channel <= 26) finalFreq = 2405 + ((channel - 11) * 5);
+        
         break;
     case 21:
         // Channels 37, 38 and 39 are used for advertising
