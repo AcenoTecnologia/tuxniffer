@@ -163,5 +163,5 @@ private:
     /**
      * @brief Maximum size of the packet queue.
      */
-    int queue_max_size = 10000;
+    int queue_max_size = 500000;
 };
