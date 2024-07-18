@@ -168,10 +168,6 @@ The file `testing.md` has a list of cases for basic, intermediate and advanced u
 
 This software was compiled using gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) (WSL).
 
-## Using as a library
-
-You can compile the ``include`` and ``src`` folder as a shared library.
-
 ## Texas Instruments Custom Packet Format
 
 Texas Instruments sends packets to Wireshark in a specific way:

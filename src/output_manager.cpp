@@ -263,6 +263,8 @@ void OutputManager::recreate_log_files()
 
     // If the time has not come yet, return
     if (!recreate) return;
+
+    // TODO: Empty the packet queue here before recreating the log files
     D(std::cout << "[INFO] Recreating log files..." << std::endl;)
 
 
