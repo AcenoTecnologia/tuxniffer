@@ -107,9 +107,9 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
     interface_string.erase(std::remove_if(interface_string.begin(), interface_string.end(), [](char c) { return !std::isdigit(c); }), interface_string.end());
     // Convert string to int
     int interface = std::stoi(interface_string);
-    // Add interface to final_packet as 16 bits
-    final_packet.push_back(interface >> 8);
+    // Add interface to final_packet as 16 bits (inverted endianess)
     final_packet.push_back(interface & 0xFF);
+    final_packet.push_back(interface >> 8);
 
 
     // Add separator

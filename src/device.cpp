@@ -27,10 +27,16 @@ int interruption = 0;
 
 void signal_handler(int sig)
 {
+    if(interruption)
+    {
+        exit(0);
+    }
     sig = sig;
 	interruption = 1;
     D(std::cout << "[INTERRUPTION] Signal " << sig << " received. The stream will stop after recieving the next packet." << std::endl;)
     D(std::cout << "[INTERRUPTION] It may take a while to close if is saving queued packets to file/ pipe." << std::endl;)
+    D(std::cout << "[INTERRUPTION] Press CTRL+C again to kill program. May cause data loss!" << std::endl;)
+
 }
 
 
