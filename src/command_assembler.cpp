@@ -186,55 +186,85 @@ std::vector<uint8_t> CommandAssembler::assemble_command(uint8_t info)
 // Calculate final frequency
 float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
 {
-    float finalFreq;
-
+    float finalFreq = freq;
+    // Could aggregate similar options, but it would make the code less readable
+    // TODO: Check each and every value.
+    // Only 20 (802.15.4 2.4GHz) and 21 (BLE) are tested.
+    // Values taken from the SmartRF Packet Sniffer 2 from Texas Instruments
     switch (phy)
     {
     // IEEE 802.15.4ge
-    case 0x00:
-    case 0x01:
-    case 0x02:
-    case 0x03:
-        // TODO: Implement IEEE 802.15.4ge frequency calculation
-        if (freq == 868) finalFreq = 868;
-        if (freq == 915) finalFreq = 915;
+    case 0:
+        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        break;
+    case 1:
+        if(channel > 0 && channel < 33) finalFreq = 863.125 + (channel * 0.2);
+        break;
+    case 2:
+        if(channel > 0 && channel < 6) finalFreq = 433.3 + (channel * 0.2);
+        break;
+    case 3:
+        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
+        break;
+    case 4:
+        if(channel > 0 && channel < 33) finalFreq = 863.125 + (channel * 0.2); 
+        break;
+    case 5:
+        if(channel > 0 && channel < 6) finalFreq = 433.3 + (channel * 0.2);
         break;
     // Wi-SUN 
-    case 0x04:
-    case 0x05:
-    case 0x06:
-    case 0x07:
-    case 0x08:
-    case 0x09:
-    case 0x0A:
-        // TODO: Implement Wi-SUN frequency calculation
-        if (freq == 868) finalFreq = 868;
-        if (freq == 915) finalFreq = 915;
+    case 6:
+        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.1);
         break;
-    // TODO: Zigbee
-    case 0x0B:
-    case 0x0C:
+    case 7:
+        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
         break;
-    // TODO: IEEE 915
-    case 0x0D:
+    case 8:
+        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
         break;
-    // TODO: EasyLink
-    case 0x0E:
-    case 0x0F:
-    case 0x10:
-    case 0x11:
+    case 9:
+        if(channel > 0 && channel < 128) finalFreq = 902.2 + (channel * 0.2);
         break;
-    case 0x12:
+    case 10:
+        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
+        break;
+    case 11:
+        if(channel > 0 && channel < 128) finalFreq = 902.4 + (channel * 0.4);
+        break;
+    case 12:
+        if(channel > 0 && channel < 128) finalFreq = 920.8 + (channel * 0.6);
+        break;
+    // Zigbee
+    case 13:
+    case 14:
+        if(channel > 0 && channel < 128) finalFreq = 863.1 + (channel * 0.2);
+        break;
+    // IEEE 915
+    case 15:
+        if(channel > 0 && channel < 63) finalFreq = 902.4 + (channel * 0.4);
+        break;
+    // EasyLink/ Generic
+    case 16:
+        finalFreq = 863.125;
+        break;
+    case 17:
+        finalFreq = 433.3;
+        break;
+    case 18:
+        finalFreq = 863.125;
+        break;
+    case 19:
+        finalFreq = 433.3;
+        break;
+    case 20:
         finalFreq = 2405 + ((channel - 11) * 5);
         break;
-    case 0x13:
+    case 21:
         // Channels 37, 38 and 39 are used for advertising
         // There are the only channels that can be used in BLE
         if(channel == 37) finalFreq = 2402;
         if(channel == 38) finalFreq = 2426;
         if(channel == 39) finalFreq = 2480;
-        break;
-    default:
         break;
     }
 
