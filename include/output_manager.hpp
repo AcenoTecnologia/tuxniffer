@@ -159,4 +159,9 @@ private:
      * @brief Vector of threads for pipe logging.
      */
     std::vector<std::thread> log_pipes_threads;
+
+    /**
+     * @brief Maximum size of the packet queue.
+     */
+    int queue_max_size = 10000;
 };

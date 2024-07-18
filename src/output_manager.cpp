@@ -34,6 +34,15 @@ OutputManager::OutputManager(log_s log_settings)
 void OutputManager::add_packet(packet_queue_s packet)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
+    
+    // Check if the queue size has reached the maximum limit
+    if ((int)packet_queue.size() >= queue_max_size)
+    {
+        packet_queue.pop();
+        D(std::cout << "[WARNING] File packet queue is full (over " << queue_max_size << " entries). Deleting oldest packet to add the new one." << std::endl;)
+    }
+
+    // Add the new packet to the queue
     packet_queue.push(packet);
 }
 
@@ -173,7 +182,7 @@ void OutputManager::run()
         pipe_thread.join();
     }
 
-    D(std::cout << "[INFO] Output Manager stopped." << std::endl;)
+    D(std::cout << "[INFO] Output Manager stopped. Queues empty." << std::endl;)
 }
 
 void OutputManager::handle_packet(packet_queue_s packet)

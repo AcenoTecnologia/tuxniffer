@@ -208,12 +208,12 @@ public:
     /**
      * @brief Calculates the final frequency.
      * 
-     * @param phy PHY identifier.
+     * @param mode Radio Mode value.
      * @param freq Frequency value.
      * @param channel Channel number.
      * @return Calculated final frequency.
      */
-    float calculateFinalFreq(uint8_t phy, float freq, int channel);
+    float calculateFinalFreq(uint8_t mode, float freq, int channel);
 
     /**
      * @brief Converts frequency to byte format in little endian format.

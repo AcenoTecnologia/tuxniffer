@@ -54,6 +54,7 @@ public:
     void run();
 
 private:
+    int queue_max_size = 10000; ///< Maximum size of the packet queue.
     std::mutex m_mutex; ///< Mutex for thread synchronization.
     Pipe pipe; ///< Named pipe interface.
     std::string pipe_path; ///< Path to the named pipe.

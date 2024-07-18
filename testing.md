@@ -37,6 +37,8 @@ This software currently does not support Windows.
 
 ## Basic Usage
 
+Simple, easy commands that one can use without going too deep. Most of users fall in this category.
+
 - Radio Mode: 20 - IEEE 802.15.4 2.4GHz; Channel: 25;
 
 ### Case 1:
@@ -66,6 +68,8 @@ This software currently does not support Windows.
     - Check if the program closes correctly;
 
 ## Intermediate Usage
+
+Users that want to explore and take advantage of the software capabilities, but will not stress it to its limits.
 
 - Radio Mode: 20 - IEEE 802.15.4 2.4GHz; Channel: 25;
 - For YAML cases the execution command should be `./snifferCPP -i config.yaml`;
@@ -134,6 +138,7 @@ This software currently does not support Windows.
 
 ### (YAML) Case 6:
 - Basic case with parameters, but split devices log and reset period enabled in YAML;
+
   ```yaml
     devices:
       - port: /dev/ttyACM0
@@ -150,9 +155,43 @@ This software currently does not support Windows.
 
 ## Advanced Usage
 
+Users that will use all of the software capabilities and will stress it to its limits.
 
+### (YAML) Case 1:
+- Test with 3 devices, all of them set to BLE (normally High packet flow), with optional parameters, reset period set do daily and a pipe open; 
+
+  ```yaml
+    devices:
+      - port: /dev/ttyACM0
+        radio_mode: 21
+        channel: 37
+      - port: /dev/ttyACM2
+        radio_mode: 21
+        channel: 38
+      - port: /dev/ttyACM4
+        radio_mode: 21
+        channel: 39
+    log:
+        path: ./results/
+        base_name: output
+        splitDevicesLog: true
+        resetPeriod: daily
+    pipe:
+        path: /tmp/
+        base_name: output
+        splitDevicesLog: false
+  ```
+  - Basic usage tests;
+  - Intermediate usage tests;
+  - Check if system has enough RAM to run at least during one day;
+  - Check if packets are written to file faster then they are captured;
+  - Check if queue overflow;
+  - Open pipe and check how much RAM wireshark will consume over time;
+  - Check the size of the .pcap file generated during one day;
 
 ## Menu and Parameters
+
+Tests to ensure that the menu and parameters are running correctly.
 
 ### CLI Tests
 

@@ -161,14 +161,14 @@ std::vector<uint8_t> CommandAssembler::assemble_command(uint8_t info)
 }
 
 // Calculate final frequency
-float CommandAssembler::calculateFinalFreq(uint8_t phy, float freq, int channel)
+float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel)
 {
     float finalFreq = freq;
     // Could aggregate similar options, but it would make the code less readable
     // TODO: Check each and every value.
     // Only 20 (802.15.4 2.4GHz) and 21 (BLE) are tested.
     // Values taken from the SmartRF Packet Sniffer 2 from Texas Instruments
-    switch (phy)
+    switch (mode)
     {
     // IEEE 802.15.4ge
     case 0:
@@ -290,9 +290,8 @@ std::vector<uint8_t> CommandAssembler::assemble_set_freq(uint8_t radio_mode, int
 {
     D(std::cout << "[INFO] Assembling set frequency command." << std::endl;);
     // Convert frequency to byte
-    uint8_t phy = radio_mode_table[radio_mode].phy;
     float freq = radio_mode_table[radio_mode].freq;
-    std::vector<uint8_t> freq_bytes = convertFreqToByte(calculateFinalFreq(phy, freq, channel));
+    std::vector<uint8_t> freq_bytes = convertFreqToByte(calculateFinalFreq(radio_mode, freq, channel));
     return assemble_command(info_freq, freq_bytes);
 }
 
@@ -384,12 +383,19 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
 // Get device timestamp
 std::chrono::microseconds CommandAssembler::get_device_timestamp(std::vector<uint8_t> data)
 {
-    std::vector<uint8_t> timestamp;
-    // Exclude SOF, INFO and EOF
-    data = std::vector<uint8_t>(data.begin() + 3, data.end() - 2);
-    // TIMESTAMP 6B
-    timestamp.insert(timestamp.end(), data.begin() + 2, data.begin() + 8);
-    // Timestamp is in little endian
-    std::reverse(timestamp.begin(), timestamp.end());
-    return std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5]));
+    const size_t expected_length = 13; // 3 (SOF, INFO) + 6 (TIMESTAMP) + 2 (EOF) + 2 (padding or other data)
+    const size_t timestamp_offset = 5; // 3 (SOF, INFO) + 2 (padding or other data)
+
+    if (data.size() < expected_length) {
+        D(std::cout << "[ERROR] Data vector is too short to contain a valid timestamp." << std::endl;)
+        return std::chrono::microseconds(0);
+    }
+
+    // Extract the 6-byte timestamp directly from the data, considering the offset
+    uint64_t timestamp = 0;
+    for (size_t i = 0; i < 6; ++i) {
+        timestamp |= static_cast<uint64_t>(data[timestamp_offset + i]) << (i * 8);
+    }
+
+    return std::chrono::microseconds(timestamp);
 }

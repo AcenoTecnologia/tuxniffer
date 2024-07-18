@@ -117,10 +117,9 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
     final_packet.push_back(protocol);
     // Add phy
     int phy_ti = command_assembler.get_ti_phy_value(packet.mode);
-    int phy = radio_mode_table[packet.mode].phy;
     final_packet.push_back(phy_ti);
     // Add frequency
-    std::vector<uint8_t> final_frequency = command_assembler.convertFreqToByte(command_assembler.calculateFinalFreq(phy, radio_mode_table[packet.mode].freq, packet.channel));
+    std::vector<uint8_t> final_frequency = command_assembler.convertFreqToByte(command_assembler.calculateFinalFreq(packet.mode, radio_mode_table[packet.mode].freq, packet.channel));
     final_packet.insert(final_packet.end(), final_frequency.begin(), final_frequency.end());
     // Add channel as 16 bits
     final_packet.push_back(packet.channel & 0xFF);
