@@ -79,6 +79,7 @@ Usage: `.build/bin/sniffer [options]`
 - **[OPTIONAL]** `-P, --path`: Path to save file.
 - **[OPTIONAL]** `-r, --reset_period`: Reset period.
 - **[OPTIONAL]** `-s, --log_split`: Split log files by device.
+- **[OPTIONAL]** `-t, --time_duration`: Sniffing duration in seconds.
 - **[OPTIONAL]** `-i, --input`: Input config file.
 
 #### Usage Example:

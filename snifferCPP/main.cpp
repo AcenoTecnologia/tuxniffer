@@ -66,11 +66,12 @@ void print_help()
     std::cout << "[OPTIONAL]  -P, --path\t\t\t\tPath to save file" << std::endl;
     std::cout << "[OPTIONAL]  -r, --reset_period\t\t\tReset period" << std::endl;
     std::cout << "[OPTIONAL]  -s, --log_split\t\t\tSplit log files by device" << std::endl;
+    std::cout << "[OPTIONAL]  -t, --time_duration\t\t\tSniffing duration in seconds" << std::endl;
     std::cout << "[OPTIONAL]  -i, --input\t\t\t\tInput config file" << std::endl;
     std::cout << "(See config.yaml for a -i example file)" << std::endl;
 }
 
-std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log)
+std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log, int* duration)
 {
     if (filePath.empty() || log == nullptr)
     {
@@ -143,8 +144,12 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     log->pipe.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
     log->pipe.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : DEFAULT_PIPE_PATH;
     log->pipe.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
-    log->pipe.split_devices_log =   yaml_log.contains("splitDevicesPipe")   ? yaml_log["splitDevicesPipe"].get_value<bool>()     : false;
+    log->pipe.split_devices_log =   yaml_log.contains("splitDevicesPipe")   ? yaml_log["splitDevicesPipe"].get_value<bool>()    : false;
     log->pipe.reset_period = "none";
+
+    // Takes the duration from the yaml file
+    *duration =                     yaml.contains("duration")               ? yaml["duration"].get_value<int>()                 : -1;
+    std::cout << "[INFO] Duration: " << *duration << std::endl;
 
     // Return the vector of devices
     return devices;
@@ -154,24 +159,26 @@ int main(int argc, char* argv[])
 {
     D(std::cout << "[INFO] Debug mode is on!" << std::endl;)
 
-    const char* const short_opts = "hp:m:c:b:i:r:P:s";    
+    const char* const short_opts = "hp:m:c:b:i:r:P:t:s";    
     const option long_opts[] = {
-        {"help",        no_argument,       nullptr, 'h'},
-        {"port",        required_argument, nullptr, 'p'},
-        {"radio_mode",  required_argument, nullptr, 'm'},
-        {"channel",     required_argument, nullptr, 'c'},
-        {"base",        required_argument, nullptr, 'b'},
-        {"input",       required_argument, nullptr, 'i'},
-        {"reset_period",no_argument,       nullptr, 'r'},
-        {"path",        no_argument,       nullptr, 'P'},
-        {"log_split",   no_argument,       nullptr, 's'},
-        {nullptr,       no_argument,       nullptr, 0}
+        {"help",         no_argument,       nullptr, 'h'},
+        {"port",         required_argument, nullptr, 'p'},
+        {"radio_mode",   required_argument, nullptr, 'm'},
+        {"channel",      required_argument, nullptr, 'c'},
+        {"base",         required_argument, nullptr, 'b'},
+        {"input",        required_argument, nullptr, 'i'},
+        {"reset_period", no_argument,       nullptr, 'r'},
+        {"path",         no_argument,       nullptr, 'P'},
+        {"time_duration",required_argument, nullptr, 't'},
+        {"log_split",    no_argument,       nullptr, 's'},
+        {nullptr,        no_argument,       nullptr,  0 }
     };
 
     bool useInput = false;
     std::string configFilePath;
     std::vector<device_s> devices;
     device_s device;
+    int duration = -1;
 
     // If theres no input file to config the log, use default values
     log_s log = {
@@ -220,6 +227,10 @@ int main(int argc, char* argv[])
                 D(std::cout << "[CONFIG] Path " << optarg << std::endl;)
                 log.file.path = optarg;
                 break;
+            case 't':
+                D(std::cout << "[CONFIG] Time duration: " << optarg << std::endl;)
+                duration = std::stoi(optarg);
+                break;
             case 's':
                 D(std::cout << "[CONFIG] Split log files by device" << std::endl;)
                 log.file.split_devices_log = true;
@@ -245,7 +256,7 @@ int main(int argc, char* argv[])
     if(useInput) {
         std::string fileExtension = configFilePath.substr(configFilePath.find_last_of(".") + 1);
         if(fileExtension == "yaml")
-            devices = parse_input_file_yaml(configFilePath, &log);
+            devices = parse_input_file_yaml(configFilePath, &log, &duration);
         else{
             std::cout << "[ERROR] Invalid file extension. Please use a .yaml file." << std::endl;
             return 0;
@@ -257,7 +268,8 @@ int main(int argc, char* argv[])
 
     sniffer.configureAllDevices();
     sniffer.initAllDevices();
-    sniffer.streamAll();
+    if(duration != -1) sniffer.streamAll(std::chrono::seconds(duration));
+    if(duration == -1) sniffer.streamAll();
 
     return 0;
 }

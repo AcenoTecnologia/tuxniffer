@@ -4,10 +4,10 @@ devices:
     channel: 25                 # (required)
   - port: /dev/ttyACM2          # (required) /dev/ttyACM2 (linux) or COM<X> (windows)
     radio_mode: 20              # (required)
-    channel: 21                 # (required)
+    channel: 25                 # (required)
   - port: /dev/ttyACM4          # (required) /dev/ttyACM4 (linux) or COM<X> (windows)
     radio_mode: 20              # (required)
-    channel: 20                 # (required)
+    channel: 25                 # (required)
 log:
   enabled: true                 # (optional - default) true | false
   path: ./                      # (optional - default) ./
@@ -23,3 +23,9 @@ pipe:
   splitDevicesPipe: true        # true | (optional - default) false
                                 # Pipes are created as <path>/<name>[-<id>] on Linux or \\.\pipe\<name>[-<id>] on Windows
                                 # Pipes does not support the resetPeriod option
+duration: 30                    # (optional - default) -1
+                                # Duration in seconds to run the application
+                                # If not set, the application will run indefinitely
+                                # This time will not be exact, it will be the time the application will run sniffing packets.
+                                # If the application is in the middle of a packet, or processing a packet, it will finish that packet before stopping.
+                                # This time also does not include the time it takes to empty packets queues to the log or pipe.
