@@ -54,9 +54,10 @@ SOFTWARE.
 
 void print_help()
 {
-    std::cout << "Usage: ./snifferCPP [options]" << std::endl;
+    std::cout << "Usage: ./tuxniffer -p <port> -m <mode> -c <channel> [options]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "  -h, --help\t\t\t\tShow this help message and exit" << std::endl;
+    std::cout << "  -l, --list_modes\t\t\tShow radio mode table and exit" << std::endl;
     std::cout << "Device Settings (required)" << std::endl;
     std::cout << "  -p, --port\t\t\t\tSerial port to connect to" << std::endl;
     std::cout << "  -m, --radio_mode\t\t\tRadio mode to use" << std::endl;
@@ -69,6 +70,37 @@ void print_help()
     std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds" << std::endl;
     std::cout << "  -i, --input\t\t\t\tInput config file" << std::endl;
     std::cout << "(See config.yaml for a -i example file)" << std::endl;
+}
+
+void print_radio_mode_table()
+{
+    std::cout << std::endl << "Supported Radio Modes:" << std::endl;
+    std::cout << "|--------------------------------------------------------------------------------------------------|" << std::endl;
+    std::cout << "| Mode Name                                                      | Supported Channels | Radio Mode |" << std::endl;
+    std::cout << "|----------------------------------------------------------------|--------------------|------------|" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 50 Kbps - 915 MHz                        | 0-128              | 0          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 50 Kbps - 868 MHz                        | 0-33               | 1          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 50 Kbps - 433 MHz                        | 0-6                | 2          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 915 MHz        | 0-128              | 3          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 868 MHz        | 0-33               | 4          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 433 MHz        | 0-6                | 5          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1a (ID 1) - 868 MHz  | 0-128              | 6          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1b (ID 2) - 915 MHz  | 0-128              | 7          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2a (ID 3) - 868 MHz | 0-128              | 8          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2b (ID 4) - 915 MHz | 0-128              | 9          |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 150 Kbps Wi-SUN PHY #3 (ID 5) - 868 MHz  | 0-128              | 10         |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4a (ID 6) - 915 MHz | 0-128              | 11         |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4b (ID 7) - 915 MHz | 0-128              | 12         |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 100 Kbps ZigBee R23 - 868 MHz            | 0-128              | 13         |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 500 Kbps ZigBee R23 - 868 MHz            | 0-128              | 14         |" << std::endl;
+    std::cout << "| IEEE 802.15.4g - GFSK 200 Kbps - 915 MHz                       | 0-63               | 15         |" << std::endl;
+    std::cout << "| Generic - GFSK 50 Kbps - 868 MHz                               | 0                  | 16         |" << std::endl;
+    std::cout << "| Generic - GFSK 50 Kbps - 433 MHz                               | 0                  | 17         |" << std::endl;
+    std::cout << "| Generic - Simplelink Long Range 5 Kbps - 868 MHz               | 0                  | 18         |" << std::endl;
+    std::cout << "| Generic - Simplelink Long Range 5 Kbps - 433 MHz               | 0                  | 19         |" << std::endl;
+    std::cout << "| IEEE 802.15.4 - O-QPSK - 2405 MHz                              | 11-26              | 20         |" << std::endl;
+    std::cout << "| BLE - BLE 1 Mbps - 2402 MHz                                    | 37,38,39           | 21         |" << std::endl;
+    std::cout << "|--------------------------------------------------------------------------------------------------|" << std::endl;
 }
 
 std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log, int* duration)
@@ -159,9 +191,10 @@ int main(int argc, char* argv[])
 {
     D(std::cout << "[INFO] Debug mode is on!" << std::endl;)
 
-    const char* const short_opts = "hp:m:c:n:i:r:P:t:s";    
+    const char* const short_opts = "hlp:m:c:n:i:r:P:t:s";    
     const option long_opts[] = {
         {"help",         no_argument,       nullptr, 'h'},
+        {"list_radio",   no_argument,       nullptr, 'l'},
         {"port",         required_argument, nullptr, 'p'},
         {"radio_mode",   required_argument, nullptr, 'm'},
         {"channel",      required_argument, nullptr, 'c'},
@@ -196,6 +229,9 @@ int main(int argc, char* argv[])
         {
             case 'h':
                 print_help();
+                return 0;
+            case 'l':
+                print_radio_mode_table();
                 return 0;
             case 'p':
                 D(std::cout << "[CONFIG] Serial port: " << optarg << std::endl;)

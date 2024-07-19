@@ -104,11 +104,12 @@ The binary file is now stored in `build/bin`.
 <!-- TOC --><a name="cli"></a>
 ### CLI
 
-Usage: `.build/bin/sniffer -p <port> -m <mode> -c <channel> [options]`
+Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 
 <!-- TOC --><a name="options"></a>
 #### Options:
 - `-h, --help`: Show help message and exit.
+- `-l, --list_radio`: Show radio mode table and exit.
 - `-p, --port`: Serial port to connect to *(required)*.
 - `-m, --radio_mode`: Radio mode to use *(required)*.
 - `-c, --channel`: Channel to use *(required)*.
