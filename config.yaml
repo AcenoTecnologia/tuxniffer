@@ -1,13 +1,13 @@
 devices:
   - port: /dev/ttyACM0          # (required) /dev/ttyACM0 (linux) or COM<X> (windows)
-    radio_mode: 21              # (required)
-    channel: 37                 # (required)
+    radio_mode: 20              # (required)
+    channel: 25                 # (required)
   - port: /dev/ttyACM2          # (required) /dev/ttyACM2 (linux) or COM<X> (windows)
-    radio_mode: 21              # (required)
-    channel: 38                 # (required)
+    radio_mode: 20              # (required)
+    channel: 21                 # (required)
   - port: /dev/ttyACM4          # (required) /dev/ttyACM4 (linux) or COM<X> (windows)
-    radio_mode: 21              # (required)
-    channel: 39                 # (required)
+    radio_mode: 20              # (required)
+    channel: 20                 # (required)
 log:
   enabled: true                 # (optional - default) true | false
   path: ./                      # (optional - default) ./

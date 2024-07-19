@@ -33,6 +33,7 @@ void signal_handler(int sig)
     }
     sig = sig;
 	interruption = 1;
+    D(std::cout << std::endl;)
     D(std::cout << "[INTERRUPTION] Signal " << sig << " received. The stream will stop after recieving the next packet." << std::endl;)
     D(std::cout << "[INTERRUPTION] It may take a while to close if is saving queued packets to file/ pipe." << std::endl;)
     D(std::cout << "[INTERRUPTION] Press CTRL+C again to kill program. May cause data loss!" << std::endl;)
@@ -170,7 +171,14 @@ void Device::stream()
     while(is_streaming)
     {
         std::vector<uint8_t> response;
-        receive_response(response);
+        if(!receive_response(response) && interruption)
+        {
+            // Reset SIGINT to default behavior
+            signal(SIGINT, SIG_DFL);
+            // Reset SIGTERM to default behavior
+            signal(SIGTERM, SIG_DFL);
+            return;
+        }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
         D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
@@ -200,7 +208,14 @@ void Device::stream(std::chrono::seconds seconds)
     while(is_streaming)
     {
         std::vector<uint8_t> response;
-        receive_response(response);
+        if(!receive_response(response) && interruption)
+        {
+            // Check if time has elapsed
+            auto current_time = std::chrono::steady_clock::now();
+            auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+            if (elapsed_time >= seconds) is_streaming = false;
+            if (interruption) is_streaming = false;
+        }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
         D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
@@ -250,8 +265,8 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
 
             if (elapsed_time >= timeout_duration)
             {
-                std::cout << "[INFO] Timeout reached, no response received within 10 seconds." << std::endl;
-                break;
+                D(std::cout << "[INFO] Timeout reached, no response received within " << std::chrono::duration_cast<std::chrono::seconds>(timeout_duration).count() << " seconds." << std::endl;)
+                return false;
             }
 
             // Sleep for a short period before checking again
