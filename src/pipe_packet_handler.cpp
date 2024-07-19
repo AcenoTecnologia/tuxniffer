@@ -104,7 +104,8 @@ void PipePacketHandler::run()
 
         if (pipe_interrupted)
         {
-            D(std::cout << "[INFO] Pipe was interrupted. Reinitializing pipe handler." << std::endl;)
+            D(std::cout << "[INFO] Pipe was interrupted. Reinitializing ALL pipe handlers." << std::endl;)
+            D(std::cout << "[INFO] Please reconnect all pipes. Pipe streaming will be put on hold." << std::endl;)
             pipe_interrupted = 0;
             pipe.close();
             continue; // Restart the loop to wait for a new connection

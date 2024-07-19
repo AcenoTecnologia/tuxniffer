@@ -132,7 +132,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
         ssize_t result = ::write(pipeWrite, data.data(), data.size());
         if (result == -1)
         {
-            std::cout << "[ERROR] Linux Pipe: write failed" << std::endl;
+            D(std::cout << "[ERROR] Linux Pipe: write failed" << std::endl;)
         }
     #endif
 
@@ -140,7 +140,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
         DWORD bytesWritten;
         if (!WriteFile(pipeWrite, data.data(), data.size(), &bytesWritten, NULL))
         {
-            std::cout << "[ERROR] Windows Pipe: WriteFile failed" << std::endl;
+            D(std::cout << "[ERROR] Windows Pipe: WriteFile failed" << std::endl;)
         }
     #endif
 }

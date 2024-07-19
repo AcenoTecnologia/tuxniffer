@@ -74,14 +74,14 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
 {
     if (filePath.empty() || log == nullptr)
     {
-        std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;
+        D(std::cout << "[ERROR] Invalid file path or log pointer." << std::endl;)
         return std::vector<device_s>();
     }
 
     // Try to open the file
     std::ifstream f(filePath);
     if (!f.is_open()) {
-        std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;
+        D(std::cout << "[ERROR] Could not open config file: " << filePath << std::endl;)
         return std::vector<device_s>();
     }
 
@@ -96,14 +96,14 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     }
     catch(const std::exception& e)
     {
-        std::cout << "[ERROR] Could not open or parse YAML file: " << e.what() << std::endl;
+        D(std::cout << "[ERROR] Could not open or parse YAML file: " << e.what() << std::endl;)
         // Return an empty vector
         return std::vector<device_s>();
     }
 
     // Check if has field devices
     if (!yaml.contains("devices")) {
-        std::cout << "[ERROR] Missing devices field in YAML file." << std::endl;
+        D(std::cout << "[ERROR] Missing devices field in YAML file." << std::endl;)
         return std::vector<device_s>();
     }
     // Create a vector of devices
@@ -113,7 +113,7 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     for (auto& device : yaml["devices"]) {
         // Checks if all required fields exists
         if (!device.contains("port") || !device.contains("radio_mode") || !device.contains("channel")) {
-            std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;
+            D(std::cout << "[ERROR] Missing required fields (port, radio_mode, or channel) for a device. Skipping device." << std::endl;)
             continue;
         }
         devices.push_back(device_s{
