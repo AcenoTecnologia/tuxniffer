@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Sniffer)
+project(tuxniffer)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -15,8 +15,8 @@ include_directories(include)
 set(SRCDIR src)
 file(GLOB SOURCES "${SRCDIR}/*.cpp")
 
-# Add main source file
-set(MAIN_SOURCE snifferCPP/main.cpp)
+# Add main source file (now inside src directory)
+set(MAIN_SOURCE src/main.cpp)
 
 # Check if DEBUG is set
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -25,10 +25,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # Add the executable
-add_executable(sniffer ${SOURCES} ${MAIN_SOURCE})
+add_executable(tuxniffer ${SOURCES} ${MAIN_SOURCE})
 
 # Set output directories
-set_target_properties(sniffer PROPERTIES 
+set_target_properties(tuxniffer PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

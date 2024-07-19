@@ -57,17 +57,17 @@ void print_help()
     std::cout << "Usage: ./snifferCPP [options]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "  -h, --help\t\t\t\tShow this help message and exit" << std::endl;
-    std::cout << "Device Settings" << std::endl;
-    std::cout << "[REQUIRED]  -p, --port\t\t\t\tSerial port to connect to" << std::endl;
-    std::cout << "[REQUIRED]  -m, --radio_mode\t\t\tRadio mode to use" << std::endl;
-    std::cout << "[REQUIRED]  -c, --channel\t\t\tChannel to use" << std::endl;
-    std::cout << "Log Settings" << std::endl;
-    std::cout << "[OPTIONAL]  -b, --base\t\t\t\tBase file/ pipe name" << std::endl;
-    std::cout << "[OPTIONAL]  -P, --path\t\t\t\tPath to save file" << std::endl;
-    std::cout << "[OPTIONAL]  -r, --reset_period\t\t\tReset period" << std::endl;
-    std::cout << "[OPTIONAL]  -s, --log_split\t\t\tSplit log files by device" << std::endl;
-    std::cout << "[OPTIONAL]  -t, --time_duration\t\t\tSniffing duration in seconds" << std::endl;
-    std::cout << "[OPTIONAL]  -i, --input\t\t\t\tInput config file" << std::endl;
+    std::cout << "Device Settings (required)" << std::endl;
+    std::cout << "  -p, --port\t\t\t\tSerial port to connect to" << std::endl;
+    std::cout << "  -m, --radio_mode\t\t\tRadio mode to use" << std::endl;
+    std::cout << "  -c, --channel\t\t\tChannel to use" << std::endl;
+    std::cout << "Log Settings (optional)" << std::endl;
+    std::cout << "  -n, --name\t\t\t\tBase file/ pipe name" << std::endl;
+    std::cout << "  -P, --path\t\t\t\tPath to save file" << std::endl;
+    std::cout << "  -r, --reset_period\t\t\tReset period" << std::endl;
+    std::cout << "  -s, --log_split\t\t\tSplit log files by device" << std::endl;
+    std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds" << std::endl;
+    std::cout << "  -i, --input\t\t\t\tInput config file" << std::endl;
     std::cout << "(See config.yaml for a -i example file)" << std::endl;
 }
 
@@ -159,13 +159,13 @@ int main(int argc, char* argv[])
 {
     D(std::cout << "[INFO] Debug mode is on!" << std::endl;)
 
-    const char* const short_opts = "hp:m:c:b:i:r:P:t:s";    
+    const char* const short_opts = "hp:m:c:n:i:r:P:t:s";    
     const option long_opts[] = {
         {"help",         no_argument,       nullptr, 'h'},
         {"port",         required_argument, nullptr, 'p'},
         {"radio_mode",   required_argument, nullptr, 'm'},
         {"channel",      required_argument, nullptr, 'c'},
-        {"base",         required_argument, nullptr, 'b'},
+        {"name",         required_argument, nullptr, 'n'},
         {"input",        required_argument, nullptr, 'i'},
         {"reset_period", no_argument,       nullptr, 'r'},
         {"path",         no_argument,       nullptr, 'P'},
@@ -209,8 +209,8 @@ int main(int argc, char* argv[])
                 D(std::cout << "[CONFIG] Channel: " << optarg << std::endl;)
                 device.channel = std::stoi(optarg);
                 break;
-            case 'b':
-                D(std::cout << "[CONFIG] Base: " << optarg << std::endl;)
+            case 'n':
+                D(std::cout << "[CONFIG] Name: " << optarg << std::endl;)
                 log.file.base_name = optarg;
                 log.pipe.base_name = optarg;
                 break;

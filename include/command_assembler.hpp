@@ -27,6 +27,33 @@ struct phy_table_entry
     float freq;    ///< Frequency value.
 };
 
+
+// | Mode Name                | PHY ID | Frequency |Supported Channels| Radio Mode |
+// |--------------------------|--------|-----------|------------------|------------|
+// | LP-CC1352P7/LP-CC1352P1  |        |           |                  |            |
+// | ieee_868_915             | 0x00   | f868      | 0-128            | 0          |
+// | ieee_868_915             | 0x00   | f915      | 0-33             | 1          |
+// | ieee_433                 | 0x01   | f433      | 0-6              | 2          |
+// | ieee_868_915_slr         | 0x02   | f868      | 0-128            | 3          |
+// | ieee_868_915_slr         | 0x02   | f915      | 0-33             | 4          |
+// | ieee_433_slr             | 0x03   | f433      | 0-6              | 5          |
+// | wiSun_868_915_50a        | 0x04   | f868      | 0-128            | 6          |
+// | wiSun_868_915_50b        | 0x05   | f915      | 0-128            | 7          |
+// | wiSun_868_915_100a       | 0x06   | f868      | 0-128            | 8          |
+// | wiSun_868_915_100b       | 0x07   | f915      | 0-128            | 9          |
+// | wiSun_868_915_150        | 0x08   | f868      | 0-128            | 10         |
+// | wiSun_868_915_200a       | 0x09   | f915      | 0-128            | 11         |
+// | wiSun_868_915_200b       | 0x0A   | f915      | 0-128            | 12         |
+// | zigbee_868_915_100       | 0x0B   | f868      | 0-128            | 13         |
+// | zigbee_868_915_500       | 0x0C   | f868      | 0-128            | 14         |
+// | ieee_915                 | 0x0D   | f915      | 0-63             | 15         |
+// | easyLink_868_915_50      | 0x0E   | f868      | 0                | 16         |
+// | easyLink_433_50          | 0x0F   | f433      | 0                | 17         |
+// | easyLink_868_915_slr     | 0x10   | f868      | 0                | 18         |
+// | easyLink_433_slr         | 0x11   | f433      | 0                | 19         |
+// | ieee_2405                | 0x12   | f2405     | 11-26            | 20         |
+// | ble_2405                 | 0x13   | f2405     | 37,38,39         | 21         |
+
 // These values were found at packet-tirpi.c from the TI wireshark dissector source code.
 /* Protocol values */
 const uint8_t PROTOCOL_GENERIC                      = 0;

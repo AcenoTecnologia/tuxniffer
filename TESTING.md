@@ -11,6 +11,7 @@ Tests should be performed accordingly with the situation and the changes made;
 ## Notes
 
 ### WSL Tests:
+
 - For WSL tests it is necessary to forward a port from Windows to Linux:
 
 On powershell as administrator:
