@@ -176,28 +176,28 @@ This program currently supports the following Radio Modes for different kinds of
 
 | Mode Name                                                                  | Supported Channels | Radio Mode |
 |----------------------------------------------------------------------------|--------------------|------------|
-| IEEE 802.15.4g - GFSK 50 Kbps - 915 MHz - Freq Band                        | 0-128              | 0          |
-| IEEE 802.15.4g - GFSK 50 Kbps - 868 MHz - Freq Band                        | 0-33               | 1          |
-| IEEE 802.15.4g - GFSK 50 Kbps - 433 MHz - Freq Band                        | 0-6                | 2          |
-| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 915 MHz - Freq Band        | 0-128              | 3          |
-| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 868 MHz - Freq Band        | 0-33               | 4          |
-| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 433 MHz - Freq Band        | 0-6                | 5          |
-| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1a (ID 1) - 868 MHz - Freq Band  | 0-128              | 6          |
-| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1b (ID 2) - 915 MHz - Freq Band  | 0-128              | 7          |
-| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2a (ID 3) - 868 MHz - Freq Band | 0-128              | 8          |
-| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2b (ID 4) - 915 MHz - Freq Band | 0-128              | 9          |
-| IEEE 802.15.4g - GFSK 150 Kbps Wi-SUN PHY #3 (ID 5) - 868 MHz - Freq Band  | 0-128              | 10         |
-| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4a (ID 6) - 915 MHz - Freq Band | 0-128              | 11         |
-| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4b (ID 7) - 915 MHz - Freq Band | 0-128              | 12         |
-| IEEE 802.15.4g - GFSK 100 Kbps ZigBee R23 - 868 MHz - Freq Band            | 0-128              | 13         |
-| IEEE 802.15.4g - GFSK 500 Kbps ZigBee R23 - 868 MHz - Freq Band            | 0-128              | 14         |
-| IEEE 802.15.4g - GFSK 200 Kbps - 915 MHz - Freq Band                       | 0-63               | 15         |
-| Generic - GFSK 50 Kbps - 868 MHz - Freq Band                               | 0                  | 16         |
-| Generic - GFSK 50 Kbps - 433 MHz - Freq Band                               | 0                  | 17         |
-| Generic - Simplelink Long Range 5 Kbps - 868 MHz - Freq Band               | 0                  | 18         |
-| Generic - Simplelink Long Range 5 Kbps - 433 MHz - Freq Band               | 0                  | 19         |
-| IEEE 802.15.4 - O-QPSK - 2405 MHz - Freq Band                              | 11-26              | 20         |
-| BLE - BLE 1 Mbps - 2402 MHz - Freq Band                                    | 37,38,39           | 21         |
+| IEEE 802.15.4g - GFSK 50 Kbps - 915 MHz                        | 0-128              | 0          |
+| IEEE 802.15.4g - GFSK 50 Kbps - 868 MHz                        | 0-33               | 1          |
+| IEEE 802.15.4g - GFSK 50 Kbps - 433 MHz                        | 0-6                | 2          |
+| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 915 MHz        | 0-128              | 3          |
+| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 868 MHz        | 0-33               | 4          |
+| IEEE 802.15.4g - Simplelink Long Range 5 Kbps - 433 MHz        | 0-6                | 5          |
+| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1a (ID 1) - 868 MHz  | 0-128              | 6          |
+| IEEE 802.15.4g - GFSK 50 Kbps Wi-SUN PHY #1b (ID 2) - 915 MHz  | 0-128              | 7          |
+| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2a (ID 3) - 868 MHz | 0-128              | 8          |
+| IEEE 802.15.4g - GFSK 100 Kbps Wi-SUN PHY #2b (ID 4) - 915 MHz | 0-128              | 9          |
+| IEEE 802.15.4g - GFSK 150 Kbps Wi-SUN PHY #3 (ID 5) - 868 MHz  | 0-128              | 10         |
+| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4a (ID 6) - 915 MHz | 0-128              | 11         |
+| IEEE 802.15.4g - GFSK 200 Kbps Wi-SUN PHY #4b (ID 7) - 915 MHz | 0-128              | 12         |
+| IEEE 802.15.4g - GFSK 100 Kbps ZigBee R23 - 868 MHz            | 0-128              | 13         |
+| IEEE 802.15.4g - GFSK 500 Kbps ZigBee R23 - 868 MHz            | 0-128              | 14         |
+| IEEE 802.15.4g - GFSK 200 Kbps - 915 MHz                       | 0-63               | 15         |
+| Generic - GFSK 50 Kbps - 868 MHz                               | 0                  | 16         |
+| Generic - GFSK 50 Kbps - 433 MHz                               | 0                  | 17         |
+| Generic - Simplelink Long Range 5 Kbps - 868 MHz               | 0                  | 18         |
+| Generic - Simplelink Long Range 5 Kbps - 433 MHz               | 0                  | 19         |
+| IEEE 802.15.4 - O-QPSK - 2405 MHz                              | 11-26              | 20         |
+| BLE - BLE 1 Mbps - 2402 MHz                                    | 37,38,39           | 21         |
 
 
 <!-- TOC --><a name="using-with-wireshark"></a>
@@ -223,7 +223,7 @@ Wireshark doesn't need to be open at the start of the sniffer execution. The sni
 
 <!-- TOC --><a name="use-cases"></a>
 ## Use Cases
-The file `testing.md` has a list of cases for basic, intermediate and advanced uses. This file also contains a list of tests with defined inputs and expected outputs that should be checked.
+The file `TESTING.md` has a list of cases for basic, intermediate and advanced uses. This file also contains a list of tests with defined inputs and expected outputs that should be checked.
 
 <!-- TOC --><a name="compatibility"></a>
 ## Compatibility
