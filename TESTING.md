@@ -48,7 +48,7 @@ Simple, easy commands that one can use without going too deep. Most of users fal
 - Most basic usage case. No optional parameters, only the bare minimum;
 
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25
   ```
 
     - Check if program runs without error;
@@ -60,7 +60,7 @@ Simple, easy commands that one can use without going too deep. Most of users fal
 - Basic usage, but with optional parameters;
 
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/
   ```
 
     - Check if program runs without error;
@@ -75,13 +75,13 @@ Simple, easy commands that one can use without going too deep. Most of users fal
 Users that want to explore and take advantage of the software capabilities, but will not stress it to its limits.
 
 - Radio Mode: 20 - IEEE 802.15.4 2.4GHz; Channel: 25;
-- For YAML cases the execution command should be `./snifferCPP -i config.yaml`;
+- For YAML cases the execution command should be `./tuxniffer -i config.yaml`;
 
 
 ### (CLI) Case 1:
 - Basic case with parameters, but split devices log
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s
   ```
 
     - Basic usage checks;
@@ -91,7 +91,7 @@ Users that want to explore and take advantage of the software capabilities, but 
 ### (CLI) Case 2:
 - Basic case with parameters, but split devices log and reset period enabled
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s -r hourly
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s -r hourly
   ```
 
     - Basic usage checks;
@@ -266,73 +266,73 @@ Tests to ensure that the menu and parameters are running correctly.
 
 - Correct usage test:
   ```sh
-  ./snifferCPP -h # shows help message and exit
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -P ./results/ -b aceno -r hourly # run correctly
+  ./tuxniffer -h # shows help message and exit
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results/ -b aceno -r hourly # run correctly
   ```
 
 - Test without essential parameters:
   ```sh
-  ./snifferCPP # missing essentials
-  ./snifferCPP -b test # missing essentials but has optional
+  ./tuxniffer # missing essentials
+  ./tuxniffer -b test # missing essentials but has optional
   ```
 
 - Test with an incorrect essential parameter:
   ```sh
-  ./snifferCPP -p invalid_port # incorrect essential and missing
-  ./snifferCPP -p invalid_port -m 20 -c 25 # incorrect essential
+  ./tuxniffer -p invalid_port # incorrect essential and missing
+  ./tuxniffer -p invalid_port -m 20 -c 25 # incorrect essential
   ```
 
 - Test with an empty essential parameter:
   ```sh
-  ./snifferCPP -p -c 20 -m 10 # empty essential
-  ./snifferCPP -p # empty essential and missing
-  ./snifferCPP -h -p # empty essential and help
+  ./tuxniffer -p -c 20 -m 10 # empty essential
+  ./tuxniffer -p # empty essential and missing
+  ./tuxniffer -h -p # empty essential and help
   ```
 
   - Test with path ending without a "/" character:
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -P ./results -b aceno -r hourly
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results -b aceno -r hourly
   ```
   Should raise error or fix?
 
 - Test with an essential parameter of the correct type but nonsensical value:
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 99 # 99 is not a channel
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 99 # 99 is not a channel
 
-  ./snifferCPP -p /dev/ttyACM99 -m 20 -c 20 # /dev/ttyACM99 is not a realistic value
+  ./tuxniffer -p /dev/ttyACM99 -m 20 -c 20 # /dev/ttyACM99 is not a realistic value
 
-  ./snifferCPP -p /dev/ttyACM0 -m -1 -c 20 # -1 is not a radio_mode
+  ./tuxniffer -p /dev/ttyACM0 -m -1 -c 20 # -1 is not a radio_mode
   ```
 
 - Test with more than one essential parameter:
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -p /dev/ttyACM1 -m 20 -c 25 # 2 ports defined
-  ./snifferCPP -p /dev/ttyACM0 -p INVALID -m 20 -c 25 # 2 ports defined and 1 is invalid
-  ./snifferCPP -p INVALID -p /dev/ttyACM0 -m 20 -c 25 # 2 ports defined and 1 is invalid. The invalid comes first
+  ./tuxniffer -p /dev/ttyACM0 -p /dev/ttyACM1 -m 20 -c 25 # 2 ports defined
+  ./tuxniffer -p /dev/ttyACM0 -p INVALID -m 20 -c 25 # 2 ports defined and 1 is invalid
+  ./tuxniffer -p INVALID -p /dev/ttyACM0 -m 20 -c 25 # 2 ports defined and 1 is invalid. The invalid comes first
   ```
 
 - Test with only optional commands:
   ```sh
-  ./snifferCPP -b logfile_base # missing essentials, only optionals
+  ./tuxniffer -b logfile_base # missing essentials, only optionals
   ```
 
 - Test with incorrect optional commands:
   ```sh
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b -r none # no -b parameter
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b test -r hourly -r daily # 2 -r parameters
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b ////test//// -r noTime # invalid -b parameter. OS could interpret as folder
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b 0101test///%/01 -r none # invalid -b parameter. With special characters
-  ./snifferCPP -p /dev/ttyACM0 -m 20 -c 25 -b test.pdf -r test # should be a valid -b parameter despite ending with .pdf
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b -r none # no -b parameter
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b test -r hourly -r daily # 2 -r parameters
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b ////test//// -r noTime # invalid -b parameter. OS could interpret as folder
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b 0101test///%/01 -r none # invalid -b parameter. With special characters
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b test.pdf -r test # should be a valid -b parameter despite ending with .pdf
   ```
 
 - Test with an invalid path:
   ```sh
-  ./snifferCPP -p COM0 -m 20 -c 25 -P /incorrect/path/ -r weekly # incorrect absolute path
+  ./tuxniffer -p COM0 -m 20 -c 25 -P /incorrect/path/ -r weekly # incorrect absolute path
   ```
 
 - Test with a valid serial that does not work because it is another device:
   ```sh
-  ./snifferCPP -p /dev/ttyUSB1 -m radio_mode -c channel_number # ttyUSB1 is not a sniffer device
+  ./tuxniffer -p /dev/ttyUSB1 -m radio_mode -c channel_number # ttyUSB1 is not a sniffer device
   ```
 
 ## YAML Tests

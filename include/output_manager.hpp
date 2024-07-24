@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
-// Project:  C++ Interface TI Packet Sniffer
+// Project:  Tuxniffer
 // Version:  1.0
 // Date:     2024
 //
