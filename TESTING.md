@@ -32,7 +32,7 @@ On powershell as administrator:
 Each serial port forwarded is actually 2 ttys, thus, one device should map to ttyACM0 and ttyACM1.
 
 ### Windows tests
-This software currently does not support Windows.
+While this software does support Windows, it has been not tested extensively. If you want a reliable tool you can use the [SmartRF Packet Sniffer 2](https://www.ti.com/tool/PACKET-SNIFFER), the official Windows solution provided by [Texas Instruments](https://www.ti.com).
 
 ### Test Preparation
 - Check if no pipe is already created (if there is `ls /tmp/` should show it. Use `rm <pipe> to delete it`);

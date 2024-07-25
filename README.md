@@ -11,6 +11,7 @@
    * [Run CMake](#run-cmake)
    * [Build the Project](#build-the-project)
    * [Specify Debug Mode](#specify-debug-mode)
+   * [Compiling on Windows](#compiling-on-windows)
 - [Usage](#usage)
    * [CLI](#cli)
       + [Options:](#options)
@@ -97,6 +98,12 @@ cmake --build .
 ```
 
 The binary file is now stored in `build/bin`.
+
+<!-- TOC --><a name="compiling-on-windows"></a>
+### Compiling on Windows
+
+While this project is not meant to be used on Windows, it is compatible with Visual Studio C++ Compiler (MSVC). To import this repository as a VS project: ``Open VS -> Open Local Folder -> Select the tuxniffer folder -> Right click on the CMakeLists.txt -> Delete Cache and Reconfigure -> Select x64 release or debug option at tob bar -> Select tuxniffer.exe -> Execute the build/ compilation step by clicking the green arrow``. If you find any errors during this step check [Microsoft official instructions to import CMake projects into Visual Studio](learn.microsoft.com/cpp/build/cmake-projects-in-visual-studio?view=msvc-170).
+
 
 <!-- TOC --><a name="usage"></a>
 ## Usage
@@ -263,6 +270,7 @@ During development it was found some inconsistencies between the sniffer documen
 ## Known Issues
 
 - Currently, when a pipe connection is closed, all pipes stop and need to be reconnected. The workaround is to open again all pipes. When a pipe is closed it stops writing to it and stores new packets in the queue, so no data is lost.
+- Pipes cannot be interrupted and reconnected on Windows. Currently there is not workaround this issue. If a pipe disconnects on Windows it is necessary to start the program over.
 
 <!-- TOC --><a name="dependencies"></a>
 ## Dependencies
