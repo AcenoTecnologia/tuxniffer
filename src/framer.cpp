@@ -16,7 +16,11 @@
 #include <iomanip>
 #include <cstdint>
 #include <vector>
+
+#ifdef __linux__
 #include <unistd.h>
+#endif
+
 
 #include "framer.hpp"
 

@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <unistd.h> 
 #include <iomanip>
 #include <signal.h>
 #include <chrono>
@@ -22,6 +21,10 @@
 #include "common.hpp"
 #include "device.hpp"
 #include "framer.hpp"
+
+#ifdef __linux__
+#include <unistd.h> 
+#endif
 
 int interruption = 0;
 

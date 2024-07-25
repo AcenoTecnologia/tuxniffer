@@ -14,7 +14,6 @@
 #include <vector>
 #include <cstring>
 #include <fcntl.h>
-#include <unistd.h>
 #include <cerrno>  // for errno
 #include <iostream>
 #include <chrono>
@@ -22,6 +21,10 @@
 
 #include "common.hpp"
 #include "serial.hpp"
+
+#ifdef __linux__
+#include <unistd.h>
+#endif
 
 Serial::Serial(std::string port)
 {
@@ -92,7 +95,7 @@ bool Serial::connect()
         return false;
     }
     // Set the baud rates to 3_000_000
-    config.BaudRate = CBR_3000000;
+    config.BaudRate = 3000000;
     // Set 8N1 (8 data bits, no parity, 1 stop bit)
     config.ByteSize = 8;
     config.Parity = NOPARITY;
@@ -193,9 +196,10 @@ std::vector<uint8_t> Serial::readData()
 {
 
     // Read data from serial port linux
+    int bytes_read;
     #ifdef __linux__
     // Read data from serial port
-    int bytes_read = read(descriptor, buffer, BUFFER_SIZE);
+    bytes_read = read(descriptor, buffer, BUFFER_SIZE);
     if (bytes_read == 0) {
         // End of file reached
         D(std::cout << "[INFO] There was no data to read from serial port" << std::endl;);
@@ -223,9 +227,10 @@ std::vector<uint8_t> Serial::readData()
 bool Serial::readByte(uint8_t* byte)
 {
     // Read byte from serial port linux
+    int bytes_read;
     #ifdef __linux__
     // Read byte from serial port
-    int bytes_read = read(descriptor, byte, 1);
+    bytes_read = read(descriptor, byte, 1);
     if (bytes_read > 0) {
         return true;
     }

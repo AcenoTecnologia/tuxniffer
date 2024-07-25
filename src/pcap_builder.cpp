@@ -69,17 +69,17 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
     std::vector<uint8_t> final_packet;
 
     int total_length = (
-        ipv4_header.size() +
-        udp_header.size() +
-        ti_header.size() +
-        ti_protocol.size() +
+        (int)ipv4_header.size() +
+        (int)udp_header.size() +
+        (int)ti_header.size() +
+        (int)ti_protocol.size() +
         2 + // interface
         1 + // phy
         4 + // frequency
         2 + // channel
         1 + // rssi
         1 +  // fcs
-        (data.length)
+        (int)(data.length)
     );
 
     // Create copy of ipv4_header
@@ -102,7 +102,7 @@ std::vector<uint8_t> PcapBuilder::get_packet_data(packet_queue_s packet)
     final_packet.insert(final_packet.end(), ti.begin(), ti.end());
 
     // Get only number from string packet.interface
-    std::string interface_string = packet.interface;
+    std::string interface_string = packet.serial_interface;
     // Remove anything that is not a number
     interface_string.erase(std::remove_if(interface_string.begin(), interface_string.end(), [](char c) { return !std::isdigit(c); }), interface_string.end());
     // Convert string to int

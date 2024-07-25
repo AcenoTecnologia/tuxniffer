@@ -172,42 +172,42 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
     {
     // IEEE 802.15.4ge
     case 0:
-        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(902.2 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 1:
-        if(channel >= 0 && channel <= 33) finalFreq = 863.125 + (channel * 0.2);
+        if(channel >= 0 && channel <= 33) finalFreq = (float)(863.125 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 2:
-        if(channel >= 0 && channel <= 6) finalFreq = 433.3 + (channel * 0.2);
+        if(channel >= 0 && channel <= 6) finalFreq = (float)(433.3 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 3:
-        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(902.2 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 4:
-        if(channel >= 0 && channel <= 33) finalFreq = 863.125 + (channel * 0.2); 
+        if(channel >= 0 && channel <= 33) finalFreq = (float)(863.125 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 5:
-        if(channel >= 0 && channel <= 6) finalFreq = 433.3 + (channel * 0.2);
+        if(channel >= 0 && channel <= 6) finalFreq = (float)(433.3 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -215,49 +215,49 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
         break;
     // Wi-SUN 
     case 6:
-        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.1);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(863.1 + (channel * 0.1));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 7:
-        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(902.2 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 8:
-        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(863.1 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 9:
-        if(channel >= 0 && channel <= 128) finalFreq = 902.2 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(902.2 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 10:
-        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(863.1 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 11:
-        if(channel >= 0 && channel <= 128) finalFreq = 902.4 + (channel * 0.4);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(902.4 + (channel * 0.4));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 12:
-        if(channel >= 0 && channel <= 128) finalFreq = 920.8 + (channel * 0.6);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(920.8 + (channel * 0.6));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -266,7 +266,7 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
     // Zigbee
     case 13:
     case 14:
-        if(channel >= 0 && channel <= 128) finalFreq = 863.1 + (channel * 0.2);
+        if(channel >= 0 && channel <= 128) finalFreq = (float)(863.1 + (channel * 0.2));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -274,7 +274,7 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
         break;
     // IEEE 915
     case 15:
-        if(channel >= 0 && channel <= 63) finalFreq = 902.4 + (channel * 0.4);
+        if(channel >= 0 && channel <= 63) finalFreq = (float)(902.4 + (channel * 0.4));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -282,35 +282,35 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
         break;
     // EasyLink/ Generic
     case 16:
-        if(channel == 0) finalFreq = 863.125;
+        if(channel == 0) finalFreq = (float)863.125;
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 17:
-        if(channel == 0) finalFreq = 433.3;
+        if(channel == 0) finalFreq = (float)433.3;
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 18:
-        if(channel == 0) finalFreq = 863.125;
+        if(channel == 0) finalFreq = (float)863.125;
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 19:
-        if(channel == 0) finalFreq = 433.3;
+        if(channel == 0) finalFreq = (float)433.3;
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
         }
         break;
     case 20:
-        if(channel >= 11 && channel <= 26) finalFreq = 2405 + ((channel - 11) * 5);
+        if(channel >= 11 && channel <= 26) finalFreq = (float)(2405 + ((channel - 11) * 5));
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -319,9 +319,9 @@ float CommandAssembler::calculateFinalFreq(uint8_t mode, float freq, int channel
     case 21:
         // Channels 37, 38 and 39 are used for advertising
         // There are the only channels that can be used in BLE
-        if(channel == 37) finalFreq = 2402;
-        else if(channel == 38) finalFreq = 2426;
-        else if(channel == 39) finalFreq = 2480;
+        if(channel == 37) finalFreq = (float)2402;
+        else if(channel == 38) finalFreq = (float)2426;
+        else if(channel == 39) finalFreq = (float)2480;
         else {
             D(std::cout << "[ERROR] Invalid channel for Radio Mode. Check table to see available values with ./tuxniffer -l." << std::endl;)
             exit(-1);
@@ -450,14 +450,13 @@ packet_data CommandAssembler::convert_to_network_packet(std::vector<uint8_t> dat
 
     // Convert to packet
     packet_data packet = {
-        // Packetsize - (1 from RSSI + 1 from FCS + 6 from TIMESTAMP + 1 from ???? (see note above))
-        .length = ((length[0] << 8) | length[1]) - 9,
-        .device_timestamp = std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5])),
-        .system_timestamp = system_timestamp,
-        .rssi = rssi,
-        .data = payload,
-        .status = fcs,
-        .fcs = fcs
+        ((length[0] << 8) | length[1]) - 9,
+        std::chrono::microseconds((static_cast<uint64_t>(timestamp[0]) << 40) | (static_cast<uint64_t>(timestamp[1]) << 32) | (static_cast<uint64_t>(timestamp[2]) << 24) | (static_cast<uint64_t>(timestamp[3]) << 16) | (static_cast<uint64_t>(timestamp[4]) << 8) | static_cast<uint64_t>(timestamp[5])),
+        system_timestamp,
+        rssi,
+        payload,
+        fcs,
+        fcs
     };
 
     return packet;

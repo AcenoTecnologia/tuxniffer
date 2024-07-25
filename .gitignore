@@ -4,7 +4,15 @@ bin/
 # Ignore folder obj and all its contents
 obj/
 out/
-# Ignore visual code files
+# Ignore visual studio/ code files
 .vscode/
+.vs
+# Ignore PCAP generated files
 *.pcap
+# Ignore the build/ out folder
 build/
+out/
+# CMake extra files
+CMakePresets.json
+Thumbs.db:encryptable
+Thumbs.db

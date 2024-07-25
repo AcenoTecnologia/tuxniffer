@@ -22,11 +22,13 @@
 
 volatile std::sig_atomic_t pipe_interrupted = 0;
 
-void pipe_signal_handler(int signal) {
-    if (signal == SIGPIPE) {
-        pipe_interrupted = 1;
+#ifdef __linux__
+    void pipe_signal_handler(int signal) {
+        if (signal == SIGPIPE) {
+            pipe_interrupted = 1;
+        }
     }
-}
+#endif
 
 PipePacketHandler::PipePacketHandler(std::string pipe_path, std::string base, std::chrono::time_point<std::chrono::system_clock> start_time)
 {
@@ -53,7 +55,9 @@ void PipePacketHandler::add_packet(packet_queue_s packet)
 void PipePacketHandler::run()
 {
     // Set up signal handler for SIGPIPE
-    std::signal(SIGPIPE, pipe_signal_handler);
+    #ifdef __linux__
+        std::signal(SIGPIPE, pipe_signal_handler);
+    #endif
     is_running = true;
     
     while (is_running)

@@ -55,7 +55,7 @@ struct packet_data
  */
 struct packet_queue_s {
     int id;                                             ///< Packet ID.
-    std::string interface;                              ///< Interface name.
+    std::string serial_interface;                              ///< Interface name.
     int channel;                                        ///< Channel number.
     uint8_t mode;                                       ///< Mode of the packet.
     std::vector<uint8_t> packet;                        ///< Packet data.
