@@ -17,6 +17,8 @@
 #include <signal.h>
 #include <chrono>
 #include <thread>
+#include <errno.h>
+#include <cstring> 
 
 #include "common.hpp"
 #include "device.hpp"
@@ -36,10 +38,10 @@ void signal_handler(int sig)
     }
     sig = sig;
 	interruption = 1;
-    D(std::cout << std::endl;)
-    D(std::cout << "[INTERRUPTION] Signal " << sig << " received. The stream will stop after recieving the next packet." << std::endl;)
-    D(std::cout << "[INTERRUPTION] It may take a while to close if is saving queued packets to file/ pipe." << std::endl;)
-    D(std::cout << "[INTERRUPTION] Press CTRL+C again to kill program. May cause data loss!" << std::endl;)
+    std::cout << std::endl;
+    std::cout << "[INTERRUPTION] Signal " << sig << " received. The stream will stop after recieving the next packet." << std::endl;
+    std::cout << "[INTERRUPTION] It may take a while to close if is saving queued packets to file/ pipe." << std::endl;
+    std::cout << "[INTERRUPTION] Press CTRL+C again to kill program. May cause data loss!" << std::endl;
 
 }
 
@@ -81,7 +83,7 @@ bool Device::start()
     serial.writeData(start_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] started" << std::endl;)
+    std::cout << "[INFO] Device [" << id << "] started" << std::endl;
 
     state = State::STARTED;
 
@@ -121,9 +123,9 @@ bool Device::ping()
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
     // TODO: Update board info
-    D(std::cout << "[INFO] Device " << id << " pinged" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] pinged" << std::endl;)
     std::vector<uint8_t> board_info = cmd.disassemble_ping(response);
-    D(std::cout << "[INFO] Device " << id << " board info: " << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] board info: " << std::endl;)
     D(std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << std::endl;)
     D(std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << std::endl;)
     D(std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << std::endl;)
@@ -214,10 +216,11 @@ void Device::stream(std::chrono::seconds seconds)
         if(!receive_response(response) && interruption)
         {
             // Check if time has elapsed
-            auto current_time = std::chrono::steady_clock::now();
-            auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
-            if (elapsed_time >= seconds) is_streaming = false;
-            if (interruption) is_streaming = false;
+            //auto current_time = std::chrono::steady_clock::now();
+            //auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
+            //if (elapsed_time >= seconds) is_streaming = false;
+            //if (interruption) is_streaming = false;
+            is_streaming = false;
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
@@ -257,9 +260,9 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
     {
         // Read byte from serial
         uint8_t byte;
-        bool read_byte = serial.readByte(&byte);
+        int read_byte = serial.readByte(&byte);
 
-        if(!read_byte)
+        if(read_byte == 0)
         {
 
             // Check if timeout has occurred
@@ -268,13 +271,21 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
 
             if (elapsed_time >= timeout_duration)
             {
-                D(std::cout << "[INFO] Timeout reached, no response received within " << std::chrono::duration_cast<std::chrono::seconds>(timeout_duration).count() << " seconds." << std::endl;)
+                D(std::cout << "[INFO] Timeout reached, no response received within 10 seconds." << std::endl;)
                 return false;
             }
 
             // Sleep for a short period before checking again
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
+        }
+
+        if (read_byte == -1)
+        {
+            if (!reconnect()){
+                return false;
+            }
+            return receive_response(ret);
         }
 
         // Push byte to response
@@ -302,5 +313,43 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
         start_time = std::chrono::steady_clock::now();
     }
 
+    return false;
+}
+
+bool Device::reconnect(){
+    std::cout << "[ERROR] Connection lost with device [" << id << "]." << std::endl;
+    if (!disconnect())
+    {
+        D(std::cout << "[ERROR] Error closing serial port - " << strerror(errno) << ". Impossible to reconect device [" << id << "]." << std::endl;)
+        interruption = 1;
+        return false;
+    }
+    
+    D(std::cout << "[INFO] Trying to reconnect in 10 seconds." << std::endl;)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    while (true)
+    {
+        //serial = Serial(port);
+        if(connect()){
+            while (true)
+            {
+                // Read byte from serial
+                uint8_t byte;
+                int read_byte = serial.readByte(&byte);
+                if(read_byte == 0) break;
+            }
+            if(init()){
+                if(start())
+                {
+                    std::cout << "[INFO] Reconnected with device [" << id << "]." << std::endl;
+                    return true;
+                }
+            }
+        }    
+        D(std::cout << "[ERROR] Reconnection Failed. Trying again in 10 seconds." << std::endl;)
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        if (interruption) return false;
+        
+    }
     return false;
 }

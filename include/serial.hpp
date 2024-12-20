@@ -104,7 +104,7 @@ public:
      * @return true if read is successful.
      * @return false if read fails.
      */
-    bool readByte(uint8_t* byte);
+    int readByte(uint8_t* byte);
 
     /**
      * @brief Flushes the serial port buffer.

@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <memory>
 #include <errno.h>
+#include <cstring> 
 
 #include "pipe.hpp"
 #include "common.hpp"
@@ -297,7 +298,7 @@ void OutputManager::recreate_log_files()
             std::string filename = base_filename + "_" + std::to_string(i) + ".pcap";
             FILE* new_log_file = fopen(filename.c_str(), "wb");
             if (!new_log_file) {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << std::endl;)
+                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << "." << std::endl;)
                 return;
             }
             // Write global header
@@ -315,7 +316,7 @@ void OutputManager::recreate_log_files()
     std::string filename = base_filename + ".pcap";
     FILE* new_log_file = fopen(filename.c_str(), "wb");
     if (!new_log_file) {
-        D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << std::endl;)
+        D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << "." << std::endl;)
         return;
     }
     // Write global header

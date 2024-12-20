@@ -147,4 +147,7 @@ public:
      * @return true if the response was successfully received, false otherwise.
      */
     bool receive_response(std::vector<uint8_t> &ret);
+
+
+    bool reconnect();
 };
