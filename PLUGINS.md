@@ -5,7 +5,7 @@
 The information gathered in this file was partially presented on `.../wireshark/doc/README.plugins`.
 
 ## Prerequisites
-This guide assumes that you have Wireshark 4.0 installed. You can access the [Wireshark repository](https://github.com/wireshark/wireshark) to see instalation instructions. You can download id from a package manager or build it from source. Make sure that the version you using is the same version that you use to compile the plugins.
+This guide assumes that you have Wireshark 4.0 installed, but if you don't this guide will also help you install Wireshark. You can access the [Wireshark repository](https://github.com/wireshark/wireshark) to see more detailed instalation instructions. You can download id from a package manager or build it from source. Make sure that the version you using is the same version that you use to compile the plugins.
 
 
 ## Wireshark Plugins
@@ -26,7 +26,14 @@ It is necessary to have all Wireshark source code and all its dependencies for t
 git clone -b release-4.0 https://github.com/wireshark/wireshark
 ```
 
-### 2 - Copy source files to your system 
+### 2 - Install Wireshark dependencies
+
+```sh
+cd wireshark/tools
+sudo ./debian-setup.sh --install-optional   
+```
+
+### 3 - Copy source files to your system 
 
 You have to copy the source file from a Windows machine.
 
@@ -36,9 +43,9 @@ tirpi
 ti-ble
 ```
 
-### 3 - Copy plugins source code to Wireshark plugins folder
+### 4 - Copy plugins source code to Wireshark plugins folder
 ```sh
-cd wireshark/plugins/epan # Enters the plugins/epan folder
+cd wireshark/plugins/epan # Enters the plugins/epan folder from root
 
 # Create a folder and copy the source code for each plugin
 mkdir ti802154ge
@@ -51,7 +58,7 @@ mkdir ti_ble_packet_info
 cp -r .../path/to/ti-ble-wireshark-dissector-plugin-1.5.0-source/* ./ti_ble_packet_info
 ```
 
-### 4 - Update Wireshark files
+### 5 - Update Wireshark files
 This steps updates the current Wireshark files to indicate the plugins during build and compilation steps.
 
 #### Copy of CMakeListsCustom.txt.example
@@ -77,20 +84,20 @@ set(CUSTOM_PLUGIN_SRC_DIR
 # or
 #	plugins/epan/foo
 	plugins/epan/ti802154ge
-	plugins/epan/tirpi
-	plugins/epan/ti-ble-packet-info
+	plugins/epan/ti_rpi
+	plugins/epan/ti_ble_packet_info
 )
 
 # [...]
 ```
 
-### 5 - Re-run CMake generation step 
+### 6 - Re-run CMake generation step 
 
 After that, re-run the CMake generation step. To build the plugin, run your normal Wireshark build step first.
 
 ### Building Wireshark
 ```sh
-cd wireshark
+cd wireshark #from root
 mkdir build
 cd build
 cmake ..
@@ -108,7 +115,13 @@ sudo apt-get install qttools5-dev
 
 Other similar errors should be related to Wireshark dependencies. Verify if all of them are installed correctly.
 
-### 6 - Compiling the Plugin
+If you don't arealdy have Wireshark installed, run the next lines to compile and install Wireshark.
+```sh
+make
+make install
+```
+
+### 7 - Compiling the Plugin
 
 After that you need to compile each plugin using makefile. 
 
@@ -117,7 +130,7 @@ cd wireshark/build/plugins/epan/ti802154ge/
 make
 cd..
 
-cd tirpi/
+cd ti_rpi/
 make
 cd ..
 
@@ -133,9 +146,9 @@ wireshark/build/plugins/epan/ti802154ge/CMakeFiles/ti802154ge-x64-2x.dir/build.m
 
 And use `Ctrl+F` to remove all `-Werror` flags from the makefile and run make again.
 
-### 7 - Installing the plugin
+### 8 - Installing the plugin
 
-To install the plugin you `cd` into its directory and run the command `sudo make install`.
+To install the plugins you `cd` into each directory and run the command `sudo make install`.
 An example of the command is:
 
 ```
@@ -161,7 +174,7 @@ Install the project...
 
 The same process need to be repeated for all the plugins.
 
-### 8 - Verify Installation
+### 9 - Verify Installation
 After `sudo make install`, you can open `Wireshark -> Help -> About Wireshark -> Plugins`. If everything went well, you should see the plugins on the list.
 
 **Note:** The .so files generated are only for x64 systems!

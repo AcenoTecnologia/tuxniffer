@@ -1,22 +1,33 @@
-# List of devices that you want to sniff. At least one device is required.
-devices:
-  - port: /dev/ttyACM0
-    radio_mode: 20
-    channel: 25
-# Optional log options. Values below are the default ones.
+## List of devices that you want to sniff. At least one device is required.
+devices:                #required
+  - port: /dev/ttyACM0  #required
+    radio_mode: 20      #required
+    channel: 20         #required
+# - port: /dev/ttyACM2  
+#   radio_mode: 20      
+#   channel: 25         
+
+
+## Optional log parameters. Values below are the default ones.
 # log:
-#   enabled: true
-#   path: ./
-#   base_name: aceno
-#   splitDevicesLog: false
-#   resetPeriod: hourly # none | hourly | daily | weekly | monthly
-# Optional pipe options. Values below are the default ones.
-# On Windows the path name is ignored because the only path is \\.\pipe\
-# With devices split, the pipe name is name_id.
+#   enabled: true             # Set false to not create a .pcap log file.
+#   path: ./                  # Path to save log file.
+#   base_name: aceno          # Log file name.
+#   splitDevicesLog: false    # Set true to create a separete log file for each device ([name]_[device_id].pcap).
+#   resetPeriod: none         # Log file reset period  (none | hourly | daily | weekly | monthly).
+
+
+## Optional pipe parameters. Values below are the default ones.
 # pipe:
-#   enabled: true
-#   name: aceno
-#   path: /tmp/
-#   splitDevicesPipe: false
-# Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
+#   enabled: true             # Set false to not create a pipe.
+#   name: aceno               # Pipe file name.
+#   path: /tmp/               # Path to save pipe file. On Windows the path name is ignored because the only path is \\.\pipe\.
+#   splitDevicesPipe: false   # Set true to create a separete log file for each device ([name]_[device_id]).
+
+
+## Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
 # duration: -1
+
+
+## You can add more devices to the list, but for each one, you need to set valid values for all three required parameters (port, radio mode, and channel). 
+## For log and pipe options, you can only set the parameters you want to change.

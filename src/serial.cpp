@@ -18,6 +18,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <errno.h>
 
 #include "common.hpp"
 #include "serial.hpp"
@@ -41,14 +42,14 @@ bool Serial::connect()
     descriptor = open(port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     // Check if port was opened
     if (descriptor == INVALID_FILE_DESCRIPTOR) {
-        D(std::cout << "[ERROR] Error opening serial port: " << port << std::endl;)
+        D(std::cout << "[ERROR] Error opening serial port: " << port << " - " << strerror(errno) << std::endl;)
         return false;
     }
     // Set port configuration to 0 by default
     std::memset(&config, 0, sizeof(config));
     // Check if was able to get port configuration
     if (tcgetattr(descriptor, &config) != 0) {
-        D(std::cout << "[ERROR] Error getting serial port configuration" << std::endl;);
+        D(std::cout << "[ERROR] Error getting serial port configuration - " << strerror(errno) << std::endl;);
         return false;
     }
 
@@ -72,7 +73,7 @@ bool Serial::connect()
     config.c_oflag &= ~OPOST;
     // Apply settings
     if (tcsetattr(descriptor, TCSANOW, &config) != 0) {
-        D(std::cout << "[ERROR] Error setting serial port configuration" << std::endl;);
+        D(std::cout << "[ERROR] Error setting serial port configuration - " << strerror(errno) << std::endl;);
         return false;
     }
 
@@ -84,14 +85,14 @@ bool Serial::connect()
     descriptor = CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
     // Check if port was opened
     if (descriptor == INVALID_FILE_DESCRIPTOR) {
-        D(std::cout << "[ERROR] Error opening serial port: " << port << std::endl;)
+        D(std::cout << "[ERROR] Error opening serial port: " << port << " - " << strerror(errno) << std::endl;)
         return false;
     }
     // Set port configuration to 0 by default
     std::memset(&config, 0, sizeof(config));
     // Get current port configuration
     if (!GetCommState(descriptor, &config)) {
-        D(std::cout << "[ERROR] Error getting serial port configuration" << std::endl;);
+        D(std::cout << "[ERROR] Error getting serial port configuration - " << strerror(errno) << std::endl;);
         return false;
     }
     // Set the baud rates to 3_000_000
@@ -102,7 +103,7 @@ bool Serial::connect()
     config.StopBits = ONESTOPBIT;
     // Apply settings
     if (!SetCommState(descriptor, &config)) {
-        D(std::cout << "[ERROR] Error setting serial port configuration" << std::endl;);
+        D(std::cout << "[ERROR] Error setting serial port configuration - " << strerror(errno) << std::endl;);
         return false;
     }
     #endif
@@ -117,7 +118,7 @@ bool Serial::disconnect()
     D(std::cout << "[INFO] Closing serial port on LINUX: " << port << std::endl;)
     // Close serial port
     if (close(descriptor) != 0) {
-        D(std::cout << "[ERROR] Error closing serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error closing serial port - " << strerror(errno) << std::endl;);
         return false;
     }
     #endif
@@ -126,7 +127,7 @@ bool Serial::disconnect()
 
     // Close serial port
     if (!CloseHandle(descriptor)) {
-        D(std::cout << "[ERROR] Error closing serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error closing serial port - " << strerror(errno) << std::endl;);
         return false;
     }
 
@@ -143,7 +144,7 @@ bool Serial::writeData(std::vector<uint8_t> data)
     int bytes_written = write(descriptor, data.data(), data.size());
     // sleep_time(data.size());
     if (bytes_written != static_cast<int>(data.size())) {
-        D(std::cout << "[ERROR] Error writing data to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error writing data to serial port - " << strerror(errno) << std::endl;);
         return false;
     }
     #endif
@@ -152,11 +153,11 @@ bool Serial::writeData(std::vector<uint8_t> data)
 
     DWORD bytes_written;
     if (!WriteFile(descriptor, data.data(), data.size(), &bytes_written, NULL)) {
-        D(std::cout << "[ERROR] Error writing data to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error writing data to serial port - " << strerror(errno) << std::endl;);
         return false;
     }
     if (bytes_written != data.size()) {
-        D(std::cout << "[ERROR] Incomplete data written to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Incomplete data written to serial port - " << strerror(errno) << std::endl;);
         return false;
     }
 
@@ -172,7 +173,7 @@ bool Serial::writeData(uint8_t data)
     // Write byte to serial port
     if (write(descriptor, &data, 1) != 1) {
         // sleep_time(1);
-        D(std::cout << "[ERROR] Error writing byte to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error writing byte to serial port - " << strerror(errno) << std::endl;);
         return false;
     }
     #endif
@@ -180,11 +181,11 @@ bool Serial::writeData(uint8_t data)
     #ifdef _WIN32
     DWORD bytes_written;
     if (!WriteFile(descriptor, &data, 1, &bytes_written, NULL)) {
-        D(std::cout << "[ERROR] Error writing byte to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error writing byte to serial port - "<< strerror(errno) << std::endl;);
         return false;
     }
     if (bytes_written != 1) {
-        D(std::cout << "[ERROR] Incomplete byte written to serial port" << std::endl;);
+        D(std::cout << "[ERROR] Incomplete byte written to serial port - " << << strerror(errno) << std::endl;);
         return false;
     }
     #endif
@@ -206,7 +207,7 @@ std::vector<uint8_t> Serial::readData()
         return std::vector<uint8_t>();
     }
     if (bytes_read < 0) {
-        D(std::cout << "[ERROR] Error reading data from serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error reading data from serial port - " << strerror(errno) << std::endl;);
         return std::vector<uint8_t>();
     }
     #endif
@@ -214,7 +215,7 @@ std::vector<uint8_t> Serial::readData()
     #ifdef _WIN32
     DWORD bytes_read_dw;
     if (!ReadFile(descriptor, buffer, BUFFER_SIZE, &bytes_read_dw, NULL)) {
-        D(std::cout << "[ERROR] Error reading data from serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error reading data from serial port - " << strerror(errno) << std::endl;);
         return std::vector<uint8_t>();
     }
     bytes_read = static_cast<int>(bytes_read_dw);
@@ -239,7 +240,7 @@ bool Serial::readByte(uint8_t* byte)
     #ifdef _WIN32
     DWORD bytes_read_dw;
     if (!ReadFile(descriptor, byte, 1, &bytes_read_dw, NULL)) {
-        D(std::cout << "[ERROR] Error reading byte from serial port" << std::endl;);
+        D(std::cout << "[ERROR] Error reading byte from serial port - " << strerror(errno) << std::endl;);
         return false;
     }
     if (bytes_read_dw == 1) {

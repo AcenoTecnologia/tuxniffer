@@ -17,8 +17,8 @@ Tests should be performed accordingly with the situation and the changes made;
 On powershell as administrator:
   ```sh
   usbipd list # To show currently connected USB devices;
-  usbipd bind --busid 3-2 # Binds the port to be shared. 3-2 is the number of the port to be forwarded resulted from the first command;
-  usbipd attach --wsl --busid 3-2 # Attach the port to WSL
+  usbipd bind --nusid 3-2 # Binds the port to be shared. 3-2 is the number of the port to be forwarded resulted from the first command;
+  usbipd attach --wsl --nusid 3-2 # Attach the port to WSL
   # Every time the device is reconnected the last command must be executed
   ```
 
@@ -60,7 +60,7 @@ Simple, easy commands that one can use without going too deep. Most of users fal
 - Basic usage, but with optional parameters;
 
   ```sh
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n aceno -P ./results/
   ```
 
     - Check if program runs without error;
@@ -81,21 +81,20 @@ Users that want to explore and take advantage of the software capabilities, but 
 ### (CLI) Case 1:
 - Basic case with parameters, but split devices log
   ```sh
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n aceno -P ./results/ -t 60
   ```
 
     - Basic usage checks;
-    - Check if logs (files and pipes) are generated with correct device id;
+    - Check if the program closes correctly after 60 seconds;
     - Check if shows errors if device could not connect;
 
 ### (CLI) Case 2:
-- Basic case with parameters, but split devices log and reset period enabled
+- Basic case with parameters, but with reset period enabled
   ```sh
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b aceno -P ./results/ -s -r hourly
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n aceno -P ./results/ -r hourly
   ```
 
     - Basic usage checks;
-    - Check if logs (files and pipes) are generated with correct device id;
     - Check if reset period works
     - Check if shows errors if device could not connect;
 
@@ -267,13 +266,13 @@ Tests to ensure that the menu and parameters are running correctly.
 - Correct usage test:
   ```sh
   ./tuxniffer -h # shows help message and exit
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results/ -b aceno -r hourly # run correctly
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results/ -n aceno -r hourly # run correctly
   ```
 
 - Test without essential parameters:
   ```sh
   ./tuxniffer # missing essentials
-  ./tuxniffer -b test # missing essentials but has optional
+  ./tuxniffer -n test # missing essentials but has optional
   ```
 
 - Test with an incorrect essential parameter:
@@ -291,7 +290,7 @@ Tests to ensure that the menu and parameters are running correctly.
 
   - Test with path ending without a "/" character:
   ```sh
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results -b aceno -r hourly
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -P ./results -n aceno -r hourly
   ```
   Should raise error or fix?
 
@@ -313,16 +312,16 @@ Tests to ensure that the menu and parameters are running correctly.
 
 - Test with only optional commands:
   ```sh
-  ./tuxniffer -b logfile_base # missing essentials, only optionals
+  ./tuxniffer -n logfile_base # missing essentials, only optionals
   ```
 
 - Test with incorrect optional commands:
   ```sh
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b -r none # no -b parameter
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b test -r hourly -r daily # 2 -r parameters
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b ////test//// -r noTime # invalid -b parameter. OS could interpret as folder
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b 0101test///%/01 -r none # invalid -b parameter. With special characters
-  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -b test.pdf -r test # should be a valid -b parameter despite ending with .pdf
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n -r none # no -n parameter
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n test -r hourly -r daily # 2 -r parameters
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n ////test//// -r noTime # invalid -n parameter. OS could interpret as folder
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n 0101test///%/01 -r none # invalid -n parameter. With special characters
+  ./tuxniffer -p /dev/ttyACM0 -m 20 -c 25 -n test.pdf -r test # should be a valid -n parameter despite ending with .pdf
   ```
 
 - Test with an invalid path:

@@ -102,7 +102,7 @@ The binary file is now stored in `build/bin`.
 <!-- TOC --><a name="compiling-on-windows"></a>
 ### Compiling on Windows
 
-While this project is not meant to be used on Windows, it is compatible with Visual Studio C++ Compiler (MSVC). To import this repository as a VS project: ``Open VS -> Open Local Folder -> Select the tuxniffer folder -> Right click on the CMakeLists.txt -> Delete Cache and Reconfigure -> Select x64 release or debug option at tob bar -> Select tuxniffer.exe -> Execute the build/ compilation step by clicking the green arrow``. If you find any errors during this step check [Microsoft official instructions to import CMake projects into Visual Studio](learn.microsoft.com/cpp/build/cmake-projects-in-visual-studio?view=msvc-170).
+While this project is not meant to be used on Windows, it is compatible with Visual Studio C++ Compiler (MSVC). To import this repository as a VS project: ``Open VS -> Open Local Folder -> Select the tuxniffer folder -> Right click on the CMakeLists.txt -> Delete Cache and Reconfigure -> Select x64 release or debug option at tob bar -> Select tuxniffer.exe -> Execute the build/ compilation step by clicking the green arrow``. If you find any errors during this step check [Microsoft official instructions to import CMake projects into Visual Studio](https://learn.microsoft.com/cpp/build/cmake-projects-in-visual-studio?view=msvc-170).
 
 
 <!-- TOC --><a name="usage"></a>
@@ -120,18 +120,17 @@ Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 - `-p, --port`: Serial port to connect to *(required)*.
 - `-m, --radio_mode`: Radio mode to use *(required)*.
 - `-c, --channel`: Channel to use *(required)*.
-- `-n, --name`: File name/ pipe name.
-- `-P, --path`: Path to save file.
-- `-r, --reset_period`: Reset period (none | hourly | daily | weekly | monthly).
-- `-s, --log_split`: Split log files by device.
-- `-t, --time_duration`: Sniffing duration in seconds.
+- `-n, --name`: Pipe name / log file name (.pcap).
+- `-P, --path`: Path to save log file.
+- `-r, --reset_period`: Log file reset period (none | hourly | daily | weekly | monthly).
+- `-t, --time_duration`: Sniffing duration in seconds. Runs indefinitely when missing.
 - `-i, --input`: Input config file.
 
 <!-- TOC --><a name="usage-example"></a>
 #### Usage Example:
 
 ```bash
-./tuxniffer -p /dev/ttyUSB0 -m 20 -c 25 -b sniffer -r hourly
+./tuxniffer -p /dev/ttyUSB0 -m 20 -c 20 -n sniffer -r hourly
 ```
 
 Using this software through the CLI has some limitations:
@@ -143,27 +142,35 @@ Using this software through the CLI has some limitations:
 ### .YAML Config File
 
 ```yaml
-# List of devices that you want to sniff. At least one device is required.
-devices:
-  - port: /dev/ttyACM0
-    radio_mode: 20
-    channel: 25
-# Optional log options. Values below are the default ones.
+## List of devices that you want to sniff. At least one device is required.
+devices:                #required
+  - port: /dev/ttyACM0  #required
+    radio_mode: 20      #required
+    channel: 20         #required
+# - port: /dev/ttyACM2  
+#   radio_mode: 20      
+#   channel: 25         
+
+## Optional log parameters. Values below are the default ones.
 # log:
-#   enabled: true
-#   path: ./
-#   base_name: aceno
-#   splitDevicesLog: false
-#   resetPeriod: hourly # none | hourly | daily | weekly | monthly
-# Optional pipe options. Values below are the default ones.
+#   enabled: true             # Set false to not create a .pcap log file.
+#   path: ./                  # Path to save log file.
+#   base_name: aceno          # Log file name.
+#   splitDevicesLog: false    # Set true to create a separete log file for each device ([name]_[device_id].pcap).
+#   resetPeriod: none         # Log file reset period  (none | hourly | daily | weekly | monthly).
+
+## Optional pipe parameters. Values below are the default ones.
 # pipe:
-#   enabled: true
-#   name: aceno
-#   path: /tmp/
-#   splitDevicesPipe: false
-# Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
+#   enabled: true             # Set false to not create a pipe.
+#   name: aceno               # Pipe file name.
+#   path: /tmp/               # Path to save pipe file. On Windows the path name is ignored because the only path is \\.\pipe\.
+#   splitDevicesPipe: false   # Set true to create a separete log file for each device ([name]_[device_id]).
+
+## Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
 # duration: -1
 ```
+
+You can add more devices to the list, but for each one, you need to set valid values for all three required parameters (port, radio mode, and channel). For log and pipe options, you can only set the parameters you want to change.
 
 This example is also presented in the `config.yaml` file.
 
@@ -177,7 +184,7 @@ This example is also presented in the `config.yaml` file.
 **Note: when the parameter `-i` is used, other CLI parameters are ignored.**
 
 <!-- TOC --><a name="radio-mode-table"></a>
-## Radio Mode Table
+## Radio Mode TableN
 
 This program currently supports the following Radio Modes for different kinds of packets:
 
@@ -225,6 +232,8 @@ This software allows live packet viewing using Pipes. To access the pipe use:
 ```bash
 wireshark -k -i /<path>/<to>/<pipe_name>
 ```
+
+You can also select your pipe file path in `Wireshark -> Capture -> Manage interfaces -> Pipes`.
 
 Wireshark doesn't need to be open at the start of the sniffer execution. The sniffer will store a queue of packets during its running time, and as long as Wireshark is open while the sniffer is running, the packets will be sent in order to it.
 

@@ -46,7 +46,7 @@ bool Pipe::create(const std::string& pipePath)
         int response = mkfifo(pipePath.c_str(), 0666);
         if (response == -1)
         {
-            D(std::cout << "[ERROR] Linux Pipe: mkfifo creation failed: " << strerror(errno) << std::endl;)
+            D(std::cout << "[ERROR] Linux Pipe: mkfifo creation failed - " << strerror(errno) << std::endl;)
             return false;
         }
     #endif
@@ -67,7 +67,7 @@ bool Pipe::open(const std::string& pipePath)
         pipeWrite = ::open(pipePath.c_str(), O_WRONLY | O_NONBLOCK);
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
-            // D(std::cout << "[ERROR] Linux Pipe: open failed: " << strerror(errno) << std::endl;)
+            D(std::cout << "[ERROR] Linux Pipe: open failed - " << strerror(errno) << std::endl;)
             return false;
         }
     #endif
@@ -86,13 +86,13 @@ bool Pipe::open(const std::string& pipePath)
 
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
-            D(std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed" << std::endl;)
+            D(std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed - " << strerror(errno) << std::endl;)
             return false;
         }
 
         if (!ConnectNamedPipe(pipeWrite, NULL))
         {
-            D(std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed" << std::endl;)
+            D(std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed - " << strerror(errno)  << std::endl;)
             CloseHandle(pipeWrite);
             pipeWrite = INVALID_PIPE_DESCRIPTOR;
             return false;
@@ -132,7 +132,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
         ssize_t result = ::write(pipeWrite, data.data(), data.size());
         if (result == -1)
         {
-            D(std::cout << "[ERROR] Linux Pipe: write failed" << std::endl;)
+            D(std::cout << "[ERROR] Linux Pipe: write failed - " << strerror(errno)  << std::endl;)
         }
     #endif
 
@@ -140,7 +140,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
         DWORD bytesWritten;
         if (!WriteFile(pipeWrite, data.data(), data.size(), &bytesWritten, NULL))
         {
-            D(std::cout << "[ERROR] Windows Pipe: WriteFile failed" << std::endl;)
+            D(std::cout << "[ERROR] Windows Pipe: WriteFile failed - " << strerror(errno)  << std::endl;)
         }
     #endif
 }

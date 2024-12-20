@@ -64,13 +64,13 @@ void print_help()
     std::cout << "  -m, --radio_mode\t\t\tRadio mode to use" << std::endl;
     std::cout << "  -c, --channel\t\t\tChannel to use" << std::endl;
     std::cout << "Log Settings (optional)" << std::endl;
-    std::cout << "  -n, --name\t\t\t\tBase file/ pipe name" << std::endl;
+    std::cout << "  -n, --name\t\t\t\tPipe name / log file name (.pcap)" << std::endl;
     std::cout << "  -P, --path\t\t\t\tPath to save file" << std::endl;
-    std::cout << "  -r, --reset_period\t\t\tReset period" << std::endl;
-    std::cout << "  -s, --log_split\t\t\tSplit log files by device" << std::endl;
-    std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds" << std::endl;
+    std::cout << "  -r, --reset_period\t\t\tLog file reset period (none | hourly | daily | weekly | monthly)" << std::endl;
+    //std::cout << "  -s, --log_split\t\t\tSplit log files by device" << std::endl;
+    std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds. Runs indefinitely when missing" << std::endl;
     std::cout << "  -i, --input\t\t\t\tInput config file" << std::endl;
-    std::cout << "(See config.yaml for a -i example file)" << std::endl;
+    std::cout << "(See config.yaml or README.md for a -i example file)" << std::endl;
 }
 
 void print_radio_mode_table()
@@ -226,25 +226,30 @@ int main(int argc, char* argv[])
             return 0;
         }
         else if (arg == "-p" || arg == "--port") {
-            D(std::cout << "[CONFIG] Serial port: " << args[++i] << std::endl;)
-                device.port = args[i];
+            ++i;
+            D(std::cout << "[CONFIG] Serial port: " << args[i] << std::endl;)
+            device.port = args[i];
         }
         else if (arg == "-m" || arg == "--radio_mode") {
-            D(std::cout << "[CONFIG] Radio mode: " << args[++i] << std::endl;)
-                device.radio_mode = std::stoi(args[i]);
+            ++i;
+            D(std::cout << "[CONFIG] Radio mode: " << args[i] << std::endl;)
+            device.radio_mode = std::stoi(args[i]);
         }
         else if (arg == "-c" || arg == "--channel") {
-            D(std::cout << "[CONFIG] Channel: " << args[++i] << std::endl;)
-                device.channel = std::stoi(args[i]);
+            ++i;
+            D(std::cout << "[CONFIG] Channel: " << args[i] << std::endl;)
+            device.channel = std::stoi(args[i]);
         }
         else if (arg == "-n" || arg == "--name") {
-            D(std::cout << "[CONFIG] Name: " << args[++i] << std::endl;)
-                log.file.base_name = args[i];
+            ++i;
+            D(std::cout << "[CONFIG] Name: " << args[i] << std::endl;)
+            log.file.base_name = args[i];
             log.pipe.base_name = args[i];
         }
         else if (arg == "-r" || arg == "--reset_period") {
-            D(std::cout << "[CONFIG] Reset period: " << args[++i] << std::endl;)
-                std::string resetPeriod = args[i];
+            ++i;
+            D(std::cout << "[CONFIG] Reset period: " << args[i] << std::endl;)
+            std::string resetPeriod = args[i];
             if (resetPeriod == "none" || resetPeriod == "hourly" || resetPeriod == "daily" || resetPeriod == "weekly" || resetPeriod == "monthly") {
                 log.file.reset_period = resetPeriod;
             }
@@ -254,21 +259,24 @@ int main(int argc, char* argv[])
             }
         }
         else if (arg == "-P" || arg == "--path") {
-            D(std::cout << "[CONFIG] Path " << args[++i] << std::endl;)
-                log.file.path = args[i];
+            ++i;
+            D(std::cout << "[CONFIG] Path " << args[i] << std::endl;)
+            log.file.path = args[i];
         }
         else if (arg == "-t" || arg == "--time_duration") {
-            D(std::cout << "[CONFIG] Time duration: " << args[++i] << std::endl;)
-                duration = std::stoi(args[i]);
+            ++i;
+            D(std::cout << "[CONFIG] Time duration: " << args[i] << std::endl;)
+            duration = std::stoi(args[i]);
         }
-        else if (arg == "-s" || arg == "--log_split") {
-            D(std::cout << "[CONFIG] Split log files by device" << std::endl;)
-                log.file.split_devices_log = true;
-            log.pipe.split_devices_log = true;
-        }
+        //else if (arg == "-s" || arg == "--log_split") {
+        //    D(std::cout << "[CONFIG] Split log files by device" << std::endl;)
+        //    log.file.split_devices_log = true;
+        //    log.pipe.split_devices_log = true;
+        //}
         else if (arg == "-i" || arg == "--input") {
-            D(std::cout << "[CONFIG] Input config file: " << args[++i] << ". Ignoring other input commands." << std::endl;)
-                configFilePath = args[i];
+            ++i;
+            D(std::cout << "[CONFIG] Input config file: " << args[i] << ". Ignoring other input commands." << std::endl;)
+            configFilePath = args[i];
             useInput = true;
         }
     }
@@ -284,7 +292,7 @@ int main(int argc, char* argv[])
     // If useInput is true, parse input file based on file extension and add devices to device vector and update log settings
     if (useInput) {
         std::string fileExtension = configFilePath.substr(configFilePath.find_last_of(".") + 1);
-        if (fileExtension == "yaml")
+        if (fileExtension.compare(("yaml")) == 0)
             devices = parse_input_file_yaml(configFilePath, &log, &duration);
         else {
             std::cout << "[ERROR] Invalid file extension. Please use a .yaml file." << std::endl;

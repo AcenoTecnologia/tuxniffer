@@ -17,6 +17,7 @@
 #include <ctime>
 #include <iomanip>
 #include <memory>
+#include <errno.h>
 
 #include "pipe.hpp"
 #include "common.hpp"
@@ -71,7 +72,7 @@ bool OutputManager::configure_files()
                 FILE* log_file = fopen(filename.c_str(), "wb");
                 if (!log_file)
                 {
-                    D(std::cout << "[ERROR] Could not open log file: " << filename << ". Packets will be discarded." << std::endl;)
+                    D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << ". Packets will be discarded." << std::endl;)
                     return false;
                 }
                 // Write global header
@@ -87,7 +88,7 @@ bool OutputManager::configure_files()
             FILE* log_file = fopen(filename.c_str(), "wb");
             if (!log_file)
             {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << ". Packets will be discarded." << std::endl;)
+                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << ". Packets will be discarded." << std::endl;)
                 return false;
             }
             // Write global header
@@ -296,7 +297,7 @@ void OutputManager::recreate_log_files()
             std::string filename = base_filename + "_" + std::to_string(i) + ".pcap";
             FILE* new_log_file = fopen(filename.c_str(), "wb");
             if (!new_log_file) {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << std::endl;)
                 return;
             }
             // Write global header
@@ -314,7 +315,7 @@ void OutputManager::recreate_log_files()
     std::string filename = base_filename + ".pcap";
     FILE* new_log_file = fopen(filename.c_str(), "wb");
     if (!new_log_file) {
-        D(std::cout << "[ERROR] Could not open log file: " << filename << std::endl;)
+        D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << std::endl;)
         return;
     }
     // Write global header

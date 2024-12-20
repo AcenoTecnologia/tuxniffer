@@ -92,7 +92,7 @@ void Sniffer::streamAll()
 {
     // Check if all devices are ready. At least one must be to start streaming.
     if (std::all_of(devices.begin(), devices.end(), [](Device& device) { return !device.is_ready; })) {
-        D(std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;)
+        std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;
         return;
     }
 
@@ -133,7 +133,7 @@ void Sniffer::streamAll(std::chrono::seconds duration)
 {
     // Check if all devices are ready. At least one must be to start streaming.
     if (std::all_of(devices.begin(), devices.end(), [](Device& device) { return !device.is_ready; })) {
-        D(std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;)
+        std::cout << "[ERROR] No devices are ready to start streaming." << std::endl;
         return;
     }
 
