@@ -324,12 +324,12 @@ bool Device::reconnect(){
         interruption = 1;
         return false;
     }
-    
     D(std::cout << "[INFO] Trying to reconnect in 10 seconds." << std::endl;)
     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     while (true)
     {
-        //serial = Serial(port);
+        
+        serial.closePort();
         if(connect()){
             while (true)
             {

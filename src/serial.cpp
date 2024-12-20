@@ -136,6 +136,19 @@ bool Serial::disconnect()
     return true;
 }
 
+void Serial::closePort()
+{
+    // Close serial port linux
+    #ifdef __linux__
+    close(descriptor);
+    #endif
+    // Close serial port windows
+    #ifdef _WIN32
+    // Close serial port
+    CloseHandle(descriptor);
+    #endif
+}
+
 bool Serial::writeData(std::vector<uint8_t> data)
 {
     // Write to serial port linux

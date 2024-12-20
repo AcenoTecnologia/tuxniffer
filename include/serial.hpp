@@ -73,6 +73,11 @@ public:
     bool disconnect();
 
     /**
+     * @brief Disconnects from the serial port.
+     */
+    void closePort();
+
+    /**
      * @brief Writes data to the serial port.
      * 
      * @param data The data to write.
