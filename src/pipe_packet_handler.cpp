@@ -72,6 +72,9 @@ void PipePacketHandler::run()
         while (is_running && !is_open)
         {
             is_open = pipe.open(path);
+            #ifdef __linux__
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            #endif
         }
         
         // If the pipe is not open, the pipe thread will be closed and the data will be discarded

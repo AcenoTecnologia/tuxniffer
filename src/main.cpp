@@ -182,7 +182,16 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
 
     // Takes the duration from the yaml file
     *duration =                     yaml.contains("duration")               ? yaml["duration"].get_value<int>()                 : -1;
-    std::cout << "[INFO] Duration: " << *duration << "." << std::endl;
+    std::cout << "[INFO] Duration: " << *duration;
+    if (*duration == -1)
+    {
+        std::cout << " (runs indefinitely)." << std::endl;
+    }
+    else
+    {
+        std::cout << " seconds." << std::endl;
+    }
+    
 
     // Return the vector of devices
     return devices;

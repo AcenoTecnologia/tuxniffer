@@ -69,7 +69,6 @@ bool Pipe::open(const std::string& pipePath)
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
             //D(char* errmsg = custom_strerror(errno); std::cout << "[ERROR] Linux Pipe: open failed" << errmsg << "." << std::endl;)
-            std::this_thread::sleep_for(std::chrono::seconds(1));
             return false;
         }
     #endif

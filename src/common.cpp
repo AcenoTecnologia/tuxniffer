@@ -11,24 +11,29 @@
 
 
 #include <string>
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include "common.hpp"
 
 char* custom_strerror(int n_error){
     
-    char buf[128];
-    #ifndef __WIN32__
+    char *res;
+    #ifdef __WIN32
         if (n_error == 0)
         {
             n_error = GetLastError();
 
             if (n_error == 0)
             {
-                return "";
+                res = (char*)malloc(sizeof(char));
+                strcpy(res, "");
+                return res;
             }
             
             char* messageBuffer = nullptr;
@@ -48,21 +53,31 @@ char* custom_strerror(int n_error){
         } 
         else
         {
+            char buf[128];
             strerror_s(buf, sizeof(buf), n_error);
+            res = (char*)malloc(sizeof(char)*(strlen(buf) + 4));
+            sprintf(res, " - %s", buf); 
         }
     #else
+        char buf[128];
         if (n_error == 0)
         {
-            return "";
+            res = (char*)malloc(sizeof(char));
+            strcpy(res, "");
+            return res;
         }
-        #ifndef (POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+        #if ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
             strerror_r(n_error, buf, sizeof(buf));
+            res = (char*)malloc(sizeof(char)*(strlen(buf) + 4));
+            sprintf(res, " - %s", buf);
         #else
-            buf = strerror_r(n_error, buf, sizeof(buf));
+            char* auxStr = strerror_r(n_error, buf, sizeof(buf));
+            res = (char*)malloc(sizeof(char)*(strlen(auxStr) + 4));
+            sprintf(res, " - %s", auxStr);  
         #endif
     #endif
-    
-    char res[128];
-    sprintf(res, " - %s", buf);
     return res;
+    
+    
+    
 }

@@ -330,14 +330,6 @@ bool Device::reconnect(){
         
         serial.closePort();
         if(connect()){
-            std::cout << "ccccccc" << std::endl;
-            //while (true)
-            //{
-                // Read byte from serial
-            //    uint8_t byte;
-            //    int read_byte = serial.readByte(&byte);
-            //    if(read_byte == 0) break;
-            //}
             if(init()){
                 if(start())
                 {
