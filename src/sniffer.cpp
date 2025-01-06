@@ -39,7 +39,7 @@ void Sniffer::configureAllDevices()
     {
         if(device.connect())
         {
-            D(std::cout << "[INFO] Device connected. ID: " << device.id << std::endl;)
+            D(std::cout << "[INFO] Device connected. ID: " << device.id << "." << std::endl;)
         }
     }
 }

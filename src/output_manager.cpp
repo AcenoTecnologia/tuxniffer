@@ -73,14 +73,15 @@ bool OutputManager::configure_files()
                 FILE* log_file = fopen(filename.c_str(), "wb");
                 if (!log_file)
                 {
-                    D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << ". Packets will be discarded." << std::endl;)
+                    D(char* errmsg = custom_strerror(errno);
+                        std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;)
                     return false;
                 }
                 // Write global header
                 std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
                 fwrite(global_header.data(), 1, global_header.size(), log_file);
                 log_files.push_back(log_file);
-                D(std::cout << "[INFO] Log file created: " << filename << std::endl;);
+                D(std::cout << "[INFO] Log file created: " << filename << "." << std::endl;);
             }
         }
         if(!log.file.split_devices_log)
@@ -89,14 +90,15 @@ bool OutputManager::configure_files()
             FILE* log_file = fopen(filename.c_str(), "wb");
             if (!log_file)
             {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << ". Packets will be discarded." << std::endl;)
+                D(char* errmsg = custom_strerror(errno);
+                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;)
                 return false;
             }
             // Write global header
             std::vector<uint8_t> global_header = PcapBuilder::get_global_header();
             fwrite(global_header.data(), 1, global_header.size(), log_file);
             log_files.push_back(log_file);
-            D(std::cout << "[INFO] Log file created: " << filename << std::endl;);
+            D(std::cout << "[INFO] Log file created: " << filename << "." << std::endl;);
         }
     last_update = std::chrono::system_clock::now();
     }
@@ -159,7 +161,7 @@ void OutputManager::run()
             std::lock_guard<std::mutex> lock(m_mutex);
             packet_queue_s packet = packet_queue.front();
             packet_queue.pop();
-            // D(std::cout << "[INFO] Packet processed by Output Manager. Size: " << packet.packet.size() << std::endl;)
+            // D(std::cout << "[INFO] Packet processed by Output Manager. Size: " << packet.packet.size()  << "." << std::endl;)
             handle_packet(packet);
         }
         // Sleep to avoid busy waiting
@@ -177,7 +179,6 @@ void OutputManager::run()
     {
         pipe_packet_handler->is_running = false;
     }
-
     // Join the threads from the pipes
     for (auto& pipe_thread : log_pipes_threads)
     {
@@ -240,7 +241,7 @@ void OutputManager::handle_packet(packet_queue_s packet)
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[packet.id].get();
             pipe_packet_handler->add_packet(packet);
         }
-        if(!log.pipe.split_devices_log)
+        else
         {
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
             pipe_packet_handler->add_packet(packet);
@@ -298,7 +299,8 @@ void OutputManager::recreate_log_files()
             std::string filename = base_filename + "_" + std::to_string(i) + ".pcap";
             FILE* new_log_file = fopen(filename.c_str(), "wb");
             if (!new_log_file) {
-                D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << "." << std::endl;)
+                D(char* errmsg = custom_strerror(errno);
+                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;)
                 return;
             }
             // Write global header
@@ -307,7 +309,7 @@ void OutputManager::recreate_log_files()
 
 
             log_files.push_back(new_log_file);
-            D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
+            D(std::cout << "[INFO] Log file recreated: " << filename << "." << std::endl;)
         }
 
         return;
@@ -316,7 +318,8 @@ void OutputManager::recreate_log_files()
     std::string filename = base_filename + ".pcap";
     FILE* new_log_file = fopen(filename.c_str(), "wb");
     if (!new_log_file) {
-        D(std::cout << "[ERROR] Could not open log file: " << filename << " - " << strerror(errno) << "." << std::endl;)
+        D(char* errmsg = custom_strerror(errno);
+            std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;)
         return;
     }
     // Write global header
@@ -324,6 +327,6 @@ void OutputManager::recreate_log_files()
     fwrite(global_header.data(), 1, global_header.size(), new_log_file);
 
     log_files.push_back(new_log_file);
-    D(std::cout << "[INFO] Log file recreated: " << filename << std::endl;)
+    D(std::cout << "[INFO] Log file recreated: " << filename << "." << std::endl;)
 
 }

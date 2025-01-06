@@ -95,3 +95,5 @@ struct log_s {
     log_entry_s file;                                   ///< File log entry configuration.
     log_entry_s pipe;                                   ///< Pipe log entry configuration.
 };
+
+char* custom_strerror(int n_error);

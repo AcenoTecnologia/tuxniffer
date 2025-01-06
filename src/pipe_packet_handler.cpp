@@ -67,15 +67,13 @@ void PipePacketHandler::run()
         
         pipe.create(path);
         D(std::cout << "[INFO] Pipe was created." << std::endl;)
-        D(std::cout << "[INFO] Will be waiting for consumer on: " << path << std::endl;)
-        
+        D(std::cout << "[INFO] Will be waiting for consumer on: " << path << "." << std::endl;)
         // Check if the pipe is open each second until it's open or until is_running is false
         while (is_running && !is_open)
         {
             is_open = pipe.open(path);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-
+        
         // If the pipe is not open, the pipe thread will be closed and the data will be discarded
         if (!is_open)
         {

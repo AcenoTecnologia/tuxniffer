@@ -17,7 +17,6 @@
 #include <signal.h>
 #include <chrono>
 #include <thread>
-#include <errno.h>
 #include <cstring> 
 
 #include "common.hpp"
@@ -83,7 +82,7 @@ bool Device::start()
     serial.writeData(start_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    std::cout << "[INFO] Device [" << id << "] started" << std::endl;
+    std::cout << "[INFO] Device [" << id << "] started." << std::endl;
 
     state = State::STARTED;
 
@@ -99,7 +98,7 @@ bool Device::stop()
     serial.writeData(stop_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] stopped" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] stopped." << std::endl;)
 
     state = State::STOPPED;
 
@@ -123,13 +122,13 @@ bool Device::ping()
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
     // TODO: Update board info
-    D(std::cout << "[INFO] Device [" << id << "] pinged" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] pinged." << std::endl;)
     std::vector<uint8_t> board_info = cmd.disassemble_ping(response);
     D(std::cout << "[INFO] Device [" << id << "] board info: " << std::endl;)
-    D(std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << std::endl;)
-    D(std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << std::endl;)
-    D(std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << std::endl;)
-    D(std::cout << "[INFO] ---FW Rev: " << std::hex << (int)board_info[4] << (int)board_info[5] << std::endl;)
+    D(std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << "." << std::endl;)
+    D(std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << "." << std::endl;)
+    D(std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << "." << std::endl;)
+    D(std::cout << "[INFO] ---FW Rev: " << std::hex << (int)board_info[4] << "." << (int)board_info[5] << std::endl;)
 
     return true;
 }
@@ -150,7 +149,7 @@ bool Device::configure()
     serial.writeData(set_phy_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] set PHY" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] set PHY." << std::endl;)
 
     // Send frequency command
     serial.flush();
@@ -158,7 +157,7 @@ bool Device::configure()
     serial.writeData(set_freq_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] set frequency" << std::endl;)
+    D(std::cout << "[INFO] Device [" << id << "] set frequency." << std::endl;)
 
     return true;
 }
@@ -186,7 +185,7 @@ void Device::stream()
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
@@ -224,7 +223,7 @@ void Device::stream(std::chrono::seconds seconds)
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)" << std::endl;)
+        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
@@ -320,7 +319,7 @@ bool Device::reconnect(){
     std::cout << "[ERROR] Connection lost with device [" << id << "]." << std::endl;
     if (!disconnect())
     {
-        D(std::cout << "[ERROR] Error closing serial port - " << strerror(errno) << ". Impossible to reconect device [" << id << "]." << std::endl;)
+        D(std::cout << "[ERROR] Error closing serial port. Impossible to reconect device [" << id << "]." << std::endl;)
         interruption = 1;
         return false;
     }
@@ -331,13 +330,14 @@ bool Device::reconnect(){
         
         serial.closePort();
         if(connect()){
-            while (true)
-            {
+            std::cout << "ccccccc" << std::endl;
+            //while (true)
+            //{
                 // Read byte from serial
-                uint8_t byte;
-                int read_byte = serial.readByte(&byte);
-                if(read_byte == 0) break;
-            }
+            //    uint8_t byte;
+            //    int read_byte = serial.readByte(&byte);
+            //    if(read_byte == 0) break;
+            //}
             if(init()){
                 if(start())
                 {

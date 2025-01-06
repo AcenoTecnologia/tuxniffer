@@ -46,7 +46,8 @@ bool Pipe::create(const std::string& pipePath)
         int response = mkfifo(pipePath.c_str(), 0666);
         if (response == -1)
         {
-            D(std::cout << "[ERROR] Linux Pipe: mkfifo creation failed - " << strerror(errno) << std::endl;)
+            D(char* errmsg = custom_strerror(errno);
+                std::cout << "[ERROR] Linux Pipe: mkfifo creation failed" << errmsg << "." << std::endl;)
             return false;
         }
     #endif
@@ -67,7 +68,8 @@ bool Pipe::open(const std::string& pipePath)
         pipeWrite = ::open(pipePath.c_str(), O_WRONLY | O_NONBLOCK);
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
-            //D(std::cout << "[ERROR] Linux Pipe: open failed - " << strerror(errno) << std::endl;)
+            //D(char* errmsg = custom_strerror(errno); std::cout << "[ERROR] Linux Pipe: open failed" << errmsg << "." << std::endl;)
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             return false;
         }
     #endif
@@ -83,22 +85,41 @@ bool Pipe::open(const std::string& pipePath)
             0,
             NULL
         );
-
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
-            D(std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed - " << strerror(errno) << std::endl;)
+            D(char* errmsg = custom_strerror(errno);
+                std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed" << errmsg << "." << std::endl;)
             return false;
         }
+        OVERLAPPED overlapped = {};
+        overlapped.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 
-        if (!ConnectNamedPipe(pipeWrite, NULL))
-        {
-            D(std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed - " << strerror(errno)  << std::endl;)
+        if (!overlapped.hEvent) {
+            std::cerr << "Erro ao criar o evento overlapped: " << GetLastError() << std::endl;
             CloseHandle(pipeWrite);
             pipeWrite = INVALID_PIPE_DESCRIPTOR;
             return false;
         }
+        if (!ConnectNamedPipe(pipeWrite, &overlapped))
+        {
+            DWORD error = GetLastError();
+            if (error == ERROR_IO_PENDING) {
+                // Espera até que a conexão seja estabelecida ou o timeout expire
+                DWORD waitResult = WaitForSingleObject(overlapped.hEvent, 2000); // Timeout de 2 segundos
+                if (waitResult != WAIT_OBJECT_0) {
+                    if (waitResult != WAIT_TIMEOUT) {
+                        D(char* errmsg = custom_strerror(errno);
+                            std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed" << errmsg << "." << std::endl;)
+                    }
+                    CloseHandle(overlapped.hEvent);
+                    CloseHandle(pipeWrite);
+                    pipeWrite = INVALID_PIPE_DESCRIPTOR;
+                    return false;
+                }
+            }
+        }
+        CloseHandle(overlapped.hEvent);
     #endif
-
     return true;
 }
 
@@ -124,7 +145,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
 {
     if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
     {
-        D(std::cout << "[ERROR] Pipe: Invalid pipe descriptor" << std::endl;)
+        D(std::cout << "[ERROR] Pipe: Invalid pipe descriptor." << std::endl;)
         return;
     }
 
@@ -132,7 +153,8 @@ void Pipe::write(const std::vector<uint8_t>& data)
         ssize_t result = ::write(pipeWrite, data.data(), data.size());
         if (result == -1)
         {
-            D(std::cout << "[ERROR] Linux Pipe: write failed - " << strerror(errno)  << std::endl;)
+            D(char* errmsg = custom_strerror(errno);
+                std::cout << "[ERROR] Linux Pipe: write failed" << errmsg << "." << std::endl;)
         }
     #endif
 
@@ -140,7 +162,8 @@ void Pipe::write(const std::vector<uint8_t>& data)
         DWORD bytesWritten;
         if (!WriteFile(pipeWrite, data.data(), data.size(), &bytesWritten, NULL))
         {
-            D(std::cout << "[ERROR] Windows Pipe: WriteFile failed - " << strerror(errno)  << std::endl;)
+            D(char* errmsg = custom_strerror(errno);
+                std::cout << "[ERROR] Windows Pipe: WriteFile failed" << errmsg << "." << std::endl;)
         }
     #endif
 }
