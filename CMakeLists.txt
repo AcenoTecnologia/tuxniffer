@@ -27,6 +27,10 @@ endif()
 # Add the executable
 add_executable(tuxniffer ${SOURCES} ${MAIN_SOURCE})
 
+# Especifica as bibliotecas necessárias
+find_package(OpenSSL REQUIRED)
+target_link_libraries(tuxniffer OpenSSL::SSL OpenSSL::Crypto)
+
 # Set output directories
 set_target_properties(tuxniffer PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin

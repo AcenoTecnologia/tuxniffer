@@ -225,6 +225,14 @@ public:
     packet_data convert_to_network_packet(std::vector<uint8_t> data, std::chrono::microseconds system_timestamp);
 
     /**
+     * @brief Get the payload of the network packet from a packet queue entry.
+     * 
+     * @param packet Queue entry from the packet.
+     * @return Payload from network packet.
+     */
+    std::vector<uint8_t> get_payload(packet_queue_s packet);
+
+    /**
      * @brief Gets the device timestamp from data.
      * 
      * @param data Data containing the timestamp.

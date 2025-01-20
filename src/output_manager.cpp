@@ -30,6 +30,7 @@
 OutputManager::OutputManager(log_s log_settings)
 {
     log = log_settings;
+    crypto_handler.security_level = log_settings.crypto.security_level;
 }
 
 
@@ -154,6 +155,11 @@ void OutputManager::run()
 {
     // Starts to run
     is_running = true;
+    if(log.crypto.simulation)
+    {
+        loadAndSimulateKeyPackets(log.crypto.simulation_path);
+    }
+
     while ((is_running || !packet_queue.empty()) && can_run)
     {
         if(!packet_queue.empty())
@@ -185,6 +191,32 @@ void OutputManager::run()
         pipe_thread.join();
     }
 
+    if(log.crypto.save_keys)
+    {
+        std::string filename = log.crypto.keys_path + ".txt";
+        std::ofstream keys_file(filename);
+        if (!keys_file.is_open()) {
+            std::cout << "[ERROR] Could not open file to save keys: " << filename << std::endl;
+        }
+        else
+        {
+            keys_file << "Link Keys:";
+            for(int i = 1; i < crypto_handler.link_keys.size(); i++){
+                keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.link_keys[i]);
+            }
+            keys_file << std::endl << "Network Keys:";
+            for(int i = 0; i < crypto_handler.nwk_keys.size(); i++){
+                keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.nwk_keys[i]);
+            }
+            keys_file.close();
+        }
+    }
+
+    if(log.crypto.save_packets)
+    {
+        saveKeyPackets(log.crypto.packets_path, key_packets, log.crypto.append_mode);
+    }
+
     D(std::cout << "[INFO] Output Manager stopped. Queues empty." << std::endl;)
 }
 
@@ -193,11 +225,11 @@ void OutputManager::handle_packet(packet_queue_s packet)
     // Check if it is the first packet
     // If so, defines the start-time to system time - first packet timestamp
     // This base will be summed to the timestamp of each packet to get the correct timestamp
+    CommandAssembler command_assembler;
     if(is_first_packet)
-    {
-        CommandAssembler command_assembler;
+    {        
         auto now = std::chrono::system_clock::now();
-        start_time = now - command_assembler.get_device_timestamp(packet.packet) + std::chrono::seconds(TIMEZONE);;
+        start_time = now - command_assembler.get_device_timestamp(packet.packet) + std::chrono::seconds(TIMEZONE);
         is_first_packet = false;
         // Update the time on the PipePacketHandler
         for (auto pipe_packet_handler : log_pipes_handlers)
@@ -209,6 +241,11 @@ void OutputManager::handle_packet(packet_queue_s packet)
     // Recreate log files if necessary (based on reset period)
     recreate_log_files();
 
+    std::vector<uint8_t> payload = command_assembler.get_payload(packet);
+    if (crypto_handler.extract_key(payload))
+    {
+        key_packets.push_back(packet);
+    }
     if(log.file.enabled)
     {
         // Check if i have more than one log file
@@ -246,7 +283,7 @@ void OutputManager::handle_packet(packet_queue_s packet)
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
             pipe_packet_handler->add_packet(packet);
         }
-    }
+    }   
 }
 
 void OutputManager::recreate_log_files()
@@ -329,4 +366,75 @@ void OutputManager::recreate_log_files()
     log_files.push_back(new_log_file);
     D(std::cout << "[INFO] Log file recreated: " << filename << "." << std::endl;)
 
+}
+
+void OutputManager::saveKeyPackets(const std::string& filename, const std::vector<packet_queue_s>& packets, bool append_mode) {//corrigir essa e a proxima
+    std::ofstream outFile;
+    if (append_mode)
+    {
+        outFile = ofstream(filename, std::ios::binary | std::ios::app);
+    }
+    else
+    {
+        outFile = ofstream(filename, std::ios::binary);
+    }
+    if (!outFile.is_open()) {
+        std::cout << "[ERROR] Could not open file to save key packets: " << filename << std::endl;
+        return;
+    }
+
+    for (const auto& p : packets) {
+        // Serializar os dados
+        outFile.write(reinterpret_cast<const char*>(&p.id), sizeof(p.id));
+        int interfaceSize = p.serial_interface.size();
+        outFile.write(reinterpret_cast<const char*>(&interfaceSize), sizeof(interfaceSize));
+        outFile.write(p.serial_interface.data(), interfaceSize);
+        outFile.write(reinterpret_cast<const char*>(&p.channel), sizeof(p.channel));
+        outFile.write(reinterpret_cast<const char*>(&p.mode), sizeof(p.mode));
+
+        int packetSize = p.packet.size();
+        outFile.write(reinterpret_cast<const char*>(&packetSize), sizeof(packetSize));
+        outFile.write(reinterpret_cast<const char*>(p.packet.data()), packetSize);
+
+        //auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(
+        //    p.timestamp.time_since_epoch()).count();
+        //outFile.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
+    }
+
+    outFile.close();
+}
+
+
+void OutputManager::loadAndSimulateKeyPackets(const std::string& filename) {
+    std::ifstream inFile(filename, std::ios::binary);
+    if (!inFile.is_open()) {
+        std::cout << "[ERROR] Could not open file to load key packets: " << filename << std::endl;
+        return;
+    }
+
+    while (inFile.peek() != EOF) {
+        packet_queue_s p;
+
+        // Desserializar os dados
+        inFile.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
+        int interfaceSize;
+        inFile.read(reinterpret_cast<char*>(&interfaceSize), sizeof(interfaceSize));
+        p.serial_interface.resize(interfaceSize);
+        inFile.read(&p.serial_interface[0], interfaceSize);
+        inFile.read(reinterpret_cast<char*>(&p.channel), sizeof(p.channel));
+        inFile.read(reinterpret_cast<char*>(&p.mode), sizeof(p.mode));
+
+        int packetSize;
+        inFile.read(reinterpret_cast<char*>(&packetSize), sizeof(packetSize));
+        p.packet.resize(packetSize);
+        inFile.read(reinterpret_cast<char*>(p.packet.data()), packetSize);
+
+        //long long timestampSeconds;
+        //inFile.read(reinterpret_cast<char*>(&timestampSeconds), sizeof(timestampSeconds));
+        p.timestamp = std::chrono::system_clock::now();
+        std::lock_guard<std::mutex> lock(m_mutex);
+        handle_packet(p);
+    }
+    inFile.close();
+    key_packets.clear();
 }

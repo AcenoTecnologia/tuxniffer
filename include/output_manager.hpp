@@ -19,6 +19,7 @@
 
 #include "common.hpp"
 #include "pipe_packet_handler.hpp"
+#include "crypto_handler.hpp"
 
 /**
  * @class OutputManager
@@ -143,6 +144,16 @@ private:
     log_s log;
 
     /**
+     * @brief CryptoHandler instance.
+     */
+    CryptoHandler crypto_handler;
+
+    /**
+     * @brief Vector with the packets queue entrys with extracted keys.
+     */
+    std::vector<packet_queue_s> key_packets;
+
+    /**
      * @brief Vector of pointers to log files.
      */
     std::vector<FILE*> log_files;
@@ -165,4 +176,20 @@ private:
      * - May be useful to avoid memory issues in high packet flow situations (such as BLE).
      */
     int queue_max_size = 500000;
+
+    /**
+     * @brief Save packet_queue_s entrys with packets of extracted keys on a bin file 
+     * 
+     * @param filename Path for the bin file.
+     * @param packets Vector with the packet_queue_s entrys to be saved.
+     * @param append_mode Bool value indicating if packets will be written on append mode.
+     */
+    static void saveKeyPackets(const std::string& filename, const std::vector<packet_queue_s>& packets, bool append_mode);
+
+    /**
+     * @brief Load a bin file with packet_queue_s entrys of packets of extracted keys and simulate then.
+     * 
+     * @param filename Path for the bin file.
+     */
+    void loadAndSimulateKeyPackets(const std::string& filename);
 };

@@ -481,3 +481,15 @@ std::chrono::microseconds CommandAssembler::get_device_timestamp(std::vector<uin
 
     return std::chrono::microseconds(timestamp);
 }
+
+
+std::vector<uint8_t> CommandAssembler::get_payload(packet_queue_s packet)
+{
+
+    std::vector<uint8_t> payload;
+    // DATA N B
+    payload.insert(payload.end(), packet.packet.begin() + 12, packet.packet.end() - 4);
+
+
+    return payload;
+}

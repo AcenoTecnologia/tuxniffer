@@ -10,7 +10,7 @@ devices:                #required
 
 ## Optional log parameters. Values below are the default ones.
 # log:
-#   enabled: true             # Set false to not create a .pcap log file.
+#   enabled: false            # Set true to create a .pcap log file.
 #   path: ./                  # Path to save log file.
 #   base_name: aceno          # Log file name.
 #   splitDevicesLog: false    # Set true to create a separete log file for each device ([name]_[device_id].pcap).
@@ -25,9 +25,27 @@ devices:                #required
 #   splitDevicesPipe: false   # Set true to create a separete log file for each device ([name]_[device_id]).
 
 
+## Optional crypto parameters. Values below are the default ones.
+# crypto:
+#   key_extraction: false                     # Set true to tryy to decrypt packets and extract keys from them.
+#   save_keys: false                          # Set true to save extracted keys on a .txt file.
+#   keys_path: keys                           # Path to file where keys will be saved uf save_keys is true.
+#   save_packets: false                       # Set true to save decrypted transport key packets on a bin file.
+#   packets_path: transport_key_packets       # Path to file where transport key packets will be saved if save_packets is true. 
+                                              # If equal to simulation_path the packets will be written on append mode.
+#   simulation: false                         # Set true to read transport key packets from a bin file and add them on the log 
+                                              # and pipe. (It allows wireshark to decrypt packets automatically).
+#   simulation_path: transport_key_packets    # Path to bin file where transport key packets will be loaded and simulated if 
+                                              # simulation is true. 
+#   security_level: -1                        # Zigbee network level of security for decryption. Accepted values between 4 and 7.
+                                              # Levels 0 to 3 do not have encryption and 4 is not supported because the lack
+                                              # of authentication. If not informed levels 4 to 7 will be tried until a match. 
+
+
 ## Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
 # duration: -1
 
 
-## You can add more devices to the list, but for each one, you need to set valid values for all three required parameters (port, radio mode, and channel). 
+## You can add more devices to the list, but for each one, you need to set valid 
+## values for all three required parameters (port, radio mode, and channel). 
 ## For log and pipe options, you can only set the parameters you want to change.

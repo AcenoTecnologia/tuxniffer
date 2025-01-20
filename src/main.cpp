@@ -67,9 +67,10 @@ void print_help()
     std::cout << "  -n, --name\t\t\t\tPipe name / log file name (.pcap)" << std::endl;
     std::cout << "  -P, --path\t\t\t\tPath to save file" << std::endl;
     std::cout << "  -r, --reset_period\t\t\tLog file reset period (none | hourly | daily | weekly | monthly)" << std::endl;
-    //std::cout << "  -s, --log_split\t\t\tSplit log files by device" << std::endl;
+    std::cout << "Others (optional)" << std::endl;
+    std::cout << "  -k, --key_extraction\t\t\tTry to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt" << std::endl;
     std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds. Runs indefinitely when missing" << std::endl;
-    std::cout << "  -i, --input\t\t\t\tInput config file" << std::endl;
+    std::cout << "  -i, --input\t\t\t\tInput config file. When present Device Settings flags are no longer required" << std::endl;
     std::cout << "(See config.yaml or README.md for a -i example file)" << std::endl;
 }
 
@@ -160,7 +161,7 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     // Parse the log settings
     auto& yaml_log = yaml["log"];
     // Property                     Optional Field                          Read Value                                          Default Value 
-    log->file.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : true;
+    log->file.enabled =             yaml_log.contains("enabled")            ? yaml_log["enabled"].get_value<bool>()             : false;
     log->file.path =                yaml_log.contains("path")               ? yaml_log["path"].get_value<std::string>()         : "./";
     log->file.base_name =           yaml_log.contains("base_name")          ? yaml_log["base_name"].get_value<std::string>()    : "aceno";
     log->file.split_devices_log =   yaml_log.contains("splitDevicesLog")    ? yaml_log["splitDevicesLog"].get_value<bool>()     : false;
@@ -180,8 +181,28 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     log->pipe.split_devices_log =   yaml_log.contains("splitDevicesPipe")   ? yaml_log["splitDevicesPipe"].get_value<bool>()    : false;
     log->pipe.reset_period = "none";
 
+    yaml_log = yaml["crypto"];
+    // Property                     Optional Field                              Read Value                                                  Default Value 
+    log->crypto.key_extraction =    yaml_log.contains("key_extraction")         ? yaml_log["key_extraction"].get_value<bool>()              : false;
+    log->crypto.security_level =    yaml_log.contains("security_level")         ? yaml_log["security_level"].get_value<int>()               : -1;
+    log->crypto.save_keys =         yaml_log.contains("save_keys")              ? yaml_log["save_keys"].get_value<bool>()                   : false;
+    log->crypto.keys_path =         yaml_log.contains("keys_path")              ? yaml_log["keys_path"].get_value<std::string>()            : "keys";
+    log->crypto.save_packets =      yaml_log.contains("save_packets")           ? yaml_log["save_packets"].get_value<bool>()                : false;
+    log->crypto.packets_path =      yaml_log.contains("packets_path")           ? yaml_log["packets_path"].get_value<std::string>()         : "transport_key_packets";
+    log->crypto.simulation =        yaml_log.contains("simulation")             ? yaml_log["simulation"].get_value<bool>()                  : false;
+    log->crypto.simulation_path =   yaml_log.contains("simulation_path")        ? yaml_log["simulation_path"].get_value<std::string>()      : "transport_key_packets";
+
+    if (log->crypto.security_level > 7 || (log->crypto.security_level < 5 && log->crypto.security_level != -1))
+    {
+        log->crypto.security_level = -1;
+    }
+    if(log->crypto.simulation_path == log->crypto.packets_path)
+    {
+        log->crypto.append_mode = true; 
+    }
+
     // Takes the duration from the yaml file
-    *duration =                     yaml.contains("duration")               ? yaml["duration"].get_value<int>()                 : -1;
+    *duration =                     yaml.contains("duration")                   ? yaml["duration"].get_value<int>()                         : -1;
     std::cout << "[INFO] Duration: " << *duration;
     if (*duration == -1)
     {
@@ -220,8 +241,9 @@ int main(int argc, char* argv[])
 
     // If theres no input file to config the log, use default values
     log_s log = {
-        {true, "./", "aceno", false, "none"},
-        {true, DEFAULT_PIPE_PATH, "aceno", false, "none"}
+        {false, "./", "aceno", false, "none"},
+        {true, DEFAULT_PIPE_PATH, "aceno", false, "none"},
+        {false, -1, false, "keys", false, "", false, "", false}
     };
 
     for (size_t i = 1; i < args.size(); ++i) {
@@ -277,11 +299,11 @@ int main(int argc, char* argv[])
             D(std::cout << "[CONFIG] Time duration: " << args[i] << std::endl;)
             duration = std::stoi(args[i]);
         }
-        //else if (arg == "-s" || arg == "--log_split") {
-        //    D(std::cout << "[CONFIG] Split log files by device" << std::endl;)
-        //    log.file.split_devices_log = true;
-        //    log.pipe.split_devices_log = true;
-        //}
+        else if (arg == "-k" || arg == "--key_extraction") {
+            D(std::cout << "[CONFIG] Key extraction enabled" << std::endl;)
+            log.crypto.key_extraction = true;
+            log.crypto.save_keys = true;
+        }
         else if (arg == "-i" || arg == "--input") {
             ++i;
             D(std::cout << "[CONFIG] Input config file: " << args[i] << ". Ignoring other input commands." << std::endl;)

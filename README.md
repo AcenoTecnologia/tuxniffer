@@ -16,6 +16,7 @@
    * [CLI](#cli)
       + [Options:](#options)
       + [Usage Example:](#usage-example)
+   * [Crypto Options](#crypto-options)
    * [.YAML Config File](#yaml-config-file)
       + [Usage Example:](#usage-example-1)
 - [Radio Mode Table](#radio-mode-table)
@@ -123,8 +124,9 @@ Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 - `-n, --name`: Pipe name / log file name (.pcap).
 - `-P, --path`: Path to save log file.
 - `-r, --reset_period`: Log file reset period (none | hourly | daily | weekly | monthly).
+- `-k, --key_extraction` : Try to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt.
 - `-t, --time_duration`: Sniffing duration in seconds. Runs indefinitely when missing.
-- `-i, --input`: Input config file.
+- `-i, --input`: Input config file. When present Device Settings flags are no longer required.
 
 <!-- TOC --><a name="usage-example"></a>
 #### Usage Example:
@@ -133,13 +135,30 @@ Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 ./tuxniffer -p /dev/ttyUSB0 -m 20 -c 20 -n sniffer -r hourly
 ```
 
+<!-- TOC --><a name="crypto options"></a>
+### Crypto Options
+
+Tuxniffer has built-in zigbee decryption and offer the option to extract keys from zigbee transport key packets. Wireshark aready decrypt packets when possible, but only if the key is known. 
+
+Wireshark will know a key if it capture the handshake from a new device connection on the network or if the user explictly informs the key, which can be inconvenient for multiple sniffing sessions.
+
+Tuxniffer can save the keys and its respective transport key packets from a sniffing session for future use. 
+
+On the next uses, tuxniffer offer the option to simulate the previouly captured transport key packets, artificially adding them on the pipe, so wireshark can automatically identify the keys and decrypt the packets. 
+
+The flag `-k, --key_extraction` enables transport key packets decryption, but for more advanced option like save and simulate packets a input config file is necessary. 
+
+**Note: Initially tuxniffer try to decrypt with the default pre-configured zigbee trust center link key: `5a6967426565416c6c69616e63653039`. This key have to be added manually by the user on wireshar in `Edit > Preferences > Protocols > Zigbee`.**
+
+<!-- TOC --><a name="yaml-config-file"></a>
+### .YAML Config File
+
 Using this software through the CLI has some limitations:
 - You can only define one device;
 - You can only define a single base name for the .pcap file and the pipe;
 - You can't disable the .pcap or pipe log;
-
-<!-- TOC --><a name="yaml-config-file"></a>
-### .YAML Config File
+- You can't change the keys output file.
+- You can't save and simulate transport key packets.
 
 ```yaml
 ## List of devices that you want to sniff. At least one device is required.
@@ -151,13 +170,15 @@ devices:                #required
 #   radio_mode: 20      
 #   channel: 25         
 
+
 ## Optional log parameters. Values below are the default ones.
 # log:
-#   enabled: true             # Set false to not create a .pcap log file.
+#   enabled: false            # Set true to create a .pcap log file.
 #   path: ./                  # Path to save log file.
 #   base_name: aceno          # Log file name.
 #   splitDevicesLog: false    # Set true to create a separete log file for each device ([name]_[device_id].pcap).
 #   resetPeriod: none         # Log file reset period  (none | hourly | daily | weekly | monthly).
+
 
 ## Optional pipe parameters. Values below are the default ones.
 # pipe:
@@ -166,8 +187,31 @@ devices:                #required
 #   path: /tmp/               # Path to save pipe file. On Windows the path name is ignored because the only path is \\.\pipe\.
 #   splitDevicesPipe: false   # Set true to create a separete log file for each device ([name]_[device_id]).
 
+
+## Optional crypto parameters. Values below are the default ones.
+# crypto:
+#   key_extraction: false                     # Set true to tryy to decrypt packets and extract keys from them.
+#   save_keys: false                          # Set true to save extracted keys on a .txt file.
+#   keys_path: keys                           # Path to file where keys will be saved uf save_keys is true.
+#   save_packets: false                       # Set true to save decrypted transport key packets on a bin file.
+#   packets_path: transport_key_packets       # Path to file where transport key packets will be saved if save_packets is true. 
+                                              # If equal to simulation_path the packets will be written on append mode.
+#   simulation: false                         # Set true to read transport key packets from a bin file and add them on the log 
+                                              # and pipe. (It allows wireshark to decrypt packets automatically).
+#   simulation_path: transport_key_packets    # Path to bin file where transport key packets will be loaded and simulated if 
+                                              # simulation is true. 
+#   security_level: -1                        # Zigbee network level of security for decryption. Accepted values between 4 and 7.
+                                              # Levels 0 to 3 do not have encryption and 4 is not supported because the lack
+                                              # of authentication. If not informed levels 4 to 7 will be tried until a match. 
+
+
 ## Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).
 # duration: -1
+
+
+## You can add more devices to the list, but for each one, you need to set valid 
+## values for all three required parameters (port, radio mode, and channel). 
+## For log and pipe options, you can only set the parameters you want to change.
 ```
 
 You can add more devices to the list, but for each one, you need to set valid values for all three required parameters (port, radio mode, and channel). For log and pipe options, you can only set the parameters you want to change.
@@ -284,3 +328,4 @@ During development it was found some inconsistencies between the sniffer documen
 <!-- TOC --><a name="dependencies"></a>
 ## Dependencies
 [fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License - Used on ``main.cpp``).
+[OpenSSL - Toolkit for general-purpose cryptography and secure communication](https://github.com/openssl/openssl) (Apache License - Used on ``crypto.hpp``).

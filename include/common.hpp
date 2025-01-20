@@ -86,6 +86,19 @@ struct log_entry_s {
     std::string reset_period;                           ///< Log reset period.
 };
 
+struct crypto_entry_s {
+    bool key_extraction;                                ///< Indicates if key extraction is enabled.
+    int security_level;                                 ///< Indicates the network security level.
+    bool save_keys;                                     ///< Indicates if extracted keys will be saved.
+    std::string keys_path;                              ///< keys output file path.
+    bool save_packets;                                  ///< Indicates if extracted transport keys packets will be saved.
+    std::string packets_path;                           ///< transpot key output file path.
+    bool simulation;                                    ///< Indicates if transport key packets simulation is enabled.
+    std::string simulation_path;                        ///< transpot key input file path for simulation.
+    bool append_mode;                                   ///< Indicates if packets will be written in append mode on packets_path.
+    
+};
+
 /**
  * @struct log_s
  * @brief Represents the logging configuration.
@@ -94,6 +107,7 @@ struct log_entry_s {
 struct log_s {
     log_entry_s file;                                   ///< File log entry configuration.
     log_entry_s pipe;                                   ///< Pipe log entry configuration.
+    crypto_entry_s crypto;                              ///< Crypto log entry configuration.
 };
 
 char* custom_strerror(int n_error);
