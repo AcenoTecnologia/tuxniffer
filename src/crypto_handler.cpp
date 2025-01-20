@@ -433,12 +433,27 @@ bool CryptoHandler::extract_key(vector<uint8_t> payload)
         vector<uint8_t> key =  vector<uint8_t>(plaintext.begin() + 2, plaintext.begin() + 18);
         if (plaintext[1] == 0x01)
         {
-            //add compare keys
+            for (auto& auxKey : nwk_keys)
+            {
+                if (key == auxKey)
+                {
+                    cout << "[INFO] Key already know found." << endl;
+                    return false;
+                }
+            }
             nwk_keys.push_back(key);
             cout << "[INFO] New key added to known Network Keys: " << bytesToHexString(key) << "." << endl;
         }
         else if (plaintext[1] == 0x04)
         {
+            for (auto& auxKey : link_keys)
+            {
+                if (key == auxKey)
+                {
+                    cout << "[INFO] Key already know found." << endl;
+                    return false;
+                }
+            }
             link_keys.push_back(key);
             cout << "[INFO] New key added to known Link Keys: " << bytesToHexString(key) << "." << endl;
         }

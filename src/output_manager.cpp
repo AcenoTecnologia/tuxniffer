@@ -159,7 +159,7 @@ void OutputManager::run()
     is_running = true;
     if(log.crypto.simulation)
     {
-        loadAndSimulateKeyPackets(log.crypto.simulation_path);
+        loadAndSimulateKeyPackets();
     }
 
     while ((is_running || !packet_queue.empty()) && can_run)
@@ -196,19 +196,29 @@ void OutputManager::run()
     if(log.crypto.save_keys)
     {
         std::string filename = log.crypto.keys_path + ".txt";
-        std::ofstream keys_file(filename);
-        if (!keys_file.is_open()) {
-            std::cout << "[ERROR] Could not open file to save keys: " << filename << std::endl;
+        if (crypto_handler.link_keys.size() + crypto_handler.nwk_keys.size() == 1)
+        {
+            D(std::cout << "[INFO] No keys to be saved in: " << filename << ". File will not be created" << std::endl;)
         }
         else
         {
-            keys_file << "Link Keys:";
-            for(int i = 1; i < crypto_handler.link_keys.size(); i++){
-                keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.link_keys[i]);
+            std::ofstream keys_file(filename);
+            if (!keys_file.is_open()) {
+                std::cout << "[ERROR] Could not open file to save keys: " << filename << std::endl;
             }
-            keys_file << std::endl << "Network Keys:";
-            for(int i = 0; i < crypto_handler.nwk_keys.size(); i++){
-                keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.nwk_keys[i]);
+            if (crypto_handler.link_keys.size() > 1)
+            {
+                keys_file << "Link Keys:";
+                for(int i = 1; i < crypto_handler.link_keys.size(); i++){
+                    keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.link_keys[i]);
+                }
+            }
+            if (crypto_handler.nwk_keys.size() > 0)
+            {
+                keys_file << std::endl << "Network Keys:";
+                for(int i = 0; i < crypto_handler.nwk_keys.size(); i++){
+                    keys_file << std::endl << " - " << crypto_handler.bytesToHexString(crypto_handler.nwk_keys[i]);
+                }
             }
             keys_file.close();
         }
@@ -216,7 +226,7 @@ void OutputManager::run()
 
     if(log.crypto.save_packets)
     {
-        saveKeyPackets(log.crypto.packets_path, key_packets, log.crypto.append_mode);
+        saveKeyPackets();
     }
 
     D(std::cout << "[INFO] Output Manager stopped. Queues empty." << std::endl;)
@@ -372,22 +382,27 @@ void OutputManager::recreate_log_files()
 
 }
 
-void OutputManager::saveKeyPackets(const std::string& filename, const std::vector<packet_queue_s>& packets, bool append_mode) {//corrigir essa e a proxima
-    std::ofstream outFile;
-    if (append_mode)
+void OutputManager::saveKeyPackets() {//corrigir essa e a proxima
+    if (key_packets.size() == 0)
     {
-        outFile = ofstream(filename, std::ios::binary | std::ios::app);
+        D(std::cout << "[INFO] No transport key packets to be saved in: " << log.crypto.packets_path << ". File will not be created" << std::endl;)
+        return;
+    }
+    std::ofstream outFile;
+    if (log.crypto.append_mode)
+    {
+        outFile = ofstream(log.crypto.simulation_path, std::ios::binary | std::ios::app);
     }
     else
     {
-        outFile = ofstream(filename, std::ios::binary);
+        outFile = ofstream(log.crypto.simulation_path, std::ios::binary);
     }
     if (!outFile.is_open()) {
-        std::cout << "[ERROR] Could not open file to save key packets: " << filename << std::endl;
+        std::cout << "[ERROR] Could not open file to save key packets: " << log.crypto.simulation_path << std::endl;
         return;
     }
 
-    for (const auto& p : packets) {
+    for (const auto& p : key_packets) {
         // Serializar os dados
         outFile.write(reinterpret_cast<const char*>(&p.id), sizeof(p.id));
         int interfaceSize = p.serial_interface.size();
@@ -409,10 +424,10 @@ void OutputManager::saveKeyPackets(const std::string& filename, const std::vecto
 }
 
 
-void OutputManager::loadAndSimulateKeyPackets(const std::string& filename) {
-    std::ifstream inFile(filename, std::ios::binary);
+void OutputManager::loadAndSimulateKeyPackets() {
+    std::ifstream inFile(log.crypto.simulation_path, std::ios::binary);
     if (!inFile.is_open()) {
-        std::cout << "[ERROR] Could not open file to load key packets: " << filename << std::endl;
+        std::cout << "[ERROR] Could not open file to load key packets: " << log.crypto.simulation_path << std::endl;
         return;
     }
 
@@ -440,5 +455,12 @@ void OutputManager::loadAndSimulateKeyPackets(const std::string& filename) {
         handle_packet(p);
     }
     inFile.close();
-    key_packets.clear();
+    if (key_packets.size() == 0)
+    {
+        D(std::cout << "[INFO] No packets presents in: " << log.crypto.simulation_path << "." << std::endl;)
+    }
+    else
+    {
+        key_packets.clear();
+    } 
 }

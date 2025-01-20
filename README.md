@@ -117,6 +117,7 @@ Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 <!-- TOC --><a name="options"></a>
 #### Options:
 - `-h, --help`: Show help message and exit.
+- `-v, --version`: Show tuxniffer version and exit.
 - `-l, --list_radio`: Show radio mode table and exit.
 - `-p, --port`: Serial port to connect to *(required)*.
 - `-m, --radio_mode`: Radio mode to use *(required)*.
@@ -124,9 +125,10 @@ Usage: `.build/bin/tuxniffer -p <port> -m <mode> -c <channel> [options]`
 - `-n, --name`: Pipe name / log file name (.pcap).
 - `-P, --path`: Path to save log file.
 - `-r, --reset_period`: Log file reset period (none | hourly | daily | weekly | monthly).
-- `-k, --key_extraction` : Try to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt.
+- `-k, --key_extraction`: Try to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt.
 - `-t, --time_duration`: Sniffing duration in seconds. Runs indefinitely when missing.
 - `-i, --input`: Input config file. When present Device Settings flags are no longer required.
+- `-y, --yaml_example`: Show default .yaml config file and exit.
 
 <!-- TOC --><a name="usage-example"></a>
 #### Usage Example:

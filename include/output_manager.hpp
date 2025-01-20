@@ -184,12 +184,12 @@ private:
      * @param packets Vector with the packet_queue_s entrys to be saved.
      * @param append_mode Bool value indicating if packets will be written on append mode.
      */
-    static void saveKeyPackets(const std::string& filename, const std::vector<packet_queue_s>& packets, bool append_mode);
+    void saveKeyPackets();
 
     /**
      * @brief Load a bin file with packet_queue_s entrys of packets of extracted keys and simulate then.
      * 
      * @param filename Path for the bin file.
      */
-    void loadAndSimulateKeyPackets(const std::string& filename);
+    void loadAndSimulateKeyPackets();
 };
