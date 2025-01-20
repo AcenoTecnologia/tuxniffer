@@ -324,7 +324,6 @@ During development it was found some inconsistencies between the sniffer documen
 <!-- TOC --><a name="known-issues"></a>
 ## Known Issues
 
-- Currently, when a pipe connection is closed, all pipes stop and need to be reconnected. The workaround is to open again all pipes. When a pipe is closed it stops writing to it and stores new packets in the queue, so no data is lost.
 - Pipes cannot be interrupted and reconnected on Windows. Currently there is not workaround this issue. If a pipe disconnects on Windows it is necessary to start the program over.
 
 <!-- TOC --><a name="dependencies"></a>

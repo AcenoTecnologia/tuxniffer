@@ -33,7 +33,7 @@ bool PayloadHandler::parseAddressingInfo(uint8_t highByte, uint8_t lowByte, size
     bool panIdCompression = lowByte & 0b01000000;
 
     // Adiciona PAN ID de destino se Addressing Mode do destino for diferente de 0b00
-    if (destAddrMode != 0x00) {
+    if (destAddrMode != 0x00) { // pode ser preciso futuramente
         offset += 2; // PAN ID de destino
     }
 
@@ -54,6 +54,10 @@ bool PayloadHandler::parseAddressingInfo(uint8_t highByte, uint8_t lowByte, size
 
 bool PayloadHandler::getNwkLayer(std::vector<uint8_t> payload, std::vector<uint8_t>& nwkLayer){
     size_t offset = 0;
+    if (payload.size() < 9)
+    {
+        return false;
+    }
     if (!parseAddressingInfo(payload[1], payload[0], offset) || payload.size() <= offset + 3)
     {
         return false;

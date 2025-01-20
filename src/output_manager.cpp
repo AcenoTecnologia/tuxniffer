@@ -404,7 +404,7 @@ void OutputManager::saveKeyPackets() {//corrigir essa e a proxima
 
     for (const auto& p : key_packets) {
         // Serializar os dados
-        outFile.write(reinterpret_cast<const char*>(&p.id), sizeof(p.id));
+        //outFile.write(reinterpret_cast<const char*>(&p.id), sizeof(p.id));
         int interfaceSize = p.serial_interface.size();
         outFile.write(reinterpret_cast<const char*>(&interfaceSize), sizeof(interfaceSize));
         outFile.write(p.serial_interface.data(), interfaceSize);
@@ -435,7 +435,7 @@ void OutputManager::loadAndSimulateKeyPackets() {
         packet_queue_s p;
 
         // Desserializar os dados
-        inFile.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
+        //inFile.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
         int interfaceSize;
         inFile.read(reinterpret_cast<char*>(&interfaceSize), sizeof(interfaceSize));
         p.serial_interface.resize(interfaceSize);
@@ -452,7 +452,11 @@ void OutputManager::loadAndSimulateKeyPackets() {
         //inFile.read(reinterpret_cast<char*>(&timestampSeconds), sizeof(timestampSeconds));
         p.timestamp = std::chrono::system_clock::now();
         std::lock_guard<std::mutex> lock(m_mutex);
-        handle_packet(p);
+        for (int i = 0; i < log_pipes_handlers.size(); i++){
+            p.id = i;
+            handle_packet(p);
+        }
+        
     }
     inFile.close();
     if (key_packets.size() == 0)

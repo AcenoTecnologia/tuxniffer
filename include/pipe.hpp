@@ -74,8 +74,9 @@ public:
      * @brief Writes data to the pipe.
      * 
      * @param data A vector of bytes to be written to the pipe.
+     * @return true if the data was successfully written on the pipe, false otherwise.
      */
-    void write(const std::vector<uint8_t>& data);
+    bool write(const std::vector<uint8_t>& data);
 
     /**
      * @brief Closes the pipe.

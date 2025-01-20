@@ -143,12 +143,12 @@ bool Pipe::close()
 }
 
 // Writes data to the pipe.
-void Pipe::write(const std::vector<uint8_t>& data)
+bool Pipe::write(const std::vector<uint8_t>& data)
 {
     if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
     {
         D(std::cout << "[ERROR] Pipe: Invalid pipe descriptor." << std::endl;)
-        return;
+        return false;
     }
 
     #ifdef __linux__
@@ -158,6 +158,7 @@ void Pipe::write(const std::vector<uint8_t>& data)
             D(char* errmsg = custom_strerror(errno);
                 std::cout << "[ERROR] Linux Pipe: write failed" << errmsg << "." << std::endl;
                 free(errmsg);)
+            return false;
         }
     #endif
 
@@ -168,6 +169,8 @@ void Pipe::write(const std::vector<uint8_t>& data)
             D(char* errmsg = custom_strerror(errno);
                 std::cout << "[ERROR] Windows Pipe: WriteFile failed" << errmsg << "." << std::endl;
                 free(errmsg);)
+            return false;
         }
     #endif
+    return true;
 }

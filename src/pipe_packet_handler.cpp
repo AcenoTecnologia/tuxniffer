@@ -91,7 +91,7 @@ void PipePacketHandler::run()
         pipe.write(global_header);
 
         // Handle packets and check for interruptions
-        while (is_running && !pipe_interrupted)
+        while (is_running)
         {
             if (!packet_queue.empty())
             {
@@ -100,17 +100,22 @@ void PipePacketHandler::run()
                 packet_queue.pop();
                 auto start_time_micros = std::chrono::duration_cast<std::chrono::microseconds>(start_time.time_since_epoch());
                 std::vector<uint8_t> packet_header = PcapBuilder::get_packet_header(packet, start_time_micros);
-                pipe.write(packet_header);
+                if(!pipe.write(packet_header))
+                {
+                    break;
+                }
                 std::vector<uint8_t> packet_data = PcapBuilder::get_packet_data(packet);
-                pipe.write(packet_data);
+                if(!pipe.write(packet_data))
+                {
+                    break;
+                }
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-
         if (pipe_interrupted)
         {
-            D(std::cout << "[INFO] Pipe was interrupted. Reinitializing ALL pipe handlers." << std::endl;)
-            D(std::cout << "[INFO] Please reconnect all pipes. Pipe streaming will be put on hold." << std::endl;)
+            D(std::cout << "[INFO] Pipe was interrupted. Reinitializing pipe handler." << std::endl;)
+            D(std::cout << "[INFO] Please reconnect pipe. Pipe streaming will be put on hold." << std::endl;)
             pipe_interrupted = 0;
             pipe.close();
             continue; // Restart the loop to wait for a new connection
