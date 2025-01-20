@@ -44,7 +44,8 @@ bool Serial::connect()
     if (descriptor == INVALID_FILE_DESCRIPTOR) {
         
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error opening serial port: " << port << errmsg << "." << std::endl;)
+            std::cout << "[ERROR] Error opening serial port: " << port << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     // Set port configuration to 0 by default
@@ -52,7 +53,8 @@ bool Serial::connect()
     // Check if was able to get port configuration
     if (tcgetattr(descriptor, &config) != 0) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error getting serial port configuration" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error getting serial port configuration" << errmsg << "." << std::endl;
+            free(errmsg));
         return false;
     }
 
@@ -78,7 +80,8 @@ bool Serial::connect()
     if (tcsetattr(descriptor, TCSANOW, &config) != 0) {
         
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error setting serial port configuration" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error setting serial port configuration" << errmsg << "." << std::endl;
+            free(errmsg));
         return false;
     }
 
@@ -92,7 +95,9 @@ bool Serial::connect()
     // Check if port was opened
     if (descriptor == INVALID_FILE_DESCRIPTOR) {
         
-        D(std::cout << "[ERROR] Error opening serial port: " << port << custom_strerror(n_error) << "." << std::endl;)
+        D(char* errmsg = custom_strerror(errno);
+            std::cout << "[ERROR] Error opening serial port: " << port << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     // Set port configuration to 0 by default
@@ -100,7 +105,8 @@ bool Serial::connect()
     // Get current port configuration
     if (!GetCommState(descriptor, &config)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error getting serial port configuration" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error getting serial port configuration" << errmsg << "." << std::endl; 
+            free(errmsg);)
         return false;
     }
     // Set the baud rates to 3_000_000
@@ -112,7 +118,8 @@ bool Serial::connect()
     // Apply settings
     if (!SetCommState(descriptor, &config)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error setting serial port configuration" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error setting serial port configuration" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     #endif
@@ -127,7 +134,8 @@ bool Serial::disconnect()
     // Close serial port
     if (close(descriptor) != 0) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error closing serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error closing serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     #endif
@@ -137,7 +145,8 @@ bool Serial::disconnect()
     // Close serial port
     if (!CloseHandle(descriptor)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error closing serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error closing serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
 
@@ -168,7 +177,8 @@ bool Serial::writeData(std::vector<uint8_t> data)
     // sleep_time(data.size());
     if (bytes_written != static_cast<int>(data.size())) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error writing data to serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error writing data to serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     #endif
@@ -178,12 +188,14 @@ bool Serial::writeData(std::vector<uint8_t> data)
     DWORD bytes_written;
     if (!WriteFile(descriptor, data.data(), data.size(), &bytes_written, NULL)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error writing data to serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error writing data to serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     if (bytes_written != data.size()) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Incomplete data written to serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Incomplete data written to serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
 
@@ -200,7 +212,8 @@ bool Serial::writeData(uint8_t data)
     if (write(descriptor, &data, 1) != 1) {
         // sleep_time(1);
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error writing byte to serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error writing byte to serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     #endif
@@ -209,12 +222,14 @@ bool Serial::writeData(uint8_t data)
     DWORD bytes_written;
     if (!WriteFile(descriptor, &data, 1, &bytes_written, NULL)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error writing byte to serial port"<< errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error writing byte to serial port"<< errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     if (bytes_written != 1) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Incomplete byte written to serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Incomplete byte written to serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return false;
     }
     #endif
@@ -237,7 +252,8 @@ std::vector<uint8_t> Serial::readData()
     }
     if (bytes_read < 0) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error reading data from serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error reading data from serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return std::vector<uint8_t>();
     }
     #endif
@@ -246,7 +262,8 @@ std::vector<uint8_t> Serial::readData()
     DWORD bytes_read_dw;
     if (!ReadFile(descriptor, buffer, BUFFER_SIZE, &bytes_read_dw, NULL)) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Error reading data from serial port" << errmsg << "." << std::endl;);
+            std::cout << "[ERROR] Error reading data from serial port" << errmsg << "." << std::endl;
+            free(errmsg);)
         return std::vector<uint8_t>();
     }
     bytes_read = static_cast<int>(bytes_read_dw);
@@ -275,7 +292,8 @@ int Serial::readByte(uint8_t* byte)
     DWORD bytes_read_dw;
     if (!ReadFile(descriptor, byte, 1, &bytes_read_dw, NULL)) {
         //D(char* errmsg = custom_strerror(errno);
-        //    std::cout << "[ERROR] Error reading byte from serial port" << errmsg << "." << std::endl;);
+        //    std::cout << "[ERROR] Error reading byte from serial port" << errmsg << "." << std::endl;
+        //    free(errmsg);)
         return -1;
     }
     if (bytes_read_dw == 1) {

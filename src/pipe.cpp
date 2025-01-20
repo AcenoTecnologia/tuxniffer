@@ -47,7 +47,8 @@ bool Pipe::create(const std::string& pipePath)
         if (response == -1)
         {
             D(char* errmsg = custom_strerror(errno);
-                std::cout << "[ERROR] Linux Pipe: mkfifo creation failed" << errmsg << "." << std::endl;)
+                std::cout << "[ERROR] Linux Pipe: mkfifo creation failed" << errmsg << "." << std::endl;
+                free(errmsg);)
             return false;
         }
     #endif
@@ -68,7 +69,7 @@ bool Pipe::open(const std::string& pipePath)
         pipeWrite = ::open(pipePath.c_str(), O_WRONLY | O_NONBLOCK);
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
-            //D(char* errmsg = custom_strerror(errno); std::cout << "[ERROR] Linux Pipe: open failed" << errmsg << "." << std::endl;)
+            //D(char* errmsg = custom_strerror(errno); std::cout << "[ERROR] Linux Pipe: open failed" << errmsg << "." << std::endl; free(errmsg);)
             return false;
         }
     #endif
@@ -87,7 +88,8 @@ bool Pipe::open(const std::string& pipePath)
         if (pipeWrite == INVALID_PIPE_DESCRIPTOR)
         {
             D(char* errmsg = custom_strerror(errno);
-                std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed" << errmsg << "." << std::endl;)
+                std::cout << "[ERROR] Windows Pipe: CreateNamedPipe failed" << errmsg << "." << std::endl;
+                free(errmsg);)
             return false;
         }
         OVERLAPPED overlapped = {};
@@ -108,7 +110,8 @@ bool Pipe::open(const std::string& pipePath)
                 if (waitResult != WAIT_OBJECT_0) {
                     if (waitResult != WAIT_TIMEOUT) {
                         D(char* errmsg = custom_strerror(errno);
-                            std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed" << errmsg << "." << std::endl;)
+                            std::cout << "[ERROR] Windows Pipe: ConnectNamedPipe failed" << errmsg << "." << std::endl;
+                            free(errmsg);)
                     }
                     CloseHandle(overlapped.hEvent);
                     CloseHandle(pipeWrite);
@@ -153,7 +156,8 @@ void Pipe::write(const std::vector<uint8_t>& data)
         if (result == -1)
         {
             D(char* errmsg = custom_strerror(errno);
-                std::cout << "[ERROR] Linux Pipe: write failed" << errmsg << "." << std::endl;)
+                std::cout << "[ERROR] Linux Pipe: write failed" << errmsg << "." << std::endl;
+                free(errmsg);)
         }
     #endif
 
@@ -162,7 +166,8 @@ void Pipe::write(const std::vector<uint8_t>& data)
         if (!WriteFile(pipeWrite, data.data(), data.size(), &bytesWritten, NULL))
         {
             D(char* errmsg = custom_strerror(errno);
-                std::cout << "[ERROR] Windows Pipe: WriteFile failed" << errmsg << "." << std::endl;)
+                std::cout << "[ERROR] Windows Pipe: WriteFile failed" << errmsg << "." << std::endl;
+                free(errmsg);)
         }
     #endif
 }

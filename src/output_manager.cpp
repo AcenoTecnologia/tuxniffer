@@ -75,7 +75,8 @@ bool OutputManager::configure_files()
                 if (!log_file)
                 {
                     D(char* errmsg = custom_strerror(errno);
-                        std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;)
+                        std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;
+                        free(errmsg);)
                     return false;
                 }
                 // Write global header
@@ -92,7 +93,8 @@ bool OutputManager::configure_files()
             if (!log_file)
             {
                 D(char* errmsg = custom_strerror(errno);
-                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;)
+                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << ". Packets will be discarded." << std::endl;
+                    free(errmsg);)
                 return false;
             }
             // Write global header
@@ -337,7 +339,8 @@ void OutputManager::recreate_log_files()
             FILE* new_log_file = fopen(filename.c_str(), "wb");
             if (!new_log_file) {
                 D(char* errmsg = custom_strerror(errno);
-                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;)
+                    std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;
+                    free(errmsg);)
                 return;
             }
             // Write global header
@@ -356,7 +359,8 @@ void OutputManager::recreate_log_files()
     FILE* new_log_file = fopen(filename.c_str(), "wb");
     if (!new_log_file) {
         D(char* errmsg = custom_strerror(errno);
-            std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;)
+            std::cout << "[ERROR] Could not open log file: " << filename << errmsg << "." << std::endl;
+            free(errmsg);)
         return;
     }
     // Write global header
