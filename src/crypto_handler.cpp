@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.0
+// Version:  1.1
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.

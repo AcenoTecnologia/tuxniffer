@@ -2,10 +2,10 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.0
-// Date:     2024
+// Version:  1.1
+// Date:     2025
 //
-// Copyright (C) 2002-2024 Aceno Tecnologia.
+// Copyright (C) 2002-2025 Aceno Tecnologia.
 // All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,25 +53,31 @@ SOFTWARE.
     #define DEFAULT_PIPE_PATH "\\\\.\\pipe\\"
 #endif
 
+void print_version() {
+    std::cout << "Tuxniffer version: 1.1." << std::endl;
+}
+
 void print_help()
 {
     std::cout << "Usage: ./tuxniffer -p <port> -m <mode> -c <channel> [options]" << std::endl;
     std::cout << "Options:" << std::endl;
-    std::cout << "  -h, --help\t\t\t\tShow this help message and exit" << std::endl;
-    std::cout << "  -l, --list_modes\t\t\tShow radio mode table and exit" << std::endl;
+    std::cout << "  -h, --help          \tShow this help message and exit." << std::endl;
+    std::cout << "  -l, --list_modes    \tShow radio mode table and exit." << std::endl;
+    std::cout << "  -v, --version       \tShow tuxniffer version and exit." << std::endl;
     std::cout << "Device Settings (required)" << std::endl;
-    std::cout << "  -p, --port\t\t\t\tSerial port to connect to" << std::endl;
-    std::cout << "  -m, --radio_mode\t\t\tRadio mode to use" << std::endl;
-    std::cout << "  -c, --channel\t\t\tChannel to use" << std::endl;
+    std::cout << "  -p, --port          \tSerial port to connect to." << std::endl;
+    std::cout << "  -m, --radio_mode    \tRadio mode to use." << std::endl;
+    std::cout << "  -c, --channel       \tChannel to use." << std::endl;
     std::cout << "Log Settings (optional)" << std::endl;
-    std::cout << "  -n, --name\t\t\t\tPipe name / log file name (.pcap)" << std::endl;
-    std::cout << "  -P, --path\t\t\t\tPath to save file" << std::endl;
-    std::cout << "  -r, --reset_period\t\t\tLog file reset period (none | hourly | daily | weekly | monthly)" << std::endl;
+    std::cout << "  -n, --name          \tPipe name / log file name (.pcap)." << std::endl;
+    std::cout << "  -P, --path          \tPath to save file." << std::endl;
+    std::cout << "  -r, --reset_period  \tLog file reset period (none | hourly | daily | weekly | monthly)." << std::endl;
     std::cout << "Others (optional)" << std::endl;
-    std::cout << "  -k, --key_extraction\t\t\tTry to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt" << std::endl;
-    std::cout << "  -t, --time_duration\t\t\tSniffing duration in seconds. Runs indefinitely when missing" << std::endl;
-    std::cout << "  -i, --input\t\t\t\tInput config file. When present Device Settings flags are no longer required" << std::endl;
-    std::cout << "(See config.yaml or README.md for a -i example file)" << std::endl;
+    std::cout << "  -k, --key_extraction\tTry to decrypt zigbee packets and print keys extracted from transport packets. Save extracted keys in keys.txt." << std::endl;
+    std::cout << "  -t, --time_duration \tSniffing duration in seconds. Runs indefinitely when missing." << std::endl;
+    std::cout << "  -i, --input         \tInput config file. When present Device Settings flags are no longer required." << std::endl;
+    std::cout << "  -y, --yaml_example  \tShow default .yaml config file and exit." << std::endl;
+    std::cout << "(See README.md for more information)." << std::endl;
 }
 
 void print_radio_mode_table()
@@ -104,6 +110,56 @@ void print_radio_mode_table()
     std::cout << "| BLE - BLE 1 Mbps - 2402 MHz                                    | 37,38,39           | 21         |" << std::endl;
     std::cout << "|--------------------------------------------------------------------------------------------------|" << std::endl;
 }
+
+void print_default_config_file() {
+    std::cout << "## List of devices that you want to sniff. At least one device is required.\n"
+              << "devices:                #required\n"
+              << "  - port: /dev/ttyACM0  #required\n"
+              << "    radio_mode: 20      #required\n"
+              << "    channel: 20         #required\n"
+              << "# - port: /dev/ttyACM2\n"
+              << "#   radio_mode: 20\n"
+              << "#   channel: 25\n"
+              << "\n"
+              << "## Optional log parameters. Values below are the default ones.\n"
+              << "# log:\n"
+              << "#   enabled: false            # Set true to create a .pcap log file.\n"
+              << "#   path: ./                  # Path to save log file.\n"
+              << "#   base_name: aceno          # Log file name.\n"
+              << "#   splitDevicesLog: false    # Set true to create a separate log file for each device ([name]_[device_id].pcap).\n"
+              << "#   resetPeriod: none         # Log file reset period  (none | hourly | daily | weekly | monthly).\n"
+              << "\n"
+              << "## Optional pipe parameters. Values below are the default ones.\n"
+              << "# pipe:\n"
+              << "#   enabled: true             # Set false to not create a pipe.\n"
+              << "#   name: aceno               # Pipe file name.\n"
+              << "#   path: /tmp/               # Path to save pipe file. On Windows the path name is ignored because the only path is \\\\.\\pipe\\.\n"
+              << "#   splitDevicesPipe: false   # Set true to create a separate log file for each device ([name]_[device_id]).\n"
+              << "\n"
+              << "## Optional crypto parameters. Values below are the default ones.\n"
+              << "# crypto:\n"
+              << "#   key_extraction: false                     # Set true to try to decrypt packets and extract keys from them.\n"
+              << "#   save_keys: false                          # Set true to save extracted keys on a .txt file.\n"
+              << "#   keys_path: keys                           # Path to file where keys will be saved if save_keys is true.\n"
+              << "#   save_packets: false                       # Set true to save decrypted transport key packets on a bin file.\n"
+              << "#   packets_path: transport_key_packets       # Path to file where transport key packets will be saved if save_packets is true.\n"
+              << "#                                             # If equal to simulation_path the packets will be written on append mode.\n"
+              << "#   simulation: false                         # Set true to read transport key packets from a bin file and add them on the log\n"
+              << "#                                             # and pipe. (It allows Wireshark to decrypt packets automatically).\n"
+              << "#   simulation_path: transport_key_packets    # Path to bin file where transport key packets will be loaded and simulated if\n"
+              << "#                                             # simulation is true.\n"
+              << "#   security_level: -1                        # Zigbee network level of security for decryption. Accepted values between 4 and 7.\n"
+              << "#                                             # Levels 0 to 3 do not have encryption and 4 is not supported because the lack\n"
+              << "#                                             # of authentication. If not informed levels 4 to 7 will be tried until a match.\n"
+              << "\n"
+              << "## Optional time in seconds to execute the sniffer. When -1 runs indefinitely (default).\n"
+              << "# duration: -1\n"
+              << "\n"
+              << "## You can add more devices to the list, but for each one, you need to set valid\n"
+              << "## values for all three required parameters (port, radio mode, and channel).\n"
+              << "## For log and pipe options, you can only set the parameters you want to change.\n";
+}
+
 
 std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* log, int* duration)
 {
@@ -256,6 +312,14 @@ int main(int argc, char* argv[])
             print_radio_mode_table();
             return 0;
         }
+        else if (arg == "-v" || arg == "--version") {
+            print_version();
+            return 0;
+        }
+        else if (arg == "-y" || arg == "--yaml_example") {
+            print_default_config_file();
+            return 0;
+        }
         else if (arg == "-p" || arg == "--port") {
             ++i;
             D(std::cout << "[CONFIG] Serial port: " << args[i] << std::endl;)
@@ -314,6 +378,8 @@ int main(int argc, char* argv[])
 
     // If useInput is false and there are no port, radio_mode or channel, print help and exit
     if (!useInput && (device.port.empty() || !device.radio_mode || !device.channel)) {
+        print_version();
+        cout << std::endl;
         print_help();
         return 0;
     }
