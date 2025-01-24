@@ -31,7 +31,7 @@ public:
     std::vector<std::thread> threads;           ///< Threads for handling device operations.
     std::thread output_manager_thread;          ///< Thread for handling the output manager.
     std::vector<Device> devices;                ///< List of devices used for packet sniffing.
-
+    std::mutex coutMutex;
     /**
      * @brief Constructs a new Sniffer object.
      * 

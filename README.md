@@ -29,6 +29,10 @@
 - [Texas Instruments Documentation Issues](#texas-instruments-documentation-issues)
 - [Known Issues](#known-issues)
 - [Dependencies](#dependencies)
+   * [Install OpenSSL](#install-openssl)
+      + [Linux:](#linux)
+      + [Windows:](#windows) 
+     
 
 <!-- TOC end -->
 
@@ -54,6 +58,8 @@ This software is capable of:
 
 <!-- TOC --><a name="build-instructions"></a>
 ## Build Instructions
+
+Before building, make sure OpenSSL is instaled (see [Install OpenSSL](#install-openssl)).
 
 <!-- TOC --><a name="folder-creation"></a>
 ### Folder Creation
@@ -105,6 +111,7 @@ The binary file is now stored in `build/bin`.
 
 While this project is not meant to be used on Windows, it is compatible with Visual Studio C++ Compiler (MSVC). To import this repository as a VS project: ``Open VS -> Open Local Folder -> Select the tuxniffer folder -> Right click on the CMakeLists.txt -> Delete Cache and Reconfigure -> Select x64 release or debug option at tob bar -> Select tuxniffer.exe -> Execute the build/ compilation step by clicking the green arrow``. If you find any errors during this step check [Microsoft official instructions to import CMake projects into Visual Studio](https://learn.microsoft.com/cpp/build/cmake-projects-in-visual-studio?view=msvc-170).
 
+**Note: For [vcpkg](https://github.com/microsoft/vcpkg)**
 
 <!-- TOC --><a name="usage"></a>
 ## Usage
@@ -325,9 +332,38 @@ During development it was found some inconsistencies between the sniffer documen
 ## Known Issues
 
 - Pipes cannot be interrupted and reconnected on Windows. Currently there is not workaround this issue. If a pipe disconnects on Windows it is necessary to start the program over.
-
 <!-- TOC --><a name="dependencies"></a>
 ## Dependencies
 - [fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License - Used on ``main.cpp``).
-
 - [OpenSSL - Toolkit for general-purpose cryptography and secure communication](https://github.com/openssl/openssl) (Apache License - Used on ``crypto.hpp``).
+
+<!-- TOC --><a name="install-openssl"></a>
+### Install OpenSSL
+
+
+<!-- TOC --><a name="linux"></a>
+#### Linux
+
+```bash
+sudo apt-get install libssl-dev
+```
+
+<!-- TOC --><a name="windows"></a>
+#### Windows:
+
+Installing OpenSSL with [vcpkg](https://github.com/microsoft/vcpkg):
+
+Download and install vcpkg run:
+
+```bash
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat
+.\vcpkg integrate install
+```
+
+Then, to install OpenSSL, run the following instruction on the same directory:
+
+```bash
+.\vcpkg install openssl:x64-windows
+```

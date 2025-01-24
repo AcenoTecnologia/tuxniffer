@@ -185,7 +185,8 @@ void Device::stream()
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
+        D( std::lock_guard<std::mutex> lock(coutMutex);
+        std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );

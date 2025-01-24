@@ -16,3 +16,5 @@ out/
 CMakePresets.json
 Thumbs.db:encryptable
 Thumbs.db
+#vcpkg
+vcpkg*

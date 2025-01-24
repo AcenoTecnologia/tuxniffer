@@ -398,6 +398,7 @@ bool CommandAssembler::verify_response(std::vector<uint8_t> response)
     switch(response[2])
     {
         case 0x80:
+//            std::cout << "response[5] " << std::hex << static_cast<int>(response[5]) << std::endl;
             return response[5] == 0x00;
         case 0xC0:
             return true;

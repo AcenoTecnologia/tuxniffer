@@ -24,7 +24,7 @@
 char* custom_strerror(int n_error){
     
     char *res;
-    #ifdef __WIN32
+    #ifdef _WIN32
         if (n_error == 0)
         {
             n_error = GetLastError();
@@ -47,9 +47,10 @@ char* custom_strerror(int n_error){
                 0,
                 nullptr
             );
-            sprintf(buf, " - %s", messageBuffer);
+            res = (char*)malloc(sizeof(char)*(strlen(messageBuffer) + 4));
+            sprintf(res, " - %s", messageBuffer);
             LocalFree(messageBuffer); // Libera o buffer alocado pelo FormatMessage
-            return buf;
+            return res;
         } 
         else
         {

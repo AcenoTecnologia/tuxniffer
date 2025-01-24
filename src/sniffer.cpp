@@ -65,6 +65,7 @@ void Sniffer::initAllDevices()
         if(!device.is_ready) continue;
         // Pass the output manager reference to the device
         device.output_manager = &output_manager;
+        device.coutMutex = coutMutex;
         threads.push_back(std::thread([&device]() {
             device.init();
         }));

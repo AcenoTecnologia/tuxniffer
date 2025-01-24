@@ -51,6 +51,7 @@ public:
     std::string port;              ///< Port name for the device.
     uint8_t radio_mode;            ///< Radio mode setting for the device.
     uint8_t channel;               ///< Channel setting for the device.
+    std::mutex &coutMutex;
 
     /**
      * @brief Constructor for the Device class.
