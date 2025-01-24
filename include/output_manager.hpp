@@ -98,8 +98,9 @@ public:
      * - Check if the log files need to be recreated according to the reset period.
      * 
      * @param packet Packet to be handled.
+     * @param isTransportKey Bool flag indicating if the packet is a transport key packet
      */
-    void handle_packet(packet_queue_s packet);
+    void handle_packet(packet_queue_s packet, bool isTransportKey = false);
 
     /**
      * @brief Check if the log files needs to be recreated.

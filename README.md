@@ -328,5 +328,6 @@ During development it was found some inconsistencies between the sniffer documen
 
 <!-- TOC --><a name="dependencies"></a>
 ## Dependencies
-[fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License - Used on ``main.cpp``).
-[OpenSSL - Toolkit for general-purpose cryptography and secure communication](https://github.com/openssl/openssl) (Apache License - Used on ``crypto.hpp``).
+- [fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License - Used on ``main.cpp``).
+
+- [OpenSSL - Toolkit for general-purpose cryptography and secure communication](https://github.com/openssl/openssl) (Apache License - Used on ``crypto.hpp``).

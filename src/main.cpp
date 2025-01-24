@@ -54,7 +54,7 @@ SOFTWARE.
 #endif
 
 void print_version() {
-    std::cout << "Tuxniffer version: 1.1." << std::endl;
+    std::cout << "Tuxniffer version: 1.1.1." << std::endl;
 }
 
 void print_help()
@@ -252,10 +252,6 @@ std::vector<device_s> parse_input_file_yaml(const std::string& filePath, log_s* 
     {
         log->crypto.security_level = -1;
     }
-    if(log->crypto.simulation_path == log->crypto.packets_path)
-    {
-        log->crypto.append_mode = true; 
-    }
 
     // Takes the duration from the yaml file
     *duration =                     yaml.contains("duration")                   ? yaml["duration"].get_value<int>()                         : -1;
@@ -299,7 +295,7 @@ int main(int argc, char* argv[])
     log_s log = {
         {false, "./", "aceno", false, "none"},
         {true, DEFAULT_PIPE_PATH, "aceno", false, "none"},
-        {false, -1, false, "keys", false, "", false, "", false}
+        {false, -1, false, "keys", false, "", false, ""}
     };
 
     for (size_t i = 1; i < args.size(); ++i) {

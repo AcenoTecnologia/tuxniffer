@@ -182,6 +182,20 @@ void OutputManager::run()
         fclose(log_file);
     }
 
+    if(log.crypto.save_packets)
+    {
+        if (log.pipe.enabled)
+        {
+            for (int i = 0; i < log_pipes_handlers.size(); i++)
+            {
+                PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
+                key_packets.insert(key_packets.end(), pipe_packet_handler->key_packets.begin(), pipe_packet_handler->key_packets.end());
+                
+            }
+        }
+        saveKeyPackets();
+    }
+
     // The PipePacketHandler to is_running = false
     for (auto pipe_packet_handler : log_pipes_handlers)
     {
@@ -224,15 +238,10 @@ void OutputManager::run()
         }
     }
 
-    if(log.crypto.save_packets)
-    {
-        saveKeyPackets();
-    }
-
     D(std::cout << "[INFO] Output Manager stopped. Queues empty." << std::endl;)
 }
 
-void OutputManager::handle_packet(packet_queue_s packet)
+void OutputManager::handle_packet(packet_queue_s packet, bool isTransportKey)
 {   
     // Check if it is the first packet
     // If so, defines the start-time to system time - first packet timestamp
@@ -256,7 +265,7 @@ void OutputManager::handle_packet(packet_queue_s packet)
     std::vector<uint8_t> payload = command_assembler.get_payload(packet);
     if (crypto_handler.extract_key(payload))
     {
-        key_packets.push_back(packet);
+        isTransportKey = true;
     }
     if(log.file.enabled)
     {
@@ -288,14 +297,18 @@ void OutputManager::handle_packet(packet_queue_s packet)
         if(log.pipe.split_devices_log)
         {
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[packet.id].get();
-            pipe_packet_handler->add_packet(packet);
+            pipe_packet_handler->add_packet(packet, isTransportKey);
         }
         else
         {
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
-            pipe_packet_handler->add_packet(packet);
+            pipe_packet_handler->add_packet(packet, isTransportKey);
         }
-    }   
+    }
+    else
+    {
+        key_packets.push_back(packet);
+    }
 }
 
 void OutputManager::recreate_log_files()
@@ -382,23 +395,16 @@ void OutputManager::recreate_log_files()
 
 }
 
-void OutputManager::saveKeyPackets() {//corrigir essa e a proxima
+void OutputManager::saveKeyPackets() {
     if (key_packets.size() == 0)
     {
         D(std::cout << "[INFO] No transport key packets to be saved in: " << log.crypto.packets_path << ". File will not be created" << std::endl;)
         return;
     }
     std::ofstream outFile;
-    if (log.crypto.append_mode)
-    {
-        outFile = ofstream(log.crypto.simulation_path, std::ios::binary | std::ios::app);
-    }
-    else
-    {
-        outFile = ofstream(log.crypto.simulation_path, std::ios::binary);
-    }
+    outFile = ofstream(log.crypto.packets_path, std::ios::binary);
     if (!outFile.is_open()) {
-        std::cout << "[ERROR] Could not open file to save key packets: " << log.crypto.simulation_path << std::endl;
+        std::cout << "[ERROR] Could not open file to save key packets: " << log.crypto.packets_path << std::endl;
         return;
     }
 
@@ -414,7 +420,6 @@ void OutputManager::saveKeyPackets() {//corrigir essa e a proxima
         int packetSize = p.packet.size();
         outFile.write(reinterpret_cast<const char*>(&packetSize), sizeof(packetSize));
         outFile.write(reinterpret_cast<const char*>(p.packet.data()), packetSize);
-
         //auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(
         //    p.timestamp.time_since_epoch()).count();
         //outFile.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
@@ -430,41 +435,47 @@ void OutputManager::loadAndSimulateKeyPackets() {
         std::cout << "[ERROR] Could not open file to load key packets: " << log.crypto.simulation_path << std::endl;
         return;
     }
+    
+    if (inFile.peek() == EOF)
+    {
+        D(std::cout << "[INFO] File " << log.crypto.simulation_path << "is empty. No packets to simulate." << std::endl;)
+        return;
+    }
+    try
+    {
+        while (inFile.peek() != EOF) 
+        {
+            packet_queue_s p;
 
-    while (inFile.peek() != EOF) {
-        packet_queue_s p;
+            // Desserializar os dados
+            //inFile.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
+            int interfaceSize;
+            inFile.read(reinterpret_cast<char*>(&interfaceSize), sizeof(interfaceSize));
+            p.serial_interface.resize(interfaceSize);
+            inFile.read(&p.serial_interface[0], interfaceSize);
+            inFile.read(reinterpret_cast<char*>(&p.channel), sizeof(p.channel));
+            inFile.read(reinterpret_cast<char*>(&p.mode), sizeof(p.mode));
 
-        // Desserializar os dados
-        //inFile.read(reinterpret_cast<char*>(&p.id), sizeof(p.id));
-        int interfaceSize;
-        inFile.read(reinterpret_cast<char*>(&interfaceSize), sizeof(interfaceSize));
-        p.serial_interface.resize(interfaceSize);
-        inFile.read(&p.serial_interface[0], interfaceSize);
-        inFile.read(reinterpret_cast<char*>(&p.channel), sizeof(p.channel));
-        inFile.read(reinterpret_cast<char*>(&p.mode), sizeof(p.mode));
+            int packetSize;
+            inFile.read(reinterpret_cast<char*>(&packetSize), sizeof(packetSize));
+            p.packet.resize(packetSize);
+            inFile.read(reinterpret_cast<char*>(p.packet.data()), packetSize);
 
-        int packetSize;
-        inFile.read(reinterpret_cast<char*>(&packetSize), sizeof(packetSize));
-        p.packet.resize(packetSize);
-        inFile.read(reinterpret_cast<char*>(p.packet.data()), packetSize);
-
-        //long long timestampSeconds;
-        //inFile.read(reinterpret_cast<char*>(&timestampSeconds), sizeof(timestampSeconds));
-        p.timestamp = std::chrono::system_clock::now();
-        std::lock_guard<std::mutex> lock(m_mutex);
-        for (int i = 0; i < log_pipes_handlers.size(); i++){
-            p.id = i;
-            handle_packet(p);
+            //long long timestampSeconds;
+            //inFile.read(reinterpret_cast<char*>(&timestampSeconds), sizeof(timestampSeconds));
+            p.timestamp = std::chrono::system_clock::now();
+            std::lock_guard<std::mutex> lock(m_mutex);
+            for (int i = 0; i < log_pipes_handlers.size(); i++){
+                p.id = i;
+                handle_packet(p, true);
+            }
+            
         }
+        inFile.close();
+    }
+    catch(const std::exception& e)
+    {
+        D(std::cout << "[Error] No packets to read in: " << log.crypto.simulation_path << "." << std::endl;)
+    }
         
-    }
-    inFile.close();
-    if (key_packets.size() == 0)
-    {
-        D(std::cout << "[INFO] No packets presents in: " << log.crypto.simulation_path << "." << std::endl;)
-    }
-    else
-    {
-        key_packets.clear();
-    } 
 }

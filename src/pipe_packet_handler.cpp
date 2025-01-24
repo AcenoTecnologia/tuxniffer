@@ -37,7 +37,7 @@ PipePacketHandler::PipePacketHandler(std::string pipe_path, std::string base, st
     this->start_time = start_time;
 }
 
-void PipePacketHandler::add_packet(packet_queue_s packet)
+void PipePacketHandler::add_packet(packet_queue_s packet, bool isTransportKey)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
@@ -50,6 +50,10 @@ void PipePacketHandler::add_packet(packet_queue_s packet)
 
     // Add the new packet to the queue
     packet_queue.push(packet);
+    if (isTransportKey)
+    {
+        key_packets.push_back(packet);
+    }
 }
 
 void PipePacketHandler::run()
@@ -118,6 +122,10 @@ void PipePacketHandler::run()
             D(std::cout << "[INFO] Please reconnect pipe. Pipe streaming will be put on hold." << std::endl;)
             pipe_interrupted = 0;
             pipe.close();
+            for (auto packet : key_packets)
+            {
+                add_packet(packet);
+            }
             continue; // Restart the loop to wait for a new connection
         }
 

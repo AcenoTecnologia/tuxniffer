@@ -29,6 +29,7 @@ class PipePacketHandler
 public:
     bool is_running = false; ///< Flag indicating if the packet handler is running.
     std::queue<packet_queue_s> packet_queue; ///< Queue for storing incoming packets.
+    std::vector<packet_queue_s> key_packets; ///< Vector for storing transport key packets.
     std::chrono::time_point<std::chrono::system_clock> start_time; ///< Start time of packet handling.
     
     /**
@@ -45,8 +46,9 @@ public:
      * @brief Adds a packet to the packet queue.
      * 
      * @param packet The packet to add.
+     * @param isTransportKey Bool flag indicating if the packet is a transport key packet
      */
-    void add_packet(packet_queue_s packet);
+    void add_packet(packet_queue_s packet, bool isTransportKey = false);
 
     /**
      * @brief Starts the packet handling process.

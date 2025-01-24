@@ -95,7 +95,6 @@ struct crypto_entry_s {
     std::string packets_path;                           ///< transpot key output file path.
     bool simulation;                                    ///< Indicates if transport key packets simulation is enabled.
     std::string simulation_path;                        ///< transpot key input file path for simulation.
-    bool append_mode;                                   ///< Indicates if packets will be written in append mode on packets_path.
     
 };
 
