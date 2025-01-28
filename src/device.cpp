@@ -79,12 +79,13 @@ bool Device::start()
     std::vector<uint8_t> response;
     // Send start command
     serial.flush();
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Assembling start command." << std::endl;});
     std::vector<uint8_t> start_command = cmd.assemble_start();
     serial.writeData(start_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
+    std::lock_guard<std::mutex> lock(coutMutex);
     std::cout << "[INFO] Device [" << id << "] started." << std::endl;
-
     state = State::STARTED;
 
     return true;
@@ -95,11 +96,12 @@ bool Device::stop()
     std::vector<uint8_t> response;
     // Send stop command
     serial.flush();
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Assembling stop command." << std::endl;});
     std::vector<uint8_t> stop_command = cmd.assemble_stop();
     serial.writeData(stop_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] stopped." << std::endl;)
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Device [" << id << "] stopped." << std::endl;})
 
     state = State::STOPPED;
 
@@ -111,26 +113,28 @@ bool Device::ping(uint8_t* fwID)
 
     if(state != State::STOPPED)
     {
-        D(std::cout << "[ERROR] Device [" << id << "] must be stopped before pinging." << std::endl;)
+        D(std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Device [" << id << "] must be stopped before pinging." << std::endl;)
         return false;
     }
 
     std::vector<uint8_t> response;
     // Send ping command
     serial.flush();
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Assembling ping command." << std::endl;});
     std::vector<uint8_t> ping_command = cmd.assemble_ping();
     serial.writeData(ping_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
     // TODO: Update board info
-    D(std::cout << "[INFO] Device [" << id << "] pinged." << std::endl;)
     std::vector<uint8_t> board_info = cmd.disassemble_ping(response);
-    D(std::cout << "[INFO] Device [" << id << "] board info: " << std::endl;)
-    D(std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << "." << std::endl;)
-    D(std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << "." << std::endl;)
-    D(std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << "." << std::endl;)
     *fwID = board_info[3];
-    D(std::cout << "[INFO] ---FW Rev: " << std::hex << (int)board_info[4] << "." << (int)board_info[5] << std::endl;)
+    D(std::lock_guard<std::mutex> lock(coutMutex); 
+    std::cout << "[INFO] Device [" << id << "] pinged." << std::endl;
+    std::cout << "[INFO] Device [" << id << "] board info: " << std::endl;
+    std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << "." << std::endl;
+    std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << "." << std::endl;
+    std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << "." << std::endl;
+    std::cout << "[INFO] ---FW Rev: " << std::hex << (int)board_info[4] << "." << (int)board_info[5] << std::endl;)
     return true;
 }
 
@@ -139,34 +143,37 @@ bool Device::configure(uint8_t fwID)
 
     if(state != State::STOPPED)
     {
-        D(std::cout << "[ERROR] Device [" << id << "] must be stopped before configuring." << std::endl;)
+        D(std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Device [" << id << "] must be stopped before configuring." << std::endl;)
         return false;
     }
 
     std::vector<uint8_t> response;
     // Send phy command
     serial.flush();
+
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Assembling set PHY command." << std::endl;});
     std::vector<uint8_t> set_phy_command = cmd.assemble_set_phy(radio_mode, fwID);
     if (set_phy_command.empty())
     {
-        D(std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;})
     }
     serial.writeData(set_phy_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] set PHY." << std::endl;)
+    D({std::cout << "[INFO] Device [" << id << "] set PHY." << std::endl;})
 
     // Send frequency command
     serial.flush();
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Assembling set frequency command." << std::endl;});
     std::vector<uint8_t> set_freq_command = cmd.assemble_set_freq(radio_mode, channel, fwID);
     if (set_phy_command.empty())
     {
-        D(std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;})
     }
     serial.writeData(set_freq_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
-    D(std::cout << "[INFO] Device [" << id << "] set frequency." << std::endl;)
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Device [" << id << "] set frequency." << std::endl;})
 
     return true;
 }
@@ -194,8 +201,7 @@ void Device::stream()
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D( std::lock_guard<std::mutex> lock(coutMutex);
-        std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;})
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
@@ -233,7 +239,7 @@ void Device::stream(std::chrono::seconds seconds)
         }
         if(!cmd.verify_response(response)) continue;
         totalPackets++;
-        D(std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Device [" << id << "] received packet (" << std::dec << totalPackets << " received)." << std::endl;})
         if (output_manager != nullptr) output_manager->add_packet(
             {id, port, channel, radio_mode, response, std::chrono::system_clock::now()}
         );
@@ -280,7 +286,7 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
 
             if (elapsed_time >= timeout_duration)
             {
-                D(std::cout << "[INFO] Timeout reached, no response received within 10 seconds." << std::endl;)
+                D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Timeout reached, no response received from Device [" << id << "] within 10 seconds." << std::endl;})
                 return false;
             }
 
@@ -325,15 +331,19 @@ bool Device::receive_response(std::vector<uint8_t>& ret)
     return false;
 }
 
-bool Device::reconnect(){
-    std::cout << "[ERROR] Connection lost with device [" << id << "]." << std::endl;
+bool Device::reconnect()
+{
+    {
+        std::lock_guard<std::mutex> lock(coutMutex);
+        std::cout << "[ERROR] Connection lost with Device [" << id << "]." << std::endl;
+    }
     if (!disconnect())
     {
-        D(std::cout << "[ERROR] Error closing serial port. Impossible to reconect device [" << id << "]." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Error closing serial port. Impossible to reconect Device [" << id << "]." << std::endl;})
         interruption = 1;
         return false;
     }
-    D(std::cout << "[INFO] Trying to reconnect in 10 seconds." << std::endl;)
+    D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[INFO] Trying to reconnect with Device [" << id << "] in 10 seconds." << std::endl;})
     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     while (true)
     {
@@ -343,12 +353,13 @@ bool Device::reconnect(){
             if(init()){
                 if(start())
                 {
-                    std::cout << "[INFO] Reconnected with device [" << id << "]." << std::endl;
+                    std::lock_guard<std::mutex> lock(coutMutex);
+                    std::cout << "[INFO] Reconnected with Device [" << id << "]." << std::endl;
                     return true;
                 }
             }
         }    
-        D(std::cout << "[ERROR] Reconnection Failed. Trying again in 10 seconds." << std::endl;)
+        D({std::lock_guard<std::mutex> lock(coutMutex); std::cout << "[ERROR] Reconnection with Device [" << id << "] failed. Trying again in 10 seconds." << std::endl;})
         std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         if (interruption) return false;
         

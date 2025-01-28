@@ -174,3 +174,26 @@ bool Pipe::write(const std::vector<uint8_t>& data)
     #endif
     return true;
 }
+
+bool Pipe::isPipeOpen() {
+    #ifdef _WIN32
+    // Verifica o estado do handle do pipe
+        if (GetNamedPipeHandleStateA(pipeWrite, NULL, NULL, NULL, NULL, NULL, 0)) {
+            return true; // O pipe ainda está válido
+        } else {
+            DWORD error = GetLastError();
+            if (error == ERROR_BROKEN_PIPE || error == ERROR_INVALID_HANDLE) {
+                return false; // O pipe foi fechado ou não é mais válido
+            }
+        }
+        return false;
+    #endif
+    #ifdef __linux__
+        if (fcntl(pipeFd, F_GETFD) == -1) {
+            if (errno == EBADF) {
+                return false; // O descritor é inválido, o pipe está fechado
+            }
+        }
+        return true; // O pipe está aberto
+    #endif
+}

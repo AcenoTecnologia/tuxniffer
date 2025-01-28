@@ -350,21 +350,18 @@ std::vector<uint8_t> CommandAssembler::convertFreqToByte(float freq)
 // Assemble start command
 std::vector<uint8_t> CommandAssembler::assemble_start()
 {
-    D(std::cout << "[INFO] Assembling start command." << std::endl;);
     return assemble_command(info_start);
 }
 
 // Assemble stop command
 std::vector<uint8_t> CommandAssembler::assemble_stop()
 {
-    D(std::cout << "[INFO] Assembling stop command." << std::endl;);
     return assemble_command(info_stop);
 }
 
 // Assemble ping command
 std::vector<uint8_t> CommandAssembler::assemble_ping()
 {
-    D(std::cout << "[INFO] Assembling ping command." << std::endl;);
     return assemble_command(info_ping);
 }
 
@@ -383,7 +380,6 @@ std::vector<uint8_t> CommandAssembler::assemble_set_freq(uint8_t radio_mode, int
     {
         return {};
     } 
-    D(std::cout << "[INFO] Assembling set frequency command." << std::endl;);
     // Convert frequency to byte
     float freq = radio_mode_table[fw_to_rm_table[index]][radio_mode].freq;
     if (freq == 0)
@@ -414,7 +410,6 @@ std::vector<uint8_t> CommandAssembler::assemble_set_phy(uint8_t radio_mode, uint
     {
         return {};
     } 
-    D(std::cout << "[INFO] Assembling set PHY command." << std::endl;);
     std::vector<uint8_t> data;
     data.push_back(phy);
     return assemble_command(info_phy, data);

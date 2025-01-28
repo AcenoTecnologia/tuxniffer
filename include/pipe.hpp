@@ -85,6 +85,7 @@ public:
      */
     bool close();
 
+    bool isPipeOpen();
 
 private:
     PIPE_DESCRIPTOR pipeWrite; /**< The pipe descriptor for writing. */

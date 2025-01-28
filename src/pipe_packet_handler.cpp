@@ -32,7 +32,12 @@ volatile std::sig_atomic_t pipe_interrupted = 0;
 
 PipePacketHandler::PipePacketHandler(std::string pipe_path, std::string base, std::chrono::time_point<std::chrono::system_clock> start_time)
 {
-    this->pipe_path = pipe_path;
+    #ifdef __linux__
+        this->pipe_path = pipe_path;
+    #endif
+    #ifdef _WIN32
+        this->pipe_path = "\\\\.\\pipe\\";
+    #endif
     this->base = base;
     this->start_time = start_time;
 }
@@ -96,7 +101,7 @@ void PipePacketHandler::run()
 
         // Handle packets and check for interruptions
         while (is_running)
-        {
+        {     
             if (!packet_queue.empty())
             {
                 std::lock_guard<std::mutex> lock(m_mutex);
@@ -106,14 +111,34 @@ void PipePacketHandler::run()
                 std::vector<uint8_t> packet_header = PcapBuilder::get_packet_header(packet, start_time_micros);
                 if(!pipe.write(packet_header))
                 {
+                    #ifdef _WIN32
+                        pipe_interrupted = 1;
+                    #endif
                     break;
                 }
                 std::vector<uint8_t> packet_data = PcapBuilder::get_packet_data(packet);
                 if(!pipe.write(packet_data))
                 {
+                    #ifdef _WIN32
+                        pipe_interrupted = 1;
+                    #endif
                     break;
                 }
             }
+            
+            #ifdef _WIN32
+                if(!pipe.isPipeOpen())
+                {
+                    pipe_interrupted = 1;
+                    break;
+                }
+            #endif
+            #ifdef __linux__
+                if(pipe_interrupted && !pipe.isPipeOpen())
+                {
+                    break;
+                }
+            #endif
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         if (pipe_interrupted)

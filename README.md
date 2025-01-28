@@ -27,7 +27,6 @@
 - [Compatibility](#compatibility)
 - [Texas Instruments Custom Packet Format](#texas-instruments-custom-packet-format)
 - [Texas Instruments Documentation Issues](#texas-instruments-documentation-issues)
-- [Known Issues](#known-issues)
 - [Dependencies](#dependencies)
    * [Install OpenSSL](#install-openssl)
       + [Linux:](#linux)
@@ -328,10 +327,6 @@ During development it was found some inconsistencies between the sniffer documen
 - The packet response documentation also informs that the response frame data payload has the format: `Timestamp (6B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. But, in reality is `Timestamp (6B) | Separator (1B) | Payload (0-2047B) | RSSI (1B) | Status (1B)`. It was not found the usage of the Separator. However, neither considering it as Timestamp or Payload work. The Timestamp gets incorrect and the Payload doesn't match the FCS at the end of the frame (last 2B of payload).
 - While this software was developed using the ``CC1352P7-1`` model, the ``CC1352P1`` model was also used for tests and validation. A issue found is that on Windows, with the original [SmartRF Packet Sniffer 2](https://www.ti.com/tool/PACKET-SNIFFER), the ``CC1352P1`` could not run any 2.4GHz modes, despite having support. The solution for this issue can be found [here](https://e2e.ti.com/support/wireless-connectivity/bluetooth-group/bluetooth/f/bluetooth-forum/1229627/launchxl-cc1352p-packet-sniffer-2-error-sending-message-msg-cfgphy-problem-unknown?tisearch=e2e-sitesearch&keymatch=LAUNCHXL-CC1352P%25252525252525252520Error%25252525252525252520Sending%25252525252525252520Message#).
 
-<!-- TOC --><a name="known-issues"></a>
-## Known Issues
-
-- Pipes cannot be interrupted and reconnected on Windows. Currently there is not workaround this issue. If a pipe disconnects on Windows it is necessary to start the program over.
 <!-- TOC --><a name="dependencies"></a>
 ## Dependencies
 - [fkYAML - Header Only Library for parsing YAML file format](https://github.com/fktn-k/fkYAML) (MIT License - Used on ``main.cpp``).
