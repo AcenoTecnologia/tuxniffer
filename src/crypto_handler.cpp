@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.3
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -437,7 +437,7 @@ bool CryptoHandler::extract_key(vector<uint8_t> payload)
             {
                 if (key == auxKey)
                 {
-                    cout << "[INFO] Key already know found." << endl;
+                    cout << "[INFO] Key already known found." << endl;
                     return false;
                 }
             }
@@ -450,7 +450,7 @@ bool CryptoHandler::extract_key(vector<uint8_t> payload)
             {
                 if (key == auxKey)
                 {
-                    cout << "[INFO] Key already know found." << endl;
+                    cout << "[INFO] Key already known found." << endl;
                     return false;
                 }
             }

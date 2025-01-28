@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1.2
+// Version:  1.1.3
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -193,15 +193,6 @@ void OutputManager::run()
 
     if(log.crypto.save_packets)
     {
-        if (log.pipe.enabled)
-        {
-            for (int i = 0; i < log_pipes_handlers.size(); i++)
-            {
-                PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
-                key_packets.insert(key_packets.end(), pipe_packet_handler->key_packets.begin(), pipe_packet_handler->key_packets.end());
-                
-            }
-        }
         saveKeyPackets();
     }
 
@@ -274,6 +265,7 @@ void OutputManager::handle_packet(packet_queue_s packet, bool isTransportKey)
     std::vector<uint8_t> payload = command_assembler.get_payload(packet);
     if (crypto_handler.extract_key(payload))
     {
+        key_packets.push_back(packet);
         isTransportKey = true;
     }
     if(log.file.enabled)
@@ -313,10 +305,6 @@ void OutputManager::handle_packet(packet_queue_s packet, bool isTransportKey)
             PipePacketHandler* pipe_packet_handler = log_pipes_handlers[0].get();
             pipe_packet_handler->add_packet(packet, isTransportKey);
         }
-    }
-    else
-    {
-        key_packets.push_back(packet);
     }
 }
 

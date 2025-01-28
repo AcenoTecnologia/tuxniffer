@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1.2
+// Version:  1.1.3
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -54,7 +54,7 @@ SOFTWARE.
 #endif
 
 void print_version() {
-    std::cout << "Tuxniffer version: 1.1.2." << std::endl;
+    std::cout << "Tuxniffer version: 1.1.3." << std::endl;
 }
 
 void print_help()
