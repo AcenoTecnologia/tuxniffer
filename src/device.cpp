@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -45,9 +45,10 @@ void signal_handler(int sig)
 }
 
 
-Device::Device(device_s device, int id_counter)
+Device::Device(device_s device, int id_counter, std::mutex &coutMutex)
     : serial(device.port),  // Initialize serial with device.port
-      cmd()  // Initialize CommandAssembler
+      cmd(),  // Initialize CommandAssembler
+      coutMutex(coutMutex)
 {
     state = State::WAITING_FOR_COMMAND;
     id = id_counter;
@@ -65,10 +66,10 @@ bool Device::connect()
 bool Device::init()
 {
     serial.purge();
-
+    uint8_t fwID;
     if(!stop()) return false;
-    if(!ping()) return false;
-    if(!configure()) return false;
+    if(!ping(&fwID)) return false;
+    if(!configure(fwID)) return false;
 
    return true;
 }
@@ -105,7 +106,7 @@ bool Device::stop()
     return true;
 }
 
-bool Device::ping()
+bool Device::ping(uint8_t* fwID)
 {
 
     if(state != State::STOPPED)
@@ -128,12 +129,12 @@ bool Device::ping()
     D(std::cout << "[INFO] ---Chip ID: " << std::hex << (int)board_info[0] << (int)board_info[1] << "." << std::endl;)
     D(std::cout << "[INFO] ---Chip Rev: " << std::hex << (int)board_info[2] << "." << std::endl;)
     D(std::cout << "[INFO] ---FW ID: " << std::hex << (int)board_info[3] << "." << std::endl;)
+    *fwID = board_info[3];
     D(std::cout << "[INFO] ---FW Rev: " << std::hex << (int)board_info[4] << "." << (int)board_info[5] << std::endl;)
-
     return true;
 }
 
-bool Device::configure()
+bool Device::configure(uint8_t fwID)
 {
 
     if(state != State::STOPPED)
@@ -145,7 +146,11 @@ bool Device::configure()
     std::vector<uint8_t> response;
     // Send phy command
     serial.flush();
-    std::vector<uint8_t> set_phy_command = cmd.assemble_set_phy(radio_mode);
+    std::vector<uint8_t> set_phy_command = cmd.assemble_set_phy(radio_mode, fwID);
+    if (set_phy_command.empty())
+    {
+        D(std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;)
+    }
     serial.writeData(set_phy_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;
@@ -153,7 +158,11 @@ bool Device::configure()
 
     // Send frequency command
     serial.flush();
-    std::vector<uint8_t> set_freq_command = cmd.assemble_set_freq(radio_mode, channel);
+    std::vector<uint8_t> set_freq_command = cmd.assemble_set_freq(radio_mode, channel, fwID);
+    if (set_phy_command.empty())
+    {
+        D(std::cout << "[ERROR] Radio mode" << radio_mode << "not avaliable on device (firmware ID : " << fwID << ")." << std::endl;)
+    }
     serial.writeData(set_freq_command);
     receive_response(response);
     if(!cmd.verify_response(response)) return false;

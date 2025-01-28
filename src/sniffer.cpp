@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -27,7 +27,7 @@ Sniffer::Sniffer(std::vector<device_s> devices_info, log_s log_settings)
 {
     // Initialize device settings
     for (auto& device_info : devices_info) {
-        devices.emplace_back(device_info, device_id_counter);
+        devices.emplace_back(device_info, device_id_counter, coutMutex);
         device_id_counter++;
     }
 }
@@ -52,11 +52,6 @@ void Sniffer::initAllDevices()
         return;
     }
 
-    // Initialize log settings
-    D(std::cout << "[INFO] Configuring output manager." << std::endl;)
-    D(std::cout << "[INFO] Initializing Pipe threads." << std::endl;)
-    output_manager.configure(devices.size());
-
     // Preallocates vector for threads
     threads.reserve(devices.size());
 
@@ -65,9 +60,8 @@ void Sniffer::initAllDevices()
         if(!device.is_ready) continue;
         // Pass the output manager reference to the device
         device.output_manager = &output_manager;
-        device.coutMutex = coutMutex;
         threads.push_back(std::thread([&device]() {
-            device.init();
+            device.is_ready = device.init();
         }));
         D(std::cout << "[INFO] Init thread for device ID: " << device.id << " started." << std::endl;)
     }
@@ -79,7 +73,19 @@ void Sniffer::initAllDevices()
         }
     }
 
-    if(threads.size() == 0)
+    int fail_count = 0;
+    std::vector<bool> readyDevices(devices.size(), true);
+    for (int i = 0; i < devices.size(); i++)
+    {
+        Device device = devices[i];
+        if(!device.is_ready)
+        {
+            fail_count++;
+            readyDevices[i] = false;
+        }
+    }
+
+    if(threads.size() == fail_count)
     {
         D(std::cout << "[ERROR] There are no ready devices." << std::endl;)
         return;
@@ -87,6 +93,9 @@ void Sniffer::initAllDevices()
 
     D(std::cout << "[INFO] All ready devices initialized." << std::endl;)
 
+    // Initialize log settings
+    D(std::cout << "[INFO] Configuring output manager." << std::endl;)
+    output_manager.configure(devices.size(), readyDevices);
 }
 
 void Sniffer::streamAll()

@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -31,7 +31,7 @@ public:
     std::vector<std::thread> threads;           ///< Threads for handling device operations.
     std::thread output_manager_thread;          ///< Thread for handling the output manager.
     std::vector<Device> devices;                ///< List of devices used for packet sniffing.
-    std::mutex coutMutex;
+    std::mutex coutMutex;                       ///< Mutex for devices logs on debug mode.
     /**
      * @brief Constructs a new Sniffer object.
      * 

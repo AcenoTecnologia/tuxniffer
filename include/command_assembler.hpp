@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -26,6 +26,21 @@ struct phy_table_entry
     uint8_t phy;   ///< PHY identifier.
     float freq;    ///< Frequency value.
 };
+//|---------|-----------------------------------------------------------|
+//| FW ID   |   Target Board                                            |
+//|---------|-----------------------------------------------------------| 
+//| 0x0     |   LAUNCHXL-CC1350/LAUNCHXL-CC1310                         |
+//| 0x20	|   LAUNCHXL-CC2650                                         |
+//| 0x21 	|   LAUNCHXL-CC26X2R1                                       |
+//| 0x22 	|   LAUNCHXL-CC26X2RB                                       |
+//| 0x30 	|   LAUNCHXL-CC1352R1                                       |
+//| 0x40 	|   LAUNCHXL-CC1312R1                                       |
+//| 0x50 	|   LAUNCHXL-CC1352P1/LAUNCHXL-CC1352P-2/LAUNCHXL-CC1352P-4 |
+
+
+const uint8_t fw_table[7] = {0x0, 0x20, 0x21, 0x22, 0x30, 0x40, 0x50};// Table with supported firmware IDs/devices models.
+
+const int fw_to_rm_table[7] = {3, 5, 4, 4, 2, 1, 0};// Array tha associates the fw ID with its respective PHY table by their index.
 
 
 // | Mode Name                | PHY ID | Frequency |Supported Channels| Radio Mode |
@@ -100,15 +115,13 @@ const uint8_t info_freq = 0x45;  ///< Frequency command identifier.
 const uint8_t info_phy = 0x47;   ///< PHY command identifier.
 
 /**
- * @brief PHY table for different radio modes.
+ * @brief PHY table for different radio modes and different devices.
  * 
- * To insert more PHYs, you can transform the array into a matrix and add the new info.
- * For example:
- * phy_table_entry phy_table[20][2] = {LP-CC1352P7, Some other board}
- * ieee_868_915 {{0x00, F868}, {0x00, {F868}},
+ * Each device model has its own phy table, and may not be compatible with all radio modes.
  */
-const phy_table_entry radio_mode_table[22] = {   
-    /* LP-CC1352P7 */      
+const phy_table_entry radio_mode_table[6][22] = {   
+    {
+    /* LP-CC1352PX */      
     /* ieee_868_915 */          {0x00, f868},
     /* ieee_868_915 */          {0x00, f915},
     /* ieee_433 */              {0x01, f433},
@@ -131,6 +144,132 @@ const phy_table_entry radio_mode_table[22] = {
     /* easyLink_433_slr */      {0x11, f433},
     /* ieee_2405 */             {0x12, f2405},
     /* ble_2405 */              {0x13, f2405}
+    },
+    {
+    /* LP-CC1312R1 */      
+    /* ieee_868_915 */          {0x00, f868},
+    /* ieee_868_915 */          {0x00, f915},
+    /* ieee_433 */              {0xFF, 0},
+    /* ieee_868_915_slr */      {0x01, f868},
+    /* ieee_868_915_slr */      {0x01, f915},
+    /* ieee_433_slr */          {0xFF, 0},
+    /* wiSun_868_915_50a */     {0x02, f868},
+    /* wiSun_868_915_50b */     {0x03, f915},
+    /* wiSun_868_915_100a */    {0x04, f868},
+    /* wiSun_868_915_100b */    {0x05, f915},
+    /* wiSun_868_915_150 */     {0x06, f868},
+    /* wiSun_868_915_200a */    {0x07, f915},
+    /* wiSun_868_915_200b */    {0x08, f915},
+    /* zigbee_868_915_100 */    {0x09, f868},
+    /* zigbee_868_915_500 */    {0x0A, f868},
+    /* ieee_915 */              {0xFF, 0}, //Maybe present, TI docs might be wrong
+    /* easyLink_868_915_50 */   {0x0B, f868},
+    /* easyLink_433_50 */       {0xFF, 0},
+    /* easyLink_868_915_slr */  {0x0C, f868},
+    /* easyLink_433_slr */      {0xFF, 0},
+    /* ieee_2405 */             {0xFF, 0},
+    /* ble_2405 */              {0xFF, 0}
+    },
+    {
+    /* LP-CC1352R1 */      
+    /* ieee_868_915 */          {0x00, f868},
+    /* ieee_868_915 */          {0x00, f915},
+    /* ieee_433 */              {0xFF, 0},
+    /* ieee_868_915_slr */      {0x01, f868},
+    /* ieee_868_915_slr */      {0x01, f915},
+    /* ieee_433_slr */          {0xFF, 0},
+    /* wiSun_868_915_50a */     {0x02, f868},
+    /* wiSun_868_915_50b */     {0x03, f915},
+    /* wiSun_868_915_100a */    {0x04, f868},
+    /* wiSun_868_915_100b */    {0x05, f915},
+    /* wiSun_868_915_150 */     {0x06, f868},
+    /* wiSun_868_915_200a */    {0x07, f915},
+    /* wiSun_868_915_200b */    {0x08, f915},
+    /* zigbee_868_915_100 */    {0x09, f868},
+    /* zigbee_868_915_500 */    {0x0A, f868},
+    /* ieee_915 */              {0xFF, 0}, //Maybe present, TI docs might be wrong
+    /* easyLink_868_915_50 */   {0x0B, f868},
+    /* easyLink_433_50 */       {0xFF, 0},
+    /* easyLink_868_915_slr */  {0x0C, f868},
+    /* easyLink_433_slr */      {0xFF, 0},
+    /* ieee_2405 */             {0x0D, f2405},
+    /* ble_2405 */              {0x0E, f2405}
+    },
+    {
+    /* LP-CC1350/LP-CC1310 */      
+    /* ieee_868_915 */          {0x00, f868},
+    /* ieee_868_915 */          {0x00, f915},
+    /* ieee_433 */              {0x01, f433},
+    /* ieee_868_915_slr */      {0x04, f868}, //0x02 and 0x03 not suported
+    /* ieee_868_915_slr */      {0x04, f915},
+    /* ieee_433_slr */          {0x05, f433},
+    /* wiSun_868_915_50a */     {0xFF, 0},
+    /* wiSun_868_915_50b */     {0xFF, 0},
+    /* wiSun_868_915_100a */    {0xFF, 0},
+    /* wiSun_868_915_100b */    {0xFF, 0},
+    /* wiSun_868_915_150 */     {0xFF, 0},
+    /* wiSun_868_915_200a */    {0xFF, 0},
+    /* wiSun_868_915_200b */    {0xFF, 0},
+    /* zigbee_868_915_100 */    {0xFF, 0},
+    /* zigbee_868_915_500 */    {0xFF, 0},
+    /* ieee_915 */              {0xFF, 0},  //Maybe present, TI docs might be wrong
+    /* easyLink_868_915_50 */   {0x06, f868},
+    /* easyLink_433_50 */       {0x07, f433},
+    /* easyLink_868_915_slr */  {0x09, f868}, //0x08 not suported
+    /* easyLink_433_slr */      {0x0A, f433},
+    /* ieee_2405 */             {0xFF, 0},
+    /* ble_2405 */              {0xFF, 0}
+    },
+    {
+    /* LP-CC26X2R1//* LP-CC26X2RB */      
+    /* ieee_868_915 */          {0xFF, 0},
+    /* ieee_868_915 */          {0xFF, 0},
+    /* ieee_433 */              {0xFF, 0},
+    /* ieee_868_915_slr */      {0xFF, 0},
+    /* ieee_868_915_slr */      {0xFF, 0},
+    /* ieee_433_slr */          {0xFF, 0},
+    /* wiSun_868_915_50a */     {0xFF, 0},
+    /* wiSun_868_915_50b */     {0xFF, 0},
+    /* wiSun_868_915_100a */    {0xFF, 0},
+    /* wiSun_868_915_100b */    {0xFF, 0},
+    /* wiSun_868_915_150 */     {0xFF, 0},
+    /* wiSun_868_915_200a */    {0xFF, 0},
+    /* wiSun_868_915_200b */    {0xFF, 0},
+    /* zigbee_868_915_100 */    {0xFF, 0},
+    /* zigbee_868_915_500 */    {0xFF, 0},
+    /* ieee_915 */              {0xFF, 0},
+    /* easyLink_868_915_50 */   {0xFF, 0},
+    /* easyLink_433_50 */       {0xFF, 0},
+    /* easyLink_868_915_slr */  {0xFF, 0},
+    /* easyLink_433_slr */      {0xFF, 0},
+    /* ieee_2405 */             {0x00, f2405},
+    /* ble_2405 */              {0x01, f2405}
+    },
+    {
+    /* LP-CC2650 */      
+    /* ieee_868_915 */          {0xFF, 0},
+    /* ieee_868_915 */          {0xFF, 0},
+    /* ieee_433 */              {0xFF, 0},
+    /* ieee_868_915_slr */      {0xFF, 0},
+    /* ieee_868_915_slr */      {0xFF, 0},
+    /* ieee_433_slr */          {0xFF, 0},
+    /* wiSun_868_915_50a */     {0xFF, 0},
+    /* wiSun_868_915_50b */     {0xFF, 0},
+    /* wiSun_868_915_100a */    {0xFF, 0},
+    /* wiSun_868_915_100b */    {0xFF, 0},
+    /* wiSun_868_915_150 */     {0xFF, 0},
+    /* wiSun_868_915_200a */    {0xFF, 0},
+    /* wiSun_868_915_200b */    {0xFF, 0},
+    /* zigbee_868_915_100 */    {0xFF, 0},
+    /* zigbee_868_915_500 */    {0xFF, 0},
+    /* ieee_915 */              {0xFF, 0},
+    /* easyLink_868_915_50 */   {0xFF, 0},
+    /* easyLink_433_50 */       {0xFF, 0},
+    /* easyLink_868_915_slr */  {0xFF, 0},
+    /* easyLink_433_slr */      {0xFF, 0},
+    /* ieee_2405 */             {0x00, f2405},
+    /* ble_2405 */              {0xFF, 0}
+    }
 };
 
 /**
@@ -187,17 +326,19 @@ public:
      * 
      * @param radio_mode Radio mode identifier.
      * @param channel Channel number.
+     * @param fwID Firmware ID.
      * @return Assembled set frequency command.
      */
-    std::vector<uint8_t> assemble_set_freq(uint8_t radio_mode, int channel);
+    std::vector<uint8_t> assemble_set_freq(uint8_t radio_mode, int channel, uint8_t fwID);
 
     /**
      * @brief Assembles a set PHY command.
      * 
      * @param radio_mode Radio mode identifier.
+     * @param fwID Firmware ID.
      * @return Assembled set PHY command.
      */
-    std::vector<uint8_t> assemble_set_phy(uint8_t radio_mode);
+    std::vector<uint8_t> assemble_set_phy(uint8_t radio_mode, uint8_t fwID);
 
     /**
      * @brief Verifies a response.

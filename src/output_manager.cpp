@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -49,7 +49,7 @@ void OutputManager::add_packet(packet_queue_s packet)
     packet_queue.push(packet);
 }
 
-bool OutputManager::configure_files()
+bool OutputManager::configure_files(std::vector<bool> readyDevices)
 {
     if (log.file.enabled)
     {
@@ -70,6 +70,10 @@ bool OutputManager::configure_files()
         {
             for (int i = 0; i < num_devices; ++i)
             {
+                if (!readyDevices[i])
+                {
+                    continue;
+                }
                 std::string filename = base_filename + "_" + std::to_string(i) + ".pcap";
                 FILE* log_file = fopen(filename.c_str(), "wb");
                 if (!log_file)
@@ -86,7 +90,7 @@ bool OutputManager::configure_files()
                 D(std::cout << "[INFO] Log file created: " << filename << "." << std::endl;);
             }
         }
-        if(!log.file.split_devices_log)
+        else
         {
             std::string filename = base_filename + ".pcap";
             FILE* log_file = fopen(filename.c_str(), "wb");
@@ -109,15 +113,20 @@ bool OutputManager::configure_files()
     return true;
 }
 
-bool OutputManager::configure_pipes()
+bool OutputManager::configure_pipes(std::vector<bool> readyDevices)
 {
 
+    D(std::cout << "[INFO] Initializing Pipe threads." << std::endl;)
     if(log.pipe.enabled)
     {
         if(log.pipe.split_devices_log)
         {
             for (int i = 0; i < num_devices; ++i)
             {
+                if (!readyDevices[i])
+                {
+                    continue;
+                }
                 std::string pipe_path = log.pipe.path;
                 std::string pipe_base_name =  log.file.base_name + "_" + std::to_string(i);
                 std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, pipe_base_name, start_time);
@@ -126,7 +135,7 @@ bool OutputManager::configure_pipes()
                 log_pipes_threads.push_back(std::move(pipe_thread));
             }
         }
-        if(!log.pipe.split_devices_log)
+        else
         {
             std::string pipe_path = log.pipe.path;
             std::shared_ptr<PipePacketHandler> pipe_packet_handler = std::make_shared<PipePacketHandler>(pipe_path, log.file.base_name, start_time);
@@ -139,15 +148,15 @@ bool OutputManager::configure_pipes()
     return true;
 }
 
-bool OutputManager::configure(int num_devices)
+bool OutputManager::configure(int num_devices, std::vector<bool> readyDevices)
 {
     this->num_devices = num_devices;
 
     if(log.file.enabled)
-        if(!configure_files()) return false;
+        if(!configure_files(readyDevices)) return false;
 
     if(log.pipe.enabled)
-        if(!configure_pipes()) return false;
+        if(!configure_pipes(readyDevices)) return false;
 
     can_run = true;
     return true;

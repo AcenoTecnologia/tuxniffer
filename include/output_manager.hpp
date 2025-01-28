@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -63,17 +63,19 @@ public:
     /**
      * @brief Configures the log files.
      * 
+     * @param readyDevices Bool vector indicating which devices were successful initialized.
      * @return true if the configuration was successful, false otherwise.
      */
-    bool configure_files();
+    bool configure_files(std::vector<bool> readyDevices);
 
     /**
      * @brief Configures the pipes for logging.
      * - Create the pipe threads (with the wrapper PipePacketHandler)
      * 
+     * @param readyDevices Bool vector indicating which devices were successful initialized.
      * @return true if the configuration was successful, false otherwise.
      */
-    bool configure_pipes();
+    bool configure_pipes(std::vector<bool> readyDevices);
 
     /**
      * @brief Configures the output manager (log files and pipes)
@@ -81,9 +83,10 @@ public:
      * - Files could end up not being used if the device is not ready. This will leave an empty file.
      * 
      * @param num_devices Number of devices to be configured.
+     * @param readyDevices Bool vector indicating which devices were successful initialized.
      * @return true if the configuration was successful, false otherwise.
      */
-    bool configure(int num_devices);
+    bool configure(int num_devices, std::vector<bool> readyDevices);
 
     /**
      * @brief Starts the execution of the output manager.

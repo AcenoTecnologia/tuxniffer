@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -369,19 +369,51 @@ std::vector<uint8_t> CommandAssembler::assemble_ping()
 }
 
 // Assemble set frequency command
-std::vector<uint8_t> CommandAssembler::assemble_set_freq(uint8_t radio_mode, int channel)
-{
+std::vector<uint8_t> CommandAssembler::assemble_set_freq(uint8_t radio_mode, int channel, uint8_t fwID)
+{   
+    int index;
+    for (index = 0; index < 7; index++)
+    {
+        if(fwID == fw_table[index])
+        {
+            break;
+        }
+    }
+    if (index == 7)
+    {
+        return {};
+    } 
     D(std::cout << "[INFO] Assembling set frequency command." << std::endl;);
     // Convert frequency to byte
-    float freq = radio_mode_table[radio_mode].freq;
+    float freq = radio_mode_table[fw_to_rm_table[index]][radio_mode].freq;
+    if (freq == 0)
+    {
+        return {};
+    } 
     std::vector<uint8_t> freq_bytes = convertFreqToByte(calculateFinalFreq(radio_mode, freq, channel));
     return assemble_command(info_freq, freq_bytes);
 }
 
 // Assemble set PHY command
-std::vector<uint8_t> CommandAssembler::assemble_set_phy(uint8_t radio_mode)
+std::vector<uint8_t> CommandAssembler::assemble_set_phy(uint8_t radio_mode, uint8_t fwID)
 {
-    uint8_t phy = radio_mode_table[radio_mode].phy;
+    int index;
+    for (index = 0; index < 7; index++)
+    {
+        if(fwID == fw_table[index])
+        {
+            break;
+        }
+    }
+    if (index == 7)
+    {
+        return {};
+    } 
+    uint8_t phy = radio_mode_table[fw_to_rm_table[index]][radio_mode].phy;
+    if (phy == 0xFF)
+    {
+        return {};
+    } 
     D(std::cout << "[INFO] Assembling set PHY command." << std::endl;);
     std::vector<uint8_t> data;
     data.push_back(phy);

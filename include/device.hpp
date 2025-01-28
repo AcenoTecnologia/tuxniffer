@@ -2,7 +2,7 @@
 // Company:  Aceno Digital Tecnologia em Sistemas Ltda.
 // Homepage: http://www.aceno.com
 // Project:  Tuxniffer
-// Version:  1.1
+// Version:  1.1.2
 // Date:     2025
 //
 // Copyright (C) 2002-2025 Aceno Tecnologia.
@@ -51,15 +51,16 @@ public:
     std::string port;              ///< Port name for the device.
     uint8_t radio_mode;            ///< Radio mode setting for the device.
     uint8_t channel;               ///< Channel setting for the device.
-    std::mutex &coutMutex;
+    std::mutex &coutMutex;         ///< Mutex for devices logs on debug mode.
 
     /**
      * @brief Constructor for the Device class.
      * 
      * @param device Device settings.
      * @param id_counter ID counter for assigning a unique ID.
+     * @param coutMutex Mutex for devices logs on debug mode.
      */
-    Device(device_s device, int id_counter);
+    Device(device_s device, int id_counter, std::mutex &coutMutex);
 
     /**
      * @brief Connects to the device serial.
@@ -99,18 +100,20 @@ public:
      * - The ping command is used to check if the device is responsive.
      * - It also retrieves the firmware version, revision, and other board information.
      * 
+     * @param fwID Pointer to byte where firmware ID will be saved.
      * @return true if the ping was successful, false otherwise.
      */
-    bool ping();
+    bool ping(uint8_t* fwID);
 
     /**
      * @brief Configures the device settings.
      * - Sets the radio mode, channel and frequency.
      * - Avaiable radio modes can be found in the comman_assembler.hpp file.
      * 
+     * @param fwID Byte with firmware ID.
      * @return true if configuration was successful, false otherwise.
      */
-    bool configure();
+    bool configure(uint8_t fwID);
 
     /**
      * @brief Streams data from the device.
